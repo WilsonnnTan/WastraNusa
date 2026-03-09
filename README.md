@@ -1,6 +1,6 @@
-# PPL Kelompok 1 - Indonesian Traditional Clothing Encyclopedia & Marketplace
+# WastraNusa - Indonesian Traditional Clothing Encyclopedia & Marketplace
 
-A web-based digital encyclopedia of Indonesian traditional clothing integrated with a marketplace feature that enables users to explore cultural knowledge and directly purchase authentic products from local artisans, supporting cultural preservation and sustainable development (SDG 11.4).
+A web-based digital encyclopedia of Indonesian traditional clothing combined with an online store selling authentic traditional garments. We maintain inventory sourced from local artisans, enabling customers to explore cultural knowledge and purchase curated products while supporting cultural preservation and sustainable development (SDG 11.4).
 
 
 ## Contributing
