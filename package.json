@@ -8,12 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
-    "format:write": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:write": "prettier --write \"**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,css,scss}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,css,scss}\"",
     "test": "vitest"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "*.{js,jsx,ts,tsx,mjs}": [
       "eslint --fix",
       "prettier --write"
     ],
