@@ -28,3 +28,6 @@ pnpm-lock.yaml
 
 # Markdown files
 *.md
+
+# Prisma generated
+generated/

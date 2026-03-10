@@ -1,9 +1,9 @@
+import { Prisma } from '@/generated/prisma/client';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { Prisma } from '@/generated/prisma/client';
 
 const { combine, timestamp, json, colorize, align, errors } = winston.format;
 
@@ -42,9 +42,9 @@ if (process.env.NODE_ENV !== 'production') {
         errors({ stack: true }),
         colorize({ all: true }),
         timestamp(),
-        align()
+        align(),
       ),
-    })
+    }),
   );
 }
 
