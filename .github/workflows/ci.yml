@@ -7,10 +7,30 @@ on:
   push:
     branches: [main]
 
+# temp .env for CI
+env:
+  BETTER_AUTH_SECRET: my-betterauth-secret
+  POSTGRES_USER: testuser
+  POSTGRES_PASSWORD: testpassword
+  POSTGRES_DB: testdb
+  DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+  DIRECT_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+
 jobs:
   ci:
-    name: Lint and Prettier Check
+    name: Lint, Prettier, and Test Case Check
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout branch
         uses: actions/checkout@v6
@@ -34,3 +54,13 @@ jobs:
 
       - name: Prettier check
         run: pnpm format:check
+
+      # Migrate before test
+      - name: Run migration
+        run: pnpm prisma migrate dev
+
+      - name: Generate prisma client
+        run: pnpm prisma generate
+
+      - name: Run test cases
+        run: pnpm run test
