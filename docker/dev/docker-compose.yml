@@ -1,0 +1,32 @@
+services:
+  # TODO: use volume for persistent storage
+  database:
+    image: 'postgres:latest'
+    ports:
+      - 5432:5432
+    env_file:
+      - ../../.env
+
+  # migrate database
+  migrate:
+    build:
+      context: ../..
+      dockerfile: ./docker/dev/Dockerfile
+    depends_on:
+      database:
+        condition: service_started
+    env_file:
+      - ../../.env
+    command: pnpm prisma migrate dev
+
+  app:
+    build:
+      context: ../..
+      dockerfile: ./docker/dev/Dockerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - '3000:3000'
+    env_file:
+      - ../../.env
