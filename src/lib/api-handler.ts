@@ -22,10 +22,10 @@ type ApiHandler<T = unknown> = (
 export function withApiAuth<T = unknown>(handler: ApiHandler<T>) {
   return async (req: Request, { params }: { params: Promise<T> }) => {
     try {
-      const userId = await AuthHelper.getUserId();
+      const user = await AuthHelper.requireUser();
       const resolvedParams = await params;
 
-      return await handler({ userId, params: resolvedParams, req });
+      return await handler({ userId: user.id, params: resolvedParams, req });
     } catch (err) {
       const action = req.method + ' ' + new URL(req.url).pathname;
       logError(err, { action });
@@ -50,12 +50,7 @@ export function withApiAuth<T = unknown>(handler: ApiHandler<T>) {
 export function withApiAdmin<T = unknown>(handler: ApiHandler<T>) {
   return async (req: Request, { params }: { params: Promise<T> }) => {
     try {
-      const user = await AuthHelper.requireUser();
-
-      if (user.role !== 'admin') {
-        throw new ApiError('Admin privileges required', 403);
-      }
-
+      const user = await AuthHelper.requireAdmin();
       const resolvedParams = await params;
 
       return await handler({ userId: user.id, params: resolvedParams, req });
