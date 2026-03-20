@@ -1,6 +1,6 @@
-import { ApiError } from '@/lib/error';
 import { headers } from 'next/headers';
 
+import { ApiError } from '../error';
 import { auth } from './auth';
 
 /**
@@ -17,8 +17,13 @@ export const AuthHelper = {
     return session.user;
   },
 
-  async getUserId() {
+  async requireAdmin() {
     const user = await this.requireUser();
-    return user.id;
+
+    if (user.role !== 'admin') {
+      throw new ApiError('Admin privileges required', 403);
+    }
+
+    return user;
   },
 };
