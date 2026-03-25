@@ -13,6 +13,53 @@ datasource db {
   provider = "postgresql"
 }
 
+// --------------- ENUM -----------------
+enum Gender {
+  male
+  female
+}
+
+enum ArticleStatus {
+  draft
+  published
+  archived
+}
+
+enum ProductStatus {
+  active
+  inactive
+  out_of_stock
+}
+
+enum VariantType {
+  size
+  color
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+  failed
+  refunded
+}
+
+enum PaymentTransactionStatus {
+  pending
+  success
+  failed
+  expired
+}
+
+// --------------- Table -----------------
 model User {
   id            String    @id
   name          String
@@ -23,6 +70,16 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+
+  articles      Article[] @relation("ArticleCreatedBy")
+  customerAddresses CustomerAddress[]
+  orders Order[]
+  userArticleLikes  UserArticleLike[]
+
+  role       String?
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
 
   @@unique([email])
   @@map("user")
@@ -38,6 +95,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
 
   @@unique([token])
   @@index([userId])
@@ -74,4 +133,229 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Article {
+  id          String  @id
+  title       String
+  slug        String  @unique
+  description String?
+
+  province    String
+  island      String
+  region      String
+  ethnicGroup String?
+
+  clothingType String
+  gender       Gender
+
+  wikipediaPageId   String    @unique
+  wikipediaUrl      String 
+  wikimediaImageUrl String?
+  wikimediaVideoUrl String? 
+  wikipediaLastSync DateTime?
+
+  content String
+  summary String?
+
+  status    ArticleStatus @default(published)
+  createdBy String 
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  creator    User         @relation("ArticleCreatedBy", fields: [createdBy], references: [id])
+  products   Product[]
+  engagement ArticleEngagement?
+  userLikes  UserArticleLike[]
+
+  @@index([province])
+  @@index([ethnicGroup])
+  @@index([clothingType])
+  @@index([status, province])
+  @@map("article")
+}
+
+model Product {
+  id          String  @id
+  articleId   String  
+  name        String
+  slug        String  @unique
+  description String?
+
+  price          Decimal
+  compareAtPrice Decimal?
+
+  stock Int    @default(0)
+  sku   String @unique
+
+  weight Int
+
+  province     String
+  clothingType String 
+  gender       Gender
+
+  status ProductStatus @default(active)
+  sold   Int           @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  article  Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  variants ProductVariant[]
+  orders Order[]
+
+  @@index([province])
+  @@index([clothingType])
+  @@index([gender])
+  @@map("product")
+}
+
+model ProductVariant {
+  id        String @id
+  productId String
+
+  name  String
+  type  VariantType
+  price Decimal?
+  stock Int         @default(0)
+  sku   String      @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([type])
+  @@map("product_variant")
+}
+
+model CustomerAddress {
+  id String @id
+
+  userId String
+
+  label         String
+  recipientName String
+  phone         String
+
+  province    String
+  city        String
+  district    String
+  subdistrict String?
+  postalCode  String
+  fullAddress String
+
+  notes     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([userId])
+  @@map("customer_address")
+}
+
+model Order {
+  id String @id
+
+  orderNumber String @unique
+  userId      String
+
+  productId    String
+  variantId    String?
+  productName  String
+  variantName  String?
+  quantity     Int
+  productPrice Decimal
+
+  shippingAddressId String
+
+  courier           String
+  courierService    String
+  estimatedDelivery String?
+  trackingNumber    String?
+
+  subtotal     Decimal
+  shippingCost Decimal
+  totalAmount  Decimal
+
+  orderStatus   OrderStatus   @default(pending)
+  paymentStatus PaymentStatus @default(unpaid)
+  paymentMethod String?
+
+  paidAt      DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  customerNotes String?
+
+  // Relations
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  product             Product              @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant             ProductVariant?      @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  shippingAddress     CustomerAddress      @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
+  paymentTransactions PaymentTransaction[]
+
+  @@index([userId])
+  @@index([productId])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+  @@map("order")
+}
+
+model PaymentTransaction {
+  id         String                   @id
+  orderId    String
+  externalId String                   @unique
+  amount     Decimal
+  status     PaymentTransactionStatus
+
+  paymentUrl String?
+  vaNumber   String?
+  qrCode     String?
+
+  expiredAt DateTime?
+  paidAt    DateTime?
+  createdAt DateTime
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([externalId])
+  @@index([status])
+  @@map("payment_transaction")
+}
+
+model ArticleEngagement {
+  id        String   @id
+  articleId String   @unique 
+  viewCount Int      @default(0)
+  likeCount Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@map("article_engagement")
+}
+
+model UserArticleLike {
+  id        String   @id
+  articleId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([userId])
+  @@map("user_article_like")
 }
