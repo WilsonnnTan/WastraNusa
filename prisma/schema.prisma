@@ -13,6 +13,20 @@ datasource db {
   provider = "postgresql"
 }
 
+// --------------- ENUM -----------------
+enum Gender {
+  male
+  female
+}
+
+enum ArticleStatus {
+  draft
+  published
+  archived
+}
+
+
+// --------------- Table -----------------
 model User {
   id            String    @id
   name          String
@@ -23,6 +37,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+
+  articles      Article[] @relation("ArticleCreatedBy")
 
   role       String?
   banned     Boolean?  @default(false)
@@ -81,4 +97,42 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Article {
+  id          String  @id
+  title       String
+  slug        String  @unique
+  description String?
+
+  province    String
+  island      String
+  region      String
+  ethnicGroup String?
+
+  clothingType String
+  gender       Gender
+
+  wikipediaPageId   String    @unique
+  wikipediaUrl      String 
+  wikimediaImageUrl String?
+  wikimediaVideoUrl String? 
+  wikipediaLastSync DateTime?
+
+  content String
+  summary String?
+
+  status    ArticleStatus @default(published)
+  createdBy String 
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  creator    User         @relation("ArticleCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([province])
+  @@index([ethnicGroup])
+  @@index([clothingType])
+  @@index([status, province])
+  @@map("article")
 }
