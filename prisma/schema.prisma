@@ -165,6 +165,7 @@ model Article {
   // Relations
   creator    User         @relation("ArticleCreatedBy", fields: [createdBy], references: [id])
   products   Product[]
+  engagement ArticleEngagement?
 
   @@index([province])
   @@index([ethnicGroup])
@@ -329,4 +330,16 @@ model PaymentTransaction {
   @@index([externalId])
   @@index([status])
   @@map("payment_transaction")
+}
+
+model ArticleEngagement {
+  id        String   @id
+  articleId String   @unique 
+  viewCount Int      @default(0)
+  likeCount Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@map("article_engagement")
 }
