@@ -31,6 +31,11 @@ enum ProductStatus {
   out_of_stock
 }
 
+enum VariantType {
+  size
+  color
+}
+
 
 // --------------- Table -----------------
 model User {
@@ -171,9 +176,30 @@ model Product {
 
   // Relations
   article  Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  variants ProductVariant[]
 
   @@index([province])
   @@index([clothingType])
   @@index([gender])
   @@map("product")
+}
+
+model ProductVariant {
+  id        String @id
+  productId String
+
+  name  String
+  type  VariantType
+  price Decimal?
+  stock Int         @default(0)
+  sku   String      @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@map("product_variant")
 }
