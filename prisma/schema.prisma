@@ -36,6 +36,14 @@ enum VariantType {
   color
 }
 
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  shipped
+  delivered
+  cancelled
+}
 
 // --------------- Table -----------------
 model User {
@@ -51,6 +59,7 @@ model User {
 
   articles      Article[] @relation("ArticleCreatedBy")
   customerAddresses CustomerAddress[]
+  orders Order[]
 
   role       String?
   banned     Boolean?  @default(false)
@@ -178,6 +187,7 @@ model Product {
   // Relations
   article  Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
   variants ProductVariant[]
+  orders Order[]
 
   @@index([province])
   @@index([clothingType])
@@ -200,6 +210,7 @@ model ProductVariant {
 
   // Relations
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orders Order[]
 
   @@index([type])
   @@map("product_variant")
@@ -227,7 +238,54 @@ model CustomerAddress {
   updatedAt DateTime @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
 
   @@index([userId])
   @@map("customer_address")
+}
+
+model Order {
+  id String @id
+
+  orderNumber String @unique
+  userId      String
+
+  productId    String
+  variantId    String?
+  productName  String
+  variantName  String?
+  quantity     Int
+  productPrice Decimal
+
+  shippingAddressId String
+
+  courier           String
+  courierService    String
+  estimatedDelivery String?
+  trackingNumber    String?
+
+  subtotal     Decimal
+  shippingCost Decimal
+  totalAmount  Decimal
+
+  orderStatus   OrderStatus   @default(pending)
+
+  paidAt      DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  customerNotes String?
+
+  // Relations
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  product             Product              @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant             ProductVariant?      @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  shippingAddress     CustomerAddress      @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([productId])
+  @@index([orderStatus])
+  @@map("order")
 }
