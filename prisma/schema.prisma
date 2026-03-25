@@ -74,6 +74,7 @@ model User {
   articles      Article[] @relation("ArticleCreatedBy")
   customerAddresses CustomerAddress[]
   orders Order[]
+  userArticleLikes  UserArticleLike[]
 
   role       String?
   banned     Boolean?  @default(false)
@@ -166,6 +167,7 @@ model Article {
   creator    User         @relation("ArticleCreatedBy", fields: [createdBy], references: [id])
   products   Product[]
   engagement ArticleEngagement?
+  userLikes  UserArticleLike[]
 
   @@index([province])
   @@index([ethnicGroup])
@@ -342,4 +344,18 @@ model ArticleEngagement {
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@map("article_engagement")
+}
+
+model UserArticleLike {
+  id        String   @id
+  articleId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([userId])
+  @@map("user_article_like")
 }
