@@ -25,6 +25,12 @@ enum ArticleStatus {
   archived
 }
 
+enum ProductStatus {
+  active
+  inactive
+  out_of_stock
+}
+
 
 // --------------- Table -----------------
 model User {
@@ -129,10 +135,45 @@ model Article {
 
   // Relations
   creator    User         @relation("ArticleCreatedBy", fields: [createdBy], references: [id])
+  products   Product[]
 
   @@index([province])
   @@index([ethnicGroup])
   @@index([clothingType])
   @@index([status, province])
   @@map("article")
+}
+
+model Product {
+  id          String  @id
+  articleId   String  
+  name        String
+  slug        String  @unique
+  description String?
+
+  price          Decimal
+  compareAtPrice Decimal?
+
+  stock Int    @default(0)
+  sku   String @unique
+
+  weight Int
+
+  province     String
+  clothingType String 
+  gender       Gender
+
+  status ProductStatus @default(active)
+  sold   Int           @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  article  Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
+
+  @@index([province])
+  @@index([clothingType])
+  @@index([gender])
+  @@map("product")
 }
