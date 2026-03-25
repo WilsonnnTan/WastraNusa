@@ -50,6 +50,7 @@ model User {
   accounts      Account[]
 
   articles      Article[] @relation("ArticleCreatedBy")
+  customerAddresses CustomerAddress[]
 
   role       String?
   banned     Boolean?  @default(false)
@@ -202,4 +203,31 @@ model ProductVariant {
 
   @@index([type])
   @@map("product_variant")
+}
+
+model CustomerAddress {
+  id String @id
+
+  userId String
+
+  label         String
+  recipientName String
+  phone         String
+
+  province    String
+  city        String
+  district    String
+  subdistrict String?
+  postalCode  String
+  fullAddress String
+
+  notes     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("customer_address")
 }
