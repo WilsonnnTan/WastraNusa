@@ -45,6 +45,20 @@ enum OrderStatus {
   cancelled
 }
 
+enum PaymentStatus {
+  unpaid
+  paid
+  failed
+  refunded
+}
+
+enum PaymentTransactionStatus {
+  pending
+  success
+  failed
+  expired
+}
+
 // --------------- Table -----------------
 model User {
   id            String    @id
@@ -269,6 +283,8 @@ model Order {
   totalAmount  Decimal
 
   orderStatus   OrderStatus   @default(pending)
+  paymentStatus PaymentStatus @default(unpaid)
+  paymentMethod String?
 
   paidAt      DateTime?
   shippedAt   DateTime?
@@ -283,9 +299,34 @@ model Order {
   product             Product              @relation(fields: [productId], references: [id], onDelete: Restrict)
   variant             ProductVariant?      @relation(fields: [variantId], references: [id], onDelete: SetNull)
   shippingAddress     CustomerAddress      @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
+  paymentTransactions PaymentTransaction[]
 
   @@index([userId])
   @@index([productId])
   @@index([orderStatus])
+  @@index([paymentStatus])
   @@map("order")
+}
+
+model PaymentTransaction {
+  id         String                   @id
+  orderId    String
+  externalId String                   @unique
+  amount     Decimal
+  status     PaymentTransactionStatus
+
+  paymentUrl String?
+  vaNumber   String?
+  qrCode     String?
+
+  expiredAt DateTime?
+  paidAt    DateTime?
+  createdAt DateTime
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([externalId])
+  @@index([status])
+  @@map("payment_transaction")
 }
