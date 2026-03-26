@@ -17,7 +17,7 @@ export async function requireAdmin() {
     return redirect('/login?session_expired=true');
   }
   if (session.user.role !== 'admin') {
-    return redirect('/dashboard');
+    return redirect('/');
   }
   return session.user;
 }
