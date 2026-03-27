@@ -9,6 +9,7 @@ on:
 
 # temp .env for CI
 env:
+  NODE_ENV: development
   BETTER_AUTH_SECRET: my-betterauth-secret
   POSTGRES_USER: testuser
   POSTGRES_PASSWORD: testpassword
