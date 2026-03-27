@@ -63,7 +63,7 @@ jobs:
         run: pnpm prisma generate
 
       - name: Run seeding scripts
-        run: pnpm primsa-seed:dev
+        run: pnpm prisma-seed:dev
 
       - name: Run test cases
         run: pnpm run test
