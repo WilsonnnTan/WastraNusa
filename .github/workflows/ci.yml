@@ -3,9 +3,9 @@ run-name: CI for commit ${{ github.sha }} by @${{ github.actor }}
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
   push:
-    branches: [main]
+    branches: [main, dev]
 
 # temp .env for CI
 env:
