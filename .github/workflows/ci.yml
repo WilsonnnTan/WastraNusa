@@ -9,7 +9,6 @@ on:
 
 # temp .env for CI
 env:
-  NODE_ENV: development
   BETTER_AUTH_SECRET: my-betterauth-secret
   POSTGRES_USER: testuser
   POSTGRES_PASSWORD: testpassword
@@ -64,7 +63,7 @@ jobs:
         run: pnpm prisma generate
 
       - name: Run seeding scripts
-        run: pnpm prisma db seed
+        run: pnpm primsa-seed:dev
 
       - name: Run test cases
         run: pnpm run test

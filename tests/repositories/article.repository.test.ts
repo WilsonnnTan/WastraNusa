@@ -7,11 +7,11 @@ import {
   SEED_ARTICLE_2,
   SEED_ARTICLE_3,
   SEED_ENGAGEMENT_1,
-} from '../../prisma/seeds/article.seed';
+} from '../../prisma/dev-seeds/article.seed';
 import {
   SEED_ADMIN_USER,
   SEED_REGULAR_USER,
-} from '../../prisma/seeds/user.seed';
+} from '../../prisma/dev-seeds/user.seed';
 
 vi.unmock('@/lib/prisma');
 vi.unmock('@/repositories/article.repository');
