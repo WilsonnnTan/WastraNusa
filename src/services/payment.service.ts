@@ -2,7 +2,10 @@ import type { PaymentTransactionStatus } from '@/generated/prisma/client';
 import { ApiError } from '@/lib/error';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
 import { logger } from '@/logger/logger';
-import { paymentRepository } from '@/repositories/payment.repository';
+import { orderRepository } from '@/repositories/order.repository';
+import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
+import { productRepository } from '@/repositories/product.repository';
+import { productVariantRepository } from '@/repositories/productVariant.repository';
 import type {
   CheckoutInput,
   MidtransNotificationInput,
@@ -61,7 +64,7 @@ function mapPaymentStatus(
 export const paymentService = {
   checkout: async (input: CheckoutInput, userId: string) => {
     // Look up the product
-    const product = await paymentRepository.findProductById(input.productId);
+    const product = await productRepository.findProductById(input.productId);
     if (!product) {
       throw new ApiError('Product not found', 404);
     }
@@ -74,7 +77,9 @@ export const paymentService = {
     let productPrice = Number(product.price);
 
     if (input.variantId) {
-      const variant = await paymentRepository.findVariantById(input.variantId);
+      const variant = await productVariantRepository.findVariantById(
+        input.variantId,
+      );
       if (!variant) {
         throw new ApiError('Product variant not found', 404);
       }
@@ -105,7 +110,7 @@ export const paymentService = {
     const orderNumber = generateOrderNumber();
     const paymentTransactionId = crypto.randomUUID();
 
-    await paymentRepository.createOrder({
+    await orderRepository.createOrder({
       id: orderId,
       orderNumber,
       userId,
@@ -126,12 +131,12 @@ export const paymentService = {
     });
 
     if (input.variantId) {
-      await paymentRepository.decrementVariantStock(
+      await productVariantRepository.decrementVariantStock(
         input.variantId,
         input.quantity,
       );
     }
-    await paymentRepository.decrementProductStock(
+    await productRepository.decrementProductStock(
       input.productId,
       input.quantity,
     );
@@ -147,7 +152,7 @@ export const paymentService = {
       throw new ApiError('Failed to create payment transaction', 502);
     }
 
-    await paymentRepository.createPaymentTransaction({
+    await paymentTransactionRepository.createPaymentTransaction({
       id: paymentTransactionId,
       orderId,
       externalId: orderId,
@@ -206,10 +211,10 @@ export const paymentService = {
         order_id,
         fraud_status,
       });
-      await paymentRepository.updatePaymentStatus(order_id, {
+      await paymentTransactionRepository.updatePaymentStatus(order_id, {
         status: 'failed',
       });
-      await paymentRepository.updateOrderPaymentStatus(order_id, {
+      await orderRepository.updateOrderPaymentStatus(order_id, {
         paymentStatus: 'failed',
       });
       return;
@@ -221,12 +226,12 @@ export const paymentService = {
       transaction_status === 'settlement' || transaction_status === 'capture';
     const paidAt = isPaid ? new Date() : null;
 
-    await paymentRepository.updatePaymentStatus(order_id, {
+    await paymentTransactionRepository.updatePaymentStatus(order_id, {
       status: paymentTxStatus,
       paidAt,
     });
 
-    await paymentRepository.updateOrderPaymentStatus(order_id, {
+    await orderRepository.updateOrderPaymentStatus(order_id, {
       paymentStatus,
       paymentMethod: payment_type,
       paidAt,
