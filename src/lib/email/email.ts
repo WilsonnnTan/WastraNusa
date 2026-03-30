@@ -110,6 +110,5 @@ export async function sendEmail(
     return info;
   } catch (error) {
     logError(error, { to, subject, type });
-    throw error;
   }
 }
