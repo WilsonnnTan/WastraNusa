@@ -56,6 +56,7 @@ export const auth = betterAuth({
         },
       });
     },
+    resetPasswordTokenExpiresIn: 15 * 60, // 15 minutes
   },
   socialProviders: {
     google: {
@@ -76,7 +77,12 @@ export const auth = betterAuth({
       });
     },
     sendOnSignUp: true,
+    /*
+     * NOTE: Sign-in resends email & returns 403 if unverified.
+     * @see https://better-auth.com/docs/concepts/email to use the built in onError
+     */
     sendOnSignIn: true,
+    expiresIn: 15 * 60, // 15 minutes
   },
   plugins: [admin(), openAPI()],
 });
