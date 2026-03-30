@@ -1,3 +1,4 @@
+import { EmailType, sendEmail } from '@/lib/email/email';
 import prisma from '@/lib/prisma';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
@@ -43,12 +44,28 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
   },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: 'Verify your email address',
+        type: EmailType.VERIFICATION,
+        params: {
+          user_name: user.name || 'User',
+          verification_url: url,
+        },
+      });
+    },
+    sendOnSignUp: true,
+    sendOnSignIn: true,
   },
   plugins: [admin(), openAPI()],
 });
