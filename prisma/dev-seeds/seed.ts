@@ -1,6 +1,8 @@
 import 'dotenv/config';
 
+import { seedAddresses } from './address.seed';
 import { seedArticles } from './article.seed';
+import { seedProducts } from './product.seed';
 import { seedUsers } from './user.seed';
 
 if (!process.env.DATABASE_URL) {
@@ -13,6 +15,8 @@ async function main() {
 
   await seedUsers();
   await seedArticles();
+  await seedProducts();
+  await seedAddresses();
 
   console.log('\nSeeding complete!');
 }

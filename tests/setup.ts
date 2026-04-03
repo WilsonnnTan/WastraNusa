@@ -40,3 +40,44 @@ vi.mock('@/services/article.service', () => ({
     toggleLike: vi.fn(),
   },
 }));
+
+vi.mock('@/repositories/order.repository', () => ({
+  orderRepository: {
+    createOrder: vi.fn(),
+    findOrderById: vi.fn(),
+    updateOrderPaymentStatus: vi.fn(),
+  },
+}));
+
+vi.mock('@/repositories/paymentTransaction.repository', () => ({
+  paymentTransactionRepository: {
+    createPaymentTransaction: vi.fn(),
+    updatePaymentStatus: vi.fn(),
+  },
+}));
+
+vi.mock('@/repositories/product.repository', () => ({
+  productRepository: {
+    findProductById: vi.fn(),
+    decrementProductStock: vi.fn(),
+  },
+}));
+
+vi.mock('@/repositories/productVariant.repository', () => ({
+  productVariantRepository: {
+    findVariantById: vi.fn(),
+    decrementVariantStock: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/payment.service', () => ({
+  paymentService: {
+    checkout: vi.fn(),
+    handleNotification: vi.fn(),
+  },
+}));
+
+vi.mock('@/lib/midtrans', () => ({
+  createMidtransTransaction: vi.fn(),
+  verifySignatureKey: vi.fn(),
+}));

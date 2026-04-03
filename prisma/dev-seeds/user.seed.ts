@@ -19,22 +19,35 @@ export async function seedUsers() {
   const users = [SEED_ADMIN_USER, SEED_REGULAR_USER];
 
   for (const user of users) {
-    const response = await auth.api.signUpEmail({
-      body: {
-        name: user.name,
-        email: user.email,
-        password: user.password,
-      },
+    const existingUser = await prisma.user.findFirst({
+      where: { email: user.email },
     });
 
-    if (user.role === 'admin') {
-      await prisma.user.update({
-        where: { id: response.user.id },
-        data: { role: 'admin' },
+    if (!existingUser) {
+      const response = await auth.api.signUpEmail({
+        body: {
+          name: user.name,
+          email: user.email,
+          password: user.password,
+        },
       });
-    }
 
-    console.log(`Created user: ${user.email} (role: ${user.role})`);
+      if (user.role === 'admin') {
+        await prisma.user.update({
+          where: { id: response.user.id },
+          data: { role: 'admin' },
+        });
+      }
+      console.log(`Created user: ${user.email} (role: ${user.role})`);
+    } else {
+      if (user.role === 'admin' && existingUser.role !== 'admin') {
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { role: 'admin' },
+        });
+      }
+      console.log(`User already exists: ${user.email}`);
+    }
   }
 
   console.log(`Seeded ${users.length} users`);
