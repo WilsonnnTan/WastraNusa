@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* 1. Ini adalah font Segoe UI yang kamu tambahkan */
+  --font-sans: 'Segoe UI';
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -38,6 +39,16 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-wn-bg: #e5ddd0;
+  --color-wn-dark: #3a2a1a;
+  --color-wn-darker: #2a1c0e;
+  --color-wn-text: #1e1209;
+  --color-wn-muted: #7a6a58;
+  --color-wn-border: #c2b39e;
+  --color-wn-accent: #b56a3a;
+  --color-wn-primary: #4a3a2a;
+  --text-wn-primary: #4a3a2a;
+  --border-wn-primary: #4a3a2a;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
