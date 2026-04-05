@@ -1,3 +1,5 @@
+// Components for Profile Card
+
 import { User, MapPin } from "lucide-react";
 
 // --- Profile Card ---

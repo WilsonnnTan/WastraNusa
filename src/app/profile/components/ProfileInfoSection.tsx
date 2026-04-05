@@ -1,3 +1,5 @@
+// Components for Profile Info Section
+
 // --- Info Field ---
 function InfoField({ label, value }: { label: string; value: string}) {
   return (

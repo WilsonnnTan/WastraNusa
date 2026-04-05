@@ -1,3 +1,5 @@
+// Components for Security Section
+
 import { ReactNode } from "react";
 import { Lock, CheckCircle, Key } from "lucide-react";
 

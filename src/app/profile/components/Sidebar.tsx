@@ -1,3 +1,5 @@
+// Components for Sidebar
+
 import { BookOpen, User, MapPin, ShoppingBag, LogOut } from "lucide-react";
 
 // --- Sidebar ---
