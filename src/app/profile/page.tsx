@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { ShoppingCart, BookOpen, LayoutGrid, User } from "lucide-react";
 import ProfileCard from "./components/ProfileCard";
 import Sidebar from "./components/Sidebar";
