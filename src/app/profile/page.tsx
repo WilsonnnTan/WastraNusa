@@ -1,5 +1,5 @@
-import Footer from '@/components/profile/Footer';
-import Header from '@/components/profile/Header';
+import { Footer } from '@/components/footer';
+import { Header } from '@/components/header';
 import ProfileCard from '@/components/profile/ProfileCard';
 import ProfileInfoSection from '@/components/profile/ProfileInfoSection';
 import SecuritySection from '@/components/profile/SecuritySection';
@@ -15,12 +15,12 @@ import {
 
 export default function Profile() {
   return (
-    <div className="bg-brand-bg min-h-screen font-sans flex flex-col">
-      <Header />
+    <div className="bg-brand-bg flex min-h-screen flex-col font-sans">
+      <Header homeHref="/" />
 
-      <div className="px-4 md:px-8 py-3 bg-brand-bg-alt">
+      <div className="bg-brand-bg-alt px-4 py-3 md:px-8">
         <Breadcrumb>
-          <BreadcrumbList className="text-[13px] text-muted-foreground">
+          <BreadcrumbList className="text-muted-foreground text-[13px]">
             <BreadcrumbItem>
               <BreadcrumbLink
                 href="/"
@@ -40,10 +40,10 @@ export default function Profile() {
       <ProfileCard />
 
       {/* Main content area with sidebar */}
-      <div className="flex flex-col md:flex-row gap-6 items-stretch md:items-start px-4 md:px-8 py-4 md:py-6 bg-brand-bg-alt flex-1">
+      <div className="bg-brand-bg-alt flex flex-1 flex-col items-stretch gap-6 px-4 py-4 md:flex-row md:items-start md:px-8 md:py-6">
         <Sidebar active="Profil Saya" />
 
-        <div className="flex-1 flex flex-col gap-5 w-full">
+        <div className="flex w-full flex-1 flex-col gap-5">
           <ProfileInfoSection />
           <SecuritySection />
         </div>

@@ -23,7 +23,7 @@ export function EncyclopediaPagination({
           key={i}
           variant={i === currentPage ? 'default' : 'outline'}
           size="icon"
-          className={`h-8 w-8 rounded border text-sm font-semibold ${
+          className={`h-8 w-8 rounded border text-sm font-semibold transition ${
             i === currentPage
               ? 'border-[#2f5f49] bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
               : 'border-[#d6cdbc] bg-[#f7f3ea] text-[#53675a] hover:bg-[#ede7da]'
@@ -49,7 +49,7 @@ export function EncyclopediaPagination({
           key={totalPages}
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded border border-[#d6cdbc] bg-[#f7f3ea] text-sm font-semibold text-[#53675a] hover:bg-[#ede7da]"
+          className="h-8 w-8 rounded border border-[#d6cdbc] bg-[#f7f3ea] text-sm font-semibold text-[#53675a] hover:bg-[#ede7da] transition"
           onClick={() => onPageChange?.(totalPages)}
         >
           {totalPages}
@@ -65,7 +65,7 @@ export function EncyclopediaPagination({
       <Button
         variant="outline"
         size="icon"
-        className="h-8 w-8 rounded border border-[#d6cdbc] bg-[#f7f3ea] text-[#6f7f73] hover:bg-[#ede7da]"
+        className="h-8 w-8 rounded border border-[#d6cdbc] bg-[#f7f3ea] text-[#6f7f73] hover:bg-[#ede7da] transition"
         onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
       >
@@ -77,7 +77,7 @@ export function EncyclopediaPagination({
       <Button
         variant="outline"
         size="icon"
-        className="h-8 w-8 rounded border border-[#d6cdbc] bg-[#f7f3ea] text-[#6f7f73] hover:bg-[#ede7da]"
+        className="h-8 w-8 rounded border border-[#d6cdbc] bg-[#f7f3ea] text-[#6f7f73] hover:bg-[#ede7da] transition"
         onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
       >

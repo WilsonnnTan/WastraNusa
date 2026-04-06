@@ -37,11 +37,11 @@ const footerColumns = [
   },
 ];
 
-type HomepageFooterProps = {
+type FooterProps = {
   year?: number;
 };
 
-export function HomepageFooter({ year = 2025 }: HomepageFooterProps) {
+export function Footer({ year = 2025 }: FooterProps) {
   return (
     <footer className="mt-4 bg-[#2d5b48] text-[#d4dfd1]">
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-14 md:px-6 lg:px-8">

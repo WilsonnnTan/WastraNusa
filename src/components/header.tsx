@@ -15,11 +15,11 @@ const menuItems = [
   { label: 'Profil', icon: UserRound },
 ];
 
-type HomepageHeaderProps = {
+type HeaderProps = {
   homeHref?: string;
 };
 
-export function HomepageHeader({ homeHref = '/' }: HomepageHeaderProps) {
+export function Header({ homeHref = '/' }: HeaderProps) {
   return (
     <header className="border-b border-[#2f5f4a] bg-[#f9f7f2]">
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">

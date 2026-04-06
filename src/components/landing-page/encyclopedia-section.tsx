@@ -1,4 +1,7 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { ChevronRight, Search } from 'lucide-react';
 
 import { latestArticles, popularSearchTags } from './data';
@@ -9,9 +12,12 @@ export function EncyclopediaSection() {
       <div className="overflow-hidden rounded-2xl bg-[#2f5e48] text-[#edf3e8] shadow-[0_30px_50px_-35px_rgba(15,41,28,0.85)]">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="p-6 md:p-10">
-            <span className="inline-flex rounded-lg border border-white/20 bg-white/7 px-3 py-1 text-xs font-semibold text-[#d8e2d4]">
+            <Badge
+              variant="outline"
+              className="inline-flex rounded-lg border-white/20 bg-white/7 px-3 py-1 text-xs font-semibold text-[#d8e2d4]"
+            >
               Ensiklopedia Budaya
-            </span>
+            </Badge>
 
             <h3 className="mt-4 text-4xl font-bold tracking-tight text-[#f2f8ee]">
               Jelajahi Kekayaan Wastra Nusantara
@@ -25,8 +31,8 @@ export function EncyclopediaSection() {
 
             <div className="mt-7 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a]">
               <Search className="ml-4 h-4 w-4 text-[#b7cdbf]" />
-              <input
-                className="h-12 w-full bg-transparent px-3 text-sm text-[#ebf3e7] placeholder:text-[#95b19f] focus:outline-none"
+              <Input
+                className="h-12 w-full border-0 bg-transparent px-3 text-sm text-[#ebf3e7] placeholder:text-[#95b19f] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Cari artikel budaya, motif, atau provinsi..."
                 type="text"
               />
@@ -59,7 +65,7 @@ export function EncyclopediaSection() {
 
             <div className="mt-6 space-y-3">
               {latestArticles.map((article) => (
-                <article
+                <Card
                   key={article.title}
                   className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5 transition hover:bg-white/11"
                 >
@@ -75,11 +81,14 @@ export function EncyclopediaSection() {
                     <p className="mt-1 text-xs text-[#adc0b3]">
                       {article.meta}
                     </p>
-                    <span className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-[11px] font-semibold text-[#dbe5d8]">
+                    <Badge
+                      variant="secondary"
+                      className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-[11px] font-semibold text-[#dbe5d8]"
+                    >
                       {article.category}
-                    </span>
+                    </Badge>
                   </div>
-                </article>
+                </Card>
               ))}
             </div>
 

@@ -1,3 +1,5 @@
+import { Footer } from '@/components/footer';
+import { Header } from '@/components/header';
 import {
   CategoryFilters,
   EncyclopediaSection,
@@ -7,9 +9,6 @@ import {
   RegionCards,
 } from '@/components/landing-page';
 import { Plus_Jakarta_Sans } from 'next/font/google';
-
-import { HomepageFooter } from '../components/navbar/footer';
-import { HomepageHeader } from '../components/navbar/header';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -21,7 +20,7 @@ export default function HomePage() {
     <div
       className={`${plusJakartaSans.className} min-h-screen bg-[#f5f1e8] text-[#2b4d3c]`}
     >
-      <HomepageHeader homeHref="/" />
+      <Header homeHref="/" />
 
       <main className="pb-16">
         <section className="mx-auto w-full max-w-[1320px] px-4 pt-8 md:px-6 lg:px-8">
@@ -40,7 +39,7 @@ export default function HomePage() {
         <RegionCards />
       </main>
 
-      <HomepageFooter />
+      <Footer />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 
@@ -10,9 +11,12 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-black/25" />
 
       <div className="relative z-10 flex h-full flex-col justify-end p-6 md:p-8">
-        <span className="mb-3 inline-flex w-fit items-center rounded-lg border border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur">
+        <Badge
+          variant="outline"
+          className="mb-3 w-fit rounded-lg border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur"
+        >
           Kain Kebesaran Kerajaan
-        </span>
+        </Badge>
 
         <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
           Songket Palembang
@@ -21,7 +25,7 @@ export function HeroSection() {
         </h1>
 
         <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
-          Songket adalah kain mewah berbenang emas atau perak, simbol kejayaan
+          Songket adalah kain mewah berbenang emas or perak, simbol kejayaan
           kerajaan Melayu dan Minangkabau.
         </p>
 
@@ -41,9 +45,12 @@ export function HeroSection() {
         </div>
       </div>
 
-      <span className="absolute right-4 top-4 rounded-md bg-black/40 px-2.5 py-1 text-xs font-semibold text-[#e8e2d5]">
+      <Badge
+        className="absolute right-4 top-4 rounded-md bg-black/40 px-2.5 py-1 text-xs font-semibold text-[#e8e2d5]"
+        variant="secondary"
+      >
         4 / 4
-      </span>
+      </Badge>
       <Button
         className="absolute right-5 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
         type="button"

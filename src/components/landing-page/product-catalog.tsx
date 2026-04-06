@@ -1,4 +1,6 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ChevronRight, Heart, Star } from 'lucide-react';
 
 import { products, sortOptions } from './data';
@@ -7,9 +9,12 @@ export function ProductCatalog() {
   return (
     <section className="mt-10 border-y border-[#dfd8ca] bg-[#f6f3eb] py-10">
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
-        <span className="inline-flex rounded-lg border border-[#e1d8c8] bg-[#f3ecdd] px-3 py-1 text-xs font-semibold text-[#9f8d72]">
+        <Badge
+          variant="outline"
+          className="inline-flex rounded-lg border-[#e1d8c8] bg-[#f3ecdd] px-3 py-1 text-xs font-semibold text-[#9f8d72]"
+        >
           Produk Terbaru
-        </span>
+        </Badge>
 
         <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
           <div>
@@ -49,20 +54,23 @@ export function ProductCatalog() {
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {products.map((product, index) => (
-            <article
+            <Card
               key={product.name}
               className="group overflow-hidden rounded-2xl border border-[#e5ddcf] bg-[#fbf8f2] shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_14px_28px_-20px_rgba(35,56,44,0.7)] active:translate-y-0 active:shadow-sm"
               style={{ animationDelay: `${index * 55}ms` }}
             >
               <div className="relative h-56 border-b border-dashed border-[#dfd5c2] bg-[radial-gradient(circle_at_50%_24%,rgba(253,247,236,0.9)_0%,rgba(233,224,209,0.75)_58%,rgba(225,214,196,0.9)_100%)]">
-                <span className="absolute left-3 top-3 rounded-md border border-[#e4dbc8] bg-[#f8f2e6] px-2 py-0.5 text-[11px] font-semibold text-[#b7a381]">
+                <Badge
+                  variant="outline"
+                  className="absolute left-3 top-3 rounded-md border-[#e4dbc8] bg-[#f8f2e6] px-2 py-0.5 text-[11px] font-semibold text-[#b7a381]"
+                >
                   {product.material}
-                </span>
+                </Badge>
 
                 {product.badge ? (
-                  <span className="absolute left-3 top-10 rounded-md bg-[#2d5f48] px-2 py-1 text-[11px] font-bold text-[#e9f1e7]">
+                  <Badge className="absolute left-3 top-10 rounded-md bg-[#2d5f48] px-2 py-1 text-[11px] font-bold text-[#e9f1e7]">
                     {product.badge}
-                  </span>
+                  </Badge>
                 ) : null}
 
                 <Button
@@ -120,7 +128,7 @@ export function ProductCatalog() {
                   </span>
                 </div>
               </div>
-            </article>
+            </Card>
           ))}
         </div>
       </div>

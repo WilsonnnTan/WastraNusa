@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Eye, Heart } from 'lucide-react';
 
@@ -14,7 +15,7 @@ export function EncyclopediaArticleCard({
 }: EncyclopediaArticleCardProps) {
   return (
     <Card
-      className="overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+      className="cursor-pointer overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] shadow-sm transition-shadow hover:shadow-md"
       onClick={() => onClick?.(article)}
     >
       {/* Image Placeholder */}
@@ -30,12 +31,18 @@ export function EncyclopediaArticleCard({
       {/* Content */}
       <div className="p-4">
         <div className="flex flex-wrap gap-1 text-[11px] font-semibold">
-          <span className="rounded bg-[#ece6d9] px-2 py-0.5 text-[#b5a996]">
+          <Badge
+            variant="outline"
+            className="rounded border-0 bg-[#ece6d9] px-2 py-0.5 text-[#b5a996] hover:bg-[#ece6d9]/90"
+          >
             {article.region}
-          </span>
-          <span className="rounded bg-[#efe2d8] px-2 py-0.5 text-[#c17f61]">
+          </Badge>
+          <Badge
+            variant="outline"
+            className="rounded border-0 bg-[#efe2d8] px-2 py-0.5 text-[#c17f61] hover:bg-[#efe2d8]/90"
+          >
             {article.topic}
-          </span>
+          </Badge>
         </div>
 
         <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-[#315746]">

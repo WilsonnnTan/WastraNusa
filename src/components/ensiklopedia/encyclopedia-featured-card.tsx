@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
@@ -31,15 +32,21 @@ export function EncyclopediaFeaturedCard({
         {/* Content */}
         <div className="p-5">
           <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
-            <span className="rounded bg-[#2f5f49] px-2 py-1 text-[#edf3e8]">
+            <Badge className="rounded bg-[#2f5f49] px-2 py-1 text-[#edf3e8] hover:bg-[#2f5f49]/90">
               UNGGULAN
-            </span>
-            <span className="rounded bg-[#ece6d9] px-2 py-1 text-[#aea28f]">
+            </Badge>
+            <Badge
+              variant="outline"
+              className="rounded border-0 bg-[#ece6d9] px-2 py-1 text-[#aea28f] hover:bg-[#ece6d9]/90"
+            >
               {article.region}
-            </span>
-            <span className="rounded bg-[#efe2d8] px-2 py-1 text-[#c17f61]">
+            </Badge>
+            <Badge
+              variant="outline"
+              className="rounded border-0 bg-[#efe2d8] px-2 py-1 text-[#c17f61] hover:bg-[#efe2d8]/90"
+            >
               {article.topic}
-            </span>
+            </Badge>
           </div>
 
           <h2 className="mt-3 text-3xl font-bold leading-tight text-[#2f5b49]">
