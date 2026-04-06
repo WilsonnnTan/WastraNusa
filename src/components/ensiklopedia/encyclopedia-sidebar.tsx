@@ -1,9 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import type { RegionFilter } from '@/types/encyclopedia';
 import { Filter } from 'lucide-react';
-
-import type { RegionFilter } from './types';
 
 interface EncyclopediaSidebarProps {
   regions: RegionFilter[];

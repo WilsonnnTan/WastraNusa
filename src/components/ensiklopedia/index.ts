@@ -15,4 +15,4 @@ export type {
   RegionFilter,
   EncyclopediaArticle,
   ViewMode,
-} from './types';
+} from '@/types/encyclopedia';

@@ -1,4 +1,4 @@
-import type { Article, Product, RegionCard } from './types';
+import type { Article, Product, RegionCard } from '@/types/landing-page';
 
 export const categories = [
   'Batik',

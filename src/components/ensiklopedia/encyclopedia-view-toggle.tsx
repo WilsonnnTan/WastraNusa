@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
+import type { ViewMode } from '@/types/encyclopedia';
 import { LayoutGrid, List } from 'lucide-react';
-
-import type { ViewMode } from './types';
 
 interface EncyclopediaViewToggleProps {
   currentView: ViewMode;

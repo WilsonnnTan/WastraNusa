@@ -1,8 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { Eye, Heart } from 'lucide-react';
-
-import type { EncyclopediaArticle } from './types';
 
 interface EncyclopediaArticleCardProps {
   article: EncyclopediaArticle;

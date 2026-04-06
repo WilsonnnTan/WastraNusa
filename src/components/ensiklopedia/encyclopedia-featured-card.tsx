@@ -1,9 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
-
-import type { EncyclopediaArticle } from './types';
 
 interface EncyclopediaFeaturedCardProps {
   article: EncyclopediaArticle;

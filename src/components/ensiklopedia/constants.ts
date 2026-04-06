@@ -1,7 +1,11 @@
 /**
  * Data constants for Encyclopedia page
  */
-import type { EncyclopediaArticle, RegionFilter, Stat } from './types';
+import type {
+  EncyclopediaArticle,
+  RegionFilter,
+  Stat,
+} from '@/types/encyclopedia';
 
 export const ENCYCLOPEDIA_STATS: Stat[] = [
   { value: '380+', label: 'Total Artikel' },
