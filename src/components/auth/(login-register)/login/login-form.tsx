@@ -57,7 +57,7 @@ export function LoginForm() {
         Sign In to WastraNusa
       </h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
         {/* Email */}
         <Field data-invalid={!!errors.email} className="gap-1">
           <FieldLabel

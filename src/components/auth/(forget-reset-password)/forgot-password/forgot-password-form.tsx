@@ -68,37 +68,46 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-4">
-        <Field data-invalid={!!errors.email}>
-          <FieldLabel htmlFor="email">Email Address</FieldLabel>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Field data-invalid={!!errors.email} className="gap-1">
+          <FieldLabel
+            htmlFor="email"
+            className="text-xs font-sm text-[#2d2318]"
+          >
+            Email Address
+          </FieldLabel>
           <Input
             id="email"
             type="email"
             {...register('email')}
             placeholder="name@example.com"
-            className="h-11 rounded-sm border-[#b8b0a0] bg-transparent focus-visible:ring-1 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+            className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
           />
-          <FieldError>{errors.email?.message}</FieldError>
+          <FieldError className="text-[10px] font-medium leading-none">
+            {errors.email?.message}
+          </FieldError>
         </Field>
       </div>
 
       {error && (
-        <div className="flex justify-center -mt-2">
-          <FieldError className="text-center">{error}</FieldError>
+        <div className="min-h-[1rem] py-0.5">
+          <FieldError className="text-xs font-medium leading-none">
+            {error}
+          </FieldError>
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm"
+          className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm mt-0.5"
         >
           {isSubmitting ? 'Sending...' : 'Send Reset Link'}
         </Button>
 
-        <p className="mt-5 text-center text-xs text-[#7a6e62]">
+        <p className="mt-4 text-center text-xs text-[#7a6e62]">
           Remember your password?{' '}
           <Link
             href="/login"
