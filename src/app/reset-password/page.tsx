@@ -1,5 +1,5 @@
 // TODO: change the design of reset password page based on our project's style
-import { ResetPasswordForm } from './reset-password-form';
+import { ResetPasswordForm } from '../../components/(auth)/reset-password/reset-password-form';
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
