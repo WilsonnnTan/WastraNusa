@@ -1,7 +1,14 @@
+'use client';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { MapPin, User } from 'lucide-react';
 
-export default function ProfileCard() {
+type User = {
+  name?: string | null;
+  email?: string | null;
+};
+
+export default function ProfileCard({ user }: { user?: User }) {
   return (
     <div className="mx-4 md:mx-8 my-4 px-4 md:px-8 py-5 md:py-7 bg-background rounded-xl border flex flex-col md:flex-row justify-between items-center font-sans shadow-sm gap-4">
       <div className="flex flex-col md:flex-row gap-4 md:gap-5 items-center text-center md:text-left">
@@ -13,14 +20,14 @@ export default function ProfileCard() {
 
         <div className="flex flex-col gap-1.5 items-center md:items-start">
           <h2 className="m-0 text-lg md:text-xl font-bold text-foreground">
-            Siti Rahayu
+            {user?.name ?? '-'}
           </h2>
           <p className="m-0 text-[13px] text-muted-foreground break-all md:break-normal">
-            a*****@gmail.com | +62 812 3456 7890
+            {user?.email ?? '-'}
           </p>
           <p className="m-0 text-[12px] text-muted-foreground flex items-center justify-center md:justify-start gap-1">
             <MapPin size={13} />
-            Bergabung: Januari 2024
+            Bergabung: -
           </p>
         </div>
       </div>

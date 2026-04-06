@@ -1,7 +1,14 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Edit2 } from 'lucide-react';
+
+type User = {
+  name?: string | null;
+  email?: string | null;
+};
 
 function InfoField({ label, value }: { label: string; value: string }) {
   return (
@@ -16,7 +23,7 @@ function InfoField({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function ProfileInfoSection() {
+export default function ProfileInfoSection({ user }: { user?: User }) {
   return (
     <div className="bg-background rounded-2xl p-5 md:p-7 shadow-sm border">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
@@ -30,13 +37,13 @@ export default function ProfileInfoSection() {
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InfoField label="Nama Lengkap" value="Siti Rahayu" />
+        <InfoField label="Nama Lengkap" value={user?.name ?? '-'} />
+        <InfoField label="Email" value={user?.email ?? '-'} />
         <InfoField label="Nomor Telepon" value="+62 812 3456 7890" />
-        <InfoField label="Email" value="sitirahayu@gmail.com" />
         <InfoField label="Jenis Kelamin" value="Perempuan" />
       </div>
       <div className="mt-4">
-        <InfoField label="Tanggal Lahir" value="12 Januari 1995" />
+        <InfoField label="Tanggal Lahir" value="1 Januari 2000" />
       </div>
     </div>
   );
