@@ -3,11 +3,16 @@ import { redirect } from 'next/navigation';
 
 import { auth } from './auth';
 
-export async function requireUser() {
+export async function requireSession() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return redirect('/login?session_expired=true');
   }
+  return session;
+}
+
+export async function requireUser() {
+  const session = await requireSession();
   return session.user;
 }
 

@@ -12,8 +12,56 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { requireSession } from '@/lib/auth/auth-page-helper';
 
-export default function Profile() {
+function formatDate(
+  value: string | Date | null | undefined,
+  options: Intl.DateTimeFormatOptions,
+) {
+  if (!value) {
+    return '-';
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return new Intl.DateTimeFormat('id-ID', options).format(date);
+}
+
+function mapGender(value: string | null | undefined) {
+  if (value === 'male') {
+    return 'Laki-laki';
+  }
+
+  if (value === 'female') {
+    return 'Perempuan';
+  }
+
+  return '-';
+}
+
+export default async function Profile() {
+  const { user, session } = await requireSession();
+
+  const joinedAt = formatDate(user.createdAt, {
+    month: 'long',
+    year: 'numeric',
+  });
+  const birthDate = formatDate(user.birthDate, {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+  const lastLogin = formatDate(session.updatedAt ?? session.createdAt, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   return (
     <div className="bg-brand-bg flex min-h-screen flex-col font-sans">
       <Header homeHref="/" />
@@ -37,15 +85,27 @@ export default function Profile() {
         </Breadcrumb>
       </div>
 
-      <ProfileCard />
+      <ProfileCard
+        name={user.name || '-'}
+        email={user.email || '-'}
+        phoneNumber={user.phoneNumber}
+        joinedAt={joinedAt}
+        image={user.image}
+      />
 
       {/* Main content area with sidebar */}
       <div className="bg-brand-bg-alt flex flex-1 flex-col items-stretch gap-6 px-4 py-4 md:flex-row md:items-start md:px-8 md:py-6">
         <Sidebar active="Profil Saya" />
 
         <div className="flex w-full flex-1 flex-col gap-5">
-          <ProfileInfoSection />
-          <SecuritySection />
+          <ProfileInfoSection
+            fullName={user.name || '-'}
+            phoneNumber={user.phoneNumber || '-'}
+            email={user.email || '-'}
+            gender={mapGender(user.gender)}
+            birthDate={birthDate}
+          />
+          <SecuritySection lastLogin={lastLogin} />
         </div>
       </div>
 

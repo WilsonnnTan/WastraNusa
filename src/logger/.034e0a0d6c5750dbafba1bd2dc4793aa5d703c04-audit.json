@@ -1,0 +1,15 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 7
+  },
+  "auditLog": "C:\\codes\\Kuliah\\PPL\\WastraNusa\\src\\logger\\.034e0a0d6c5750dbafba1bd2dc4793aa5d703c04-audit.json",
+  "files": [
+    {
+      "date": 1775473119992,
+      "name": "C:\\codes\\Kuliah\\PPL\\WastraNusa\\src\\logger\\combined-2026-04-06.log",
+      "hash": "60a729260cea77ab11b663ce4e0e143b1b7805319a1366dbda2e8863659d35f2"
+    }
+  ],
+  "hashType": "sha256"
+}

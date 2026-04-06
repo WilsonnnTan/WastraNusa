@@ -122,10 +122,7 @@ export function LoginForm() {
               </FieldError>
             )}
           </div>
-          <Link
-            href="/forgot-password"
-            className="text-[#c07a4a] hover:underline font-medium"
-          >
+          <Link href="/forgot-password" className="text-[#c07a4a] font-medium">
             Forgot password?
           </Link>
         </div>
@@ -148,10 +145,7 @@ export function LoginForm() {
       {/* Register link */}
       <p className="mt-5 text-center text-xs text-[#7a6e62]">
         Don&apos;t have an account?{' '}
-        <Link
-          href="/register"
-          className="text-[#c07a4a] hover:underline font-medium"
-        >
+        <Link href="/register" className="text-[#c07a4a] font-medium">
           Sign Up
         </Link>
       </p>

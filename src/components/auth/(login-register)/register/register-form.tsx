@@ -282,16 +282,35 @@ export function RegisterForm() {
             {/* Gender */}
             <Field data-invalid={!!errors.gender} className="gap-1">
               <div className="flex gap-2.5 text-xs text-[#2d2318] mt-0.5">
-                {['Female', 'Male'].map((gender) => (
+                {['Male', 'Female'].map((gender) => (
                   <label
                     key={gender}
                     className="flex items-center gap-1.5 cursor-pointer"
                   >
                     <input
                       type="radio"
-                      value={gender.toLowerCase()}
                       {...register('gender')}
-                      className="accent-[#3d2e1e] w-3 h-3"
+                      className="
+                        /* 1. Reset Tampilan Default */
+                        appearance-none 
+                        
+                        /* 2. Ukuran & Bentuk Dasar (Background menyatu dengan tema) */
+                        w-4 h-4 
+                        rounded-full 
+                        border-2 border-gray-400 
+                        bg-[#E6DEC9] 
+                        
+                        /* 3. Trik Mengecilkan Titik Tengah saat Checked */
+                        /* Kita gunakan ring-inset warna background agar seolah-olah ada gap */
+                        checked:bg-[#3d2e1e] 
+                        checked:border-[#3d2e1e]
+                        checked:ring-2 checked:ring-inset checked:ring-[#E6DEC9]
+
+                        /* 4. Efek Halus & Fokus */
+                        transition-all duration-200 
+                        focus:ring-2 focus:ring-[#3d2e1e] focus:ring-offset-1 
+                        cursor-pointer
+  "
                     />
                     {gender}
                   </label>
@@ -347,10 +366,7 @@ export function RegisterForm() {
 
           <p className="mt-4 text-center text-xs text-[#7a6e62]">
             Already have an account?{' '}
-            <Link
-              href="/login"
-              className="text-[#c07a4a] hover:underline font-medium"
-            >
+            <Link href="/login" className="text-[#c07a4a] font-medium">
               Sign In
             </Link>
           </p>

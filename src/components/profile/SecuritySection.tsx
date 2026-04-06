@@ -36,7 +36,11 @@ function SecurityRow({
   );
 }
 
-export default function SecuritySection() {
+type SecuritySectionProps = {
+  lastLogin: string;
+};
+
+export default function SecuritySection({ lastLogin }: SecuritySectionProps) {
   return (
     <div className="bg-background rounded-2xl p-5 md:p-7 shadow-sm border">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4 sm:gap-0">
@@ -59,7 +63,7 @@ export default function SecuritySection() {
         <SecurityRow
           icon={<CheckCircle size={16} />}
           title="Login Terakhir"
-          subtitle="20 Mar 2025, 09:15 dari Yogyakarta, Indonesia"
+          subtitle={lastLogin}
         />
       </div>
     </div>
