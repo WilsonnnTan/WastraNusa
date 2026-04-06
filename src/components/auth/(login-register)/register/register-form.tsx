@@ -96,7 +96,7 @@ export function RegisterForm() {
       phoneNumber: data.phone,
       birthDate: birthDate,
       gender: data.gender,
-      callbackURL: '/ensiklopedia',
+      callbackURL: '/login',
     });
 
     if (signUpError) {

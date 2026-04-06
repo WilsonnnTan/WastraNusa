@@ -39,7 +39,7 @@ export function LoginForm() {
       {
         email: data.email,
         password: data.password,
-        callbackURL: '/ensiklopedia',
+        callbackURL: '/login',
       },
       {
         onError: (ctx) => {
