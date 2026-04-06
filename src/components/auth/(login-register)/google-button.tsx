@@ -1,3 +1,7 @@
+'use client';
+
+import { authClient } from '@/lib/auth/auth-client';
+
 type GoogleButtonProps = {
   label?: string;
 };
@@ -5,9 +9,20 @@ type GoogleButtonProps = {
 export function GoogleButton({
   label = 'Continue with Google',
 }: GoogleButtonProps) {
+  const handleGoogleSignIn = async () => {
+    await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: '/ensiklopedia',
+      errorCallbackURL: '/error',
+      newUserCallbackURL: '/ensiklopedia',
+      disableRedirect: false,
+    });
+  };
+
   return (
     <button
       type="button"
+      onClick={handleGoogleSignIn}
       className="flex w-full items-center justify-center gap-2.5 rounded-sm border border-[#c8bfb0] bg-transparent px-4 py-2.5 text-sm font-medium text-[#2d2318] transition hover:bg-[#ddd6c8]"
     >
       {/* Google icon */}
