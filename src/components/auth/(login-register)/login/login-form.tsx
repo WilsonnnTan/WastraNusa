@@ -35,16 +35,29 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginValues) => {
-    const { error: signInError } = await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-      callbackURL: '/ensiklopedia',
-    });
+    const { error: signInError } = await authClient.signIn.email(
+      {
+        email: data.email,
+        password: data.password,
+        callbackURL: '/ensiklopedia',
+      },
+      {
+        onError: (ctx) => {
+          if (ctx.error.status === 403) {
+            setError('root', {
+              message: 'Please verify your email address before signing in.',
+            });
+          }
+        },
+      },
+    );
 
     if (signInError) {
-      setError('root', {
-        message: signInError.message || 'Wrong email or password',
-      });
+      if (signInError.status !== 403) {
+        setError('root', {
+          message: signInError.message || 'Wrong email or password',
+        });
+      }
     } else {
       router.push('/ensiklopedia');
     }
