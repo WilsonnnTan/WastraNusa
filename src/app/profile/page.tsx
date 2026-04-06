@@ -12,8 +12,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { requireUser } from '@/lib/auth/auth-page-helper';
 
-export default function Profile() {
+export default async function Profile() {
+  await requireUser();
   return (
     <div className="bg-brand-bg flex min-h-screen flex-col font-sans">
       <Header homeHref="/" />
