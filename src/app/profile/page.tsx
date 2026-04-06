@@ -13,6 +13,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { requireSession } from '@/lib/auth/auth-page-helper';
+import prisma from '@/lib/prisma';
 
 function formatDate(
   value: string | Date | null | undefined,
@@ -43,13 +44,35 @@ function mapGender(value: string | null | undefined) {
 }
 
 export default async function Profile() {
-  const { user, session } = await requireSession();
+  const { user: sessionUser, session } = await requireSession();
 
-  const joinedAt = formatDate(user.createdAt, {
+  const user = await prisma.user.findUnique({
+    where: { id: sessionUser.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phoneNumber: true,
+      image: true,
+      createdAt: true,
+      gender: true,
+      birthDate: true,
+      _count: {
+        select: {
+          orders: true,
+        },
+      },
+    },
+  });
+
+  const profileUser = user ?? sessionUser;
+  const totalOrders = user?._count.orders ?? 0;
+
+  const joinedAt = formatDate(profileUser.createdAt, {
     month: 'long',
     year: 'numeric',
   });
-  const birthDate = formatDate(user.birthDate, {
+  const birthDate = formatDate(profileUser.birthDate, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -86,11 +109,12 @@ export default async function Profile() {
       </div>
 
       <ProfileCard
-        name={user.name || '-'}
-        email={user.email || '-'}
-        phoneNumber={user.phoneNumber}
+        name={profileUser.name || '-'}
+        email={profileUser.email || '-'}
+        phoneNumber={profileUser.phoneNumber}
         joinedAt={joinedAt}
-        image={user.image}
+        image={profileUser.image}
+        totalOrders={totalOrders}
       />
 
       {/* Main content area with sidebar */}
@@ -99,10 +123,10 @@ export default async function Profile() {
 
         <div className="flex w-full flex-1 flex-col gap-5">
           <ProfileInfoSection
-            fullName={user.name || '-'}
-            phoneNumber={user.phoneNumber || '-'}
-            email={user.email || '-'}
-            gender={mapGender(user.gender)}
+            fullName={profileUser.name || '-'}
+            phoneNumber={profileUser.phoneNumber || '-'}
+            email={profileUser.email || '-'}
+            gender={mapGender(profileUser.gender)}
             birthDate={birthDate}
           />
           <SecuritySection lastLogin={lastLogin} />
