@@ -123,13 +123,13 @@ export function RegisterForm() {
                 htmlFor="firstName"
                 className="text-xs font-sm text-[#2d2318]"
               >
-                First name
+                Full Name
               </FieldLabel>
               <Input
                 id="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="First Name"
+                placeholder="Full Name"
                 {...register('firstName')}
                 className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
               />
