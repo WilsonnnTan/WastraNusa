@@ -8,18 +8,10 @@ import {
   ProductCatalog,
   RegionCards,
 } from '@/components/landing-page';
-import { Plus_Jakarta_Sans } from 'next/font/google';
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-});
 
 export default function HomePage() {
   return (
-    <div
-      className={`${plusJakartaSans.className} min-h-screen bg-[#f5f1e8] text-[#2b4d3c]`}
-    >
+    <div className="min-h-screen bg-[#f5f1e8] text-[#2b4d3c]">
       <Header homeHref="/" />
 
       <main className="pb-16">
