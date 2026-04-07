@@ -12,7 +12,7 @@ const menuItems = [
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/ensiklopedia' },
   { label: 'Katalog', icon: Grid2X2 },
   { label: 'Keranjang', icon: ShoppingCart, badge: '3' },
-  { label: 'Profil', icon: UserRound },
+  { label: 'Profil', icon: UserRound, href: '/profile' },
 ];
 
 type HeaderProps = {
