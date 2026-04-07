@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle, Loader2, Lock, X } from 'lucide-react';
-import { ReactNode, useState } from 'react';
+import { CheckCircle, Info, Loader2, Lock, X } from 'lucide-react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod/v3';
@@ -64,6 +64,24 @@ export default function SecuritySection() {
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOAuthOnly, setIsOAuthOnly] = useState(false);
+
+  useEffect(() => {
+    const checkAccounts = async () => {
+      try {
+        const { data: accounts } = await authClient.listAccounts();
+        if (accounts) {
+          const hasCredential = accounts.some(
+            (acc) => acc.providerId === 'credential',
+          );
+          setIsOAuthOnly(!hasCredential);
+        }
+      } catch (error) {
+        console.error('Failed to fetch accounts:', error);
+      }
+    };
+    checkAccounts();
+  }, []);
 
   const {
     register,
@@ -122,12 +140,26 @@ export default function SecuritySection() {
           <Button
             variant="outline"
             onClick={() => setIsChangingPassword(true)}
-            className="flex items-center gap-1.5 text-[13px] text-brand border-gray-300 rounded-lg h-9 w-full sm:w-auto"
+            disabled={isOAuthOnly}
+            className="flex items-center gap-1.5 text-[13px] text-brand border-gray-300 rounded-lg h-9 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Ubah Password
           </Button>
         ) : null}
       </div>
+
+      {isOAuthOnly && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+          <Info className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+          <div className="text-sm text-amber-800">
+            <p className="font-semibold mb-1">Akun Terhubung dengan Google</p>
+            <p className="text-[13px] leading-relaxed">
+              Anda menggunakan login Google untuk akun ini. Pengaturan password
+              dinonaktifkan karena Anda tidak memiliki password lokal.
+            </p>
+          </div>
+        </div>
+      )}
 
       {isChangingPassword ? (
         <div className="space-y-4 bg-brand-muted/50 p-4 rounded-xl border border-border/50">
@@ -200,11 +232,13 @@ export default function SecuritySection() {
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          <SecurityRow
-            icon={<Lock size={16} />}
-            title="Password"
-            subtitle="••••••••••••"
-          />
+          {!isOAuthOnly && (
+            <SecurityRow
+              icon={<Lock size={16} />}
+              title="Password"
+              subtitle="••••••••••••"
+            />
+          )}
           <SecurityRow
             icon={<CheckCircle size={16} />}
             title="Login Terakhir"
