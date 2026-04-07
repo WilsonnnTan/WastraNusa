@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.font-segoe {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -45,6 +49,12 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-brand: var(--color-brand);
+  --color-brand-dark: var(--color-brand-dark);
+  --color-brand-light: var(--color-brand-light);
+  --color-brand-muted: var(--color-brand-muted);
+  --color-brand-bg: var(--color-brand-bg);
+  --color-brand-bg-alt: var(--color-brand-bg-alt);
 }
 
 :root {
@@ -80,6 +90,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --color-brand: oklch(0.467 0.065 152);
+  --color-brand-dark: oklch(0.358 0.052 152);
+  --color-brand-light: oklch(0.54 0.076 152);
+  --color-brand-muted: oklch(0.957 0.01 75);
+  --color-brand-bg: oklch(0.98 0.002 240);
+  --color-brand-bg-alt: oklch(0.935 0.015 75);
 }
 
 .dark {

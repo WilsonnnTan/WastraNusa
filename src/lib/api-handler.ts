@@ -1,4 +1,6 @@
+import { Prisma } from '@/generated/prisma/client';
 import { logError } from '@/logger/logger';
+import { ZodError } from 'zod';
 
 import { AuthHelper } from './auth/auth-api-helper';
 import { ApiError } from './error';
@@ -14,6 +16,51 @@ type ApiHandler<T = unknown> = (
   context: ApiHandlerContext<T>,
 ) => Promise<Response>;
 
+type PublicApiHandlerContext<T = unknown> = {
+  params: T;
+  req: Request;
+};
+
+type PublicApiHandler<T = unknown> = (
+  context: PublicApiHandlerContext<T>,
+) => Promise<Response>;
+
+function handleApiError(err: unknown, req: Request) {
+  const action = req.method + ' ' + new URL(req.url).pathname;
+  logError(err, { action });
+
+  if (err instanceof ApiError) {
+    return jsend.fail({ message: err.message }, err.status);
+  }
+
+  if (err instanceof ZodError) {
+    const fieldErrors = err.flatten().fieldErrors;
+    const flatErrors: Record<string, string> = {};
+    for (const [key, errors] of Object.entries(fieldErrors)) {
+      flatErrors[key] = (errors as string[])?.[0] || 'Invalid value';
+    }
+
+    return jsend.fail(flatErrors, 400);
+  }
+
+  // Prisma Error Handling
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    const code = err.code;
+
+    if (code === 'P2002') {
+      return jsend.fail({ message: 'Resource already exists' }, 400);
+    }
+    if (code === 'P2025') {
+      return jsend.fail({ message: 'Resource not found' }, 404);
+    }
+  }
+
+  return jsend.error(
+    err instanceof Error ? err.message : 'Internal Server Error',
+    500,
+  );
+}
+
 /**
  * Higher-order function to wrap API routes with authentication and standardized error handling.
  * @param handler The actual route logic
@@ -27,17 +74,7 @@ export function withApiAuth<T = unknown>(handler: ApiHandler<T>) {
 
       return await handler({ userId: user.id, params: resolvedParams, req });
     } catch (err) {
-      const action = req.method + ' ' + new URL(req.url).pathname;
-      logError(err, { action });
-
-      if (err instanceof ApiError) {
-        return jsend.fail({ message: err.message }, err.status);
-      }
-
-      return jsend.error(
-        err instanceof Error ? err.message : 'Internal Server Error',
-        500,
-      );
+      return handleApiError(err, req);
     }
   };
 }
@@ -55,17 +92,23 @@ export function withApiAdmin<T = unknown>(handler: ApiHandler<T>) {
 
       return await handler({ userId: user.id, params: resolvedParams, req });
     } catch (err) {
-      const action = req.method + ' ' + new URL(req.url).pathname;
-      logError(err, { action });
+      return handleApiError(err, req);
+    }
+  };
+}
 
-      if (err instanceof ApiError) {
-        return jsend.fail({ message: err.message }, err.status);
-      }
-
-      return jsend.error(
-        err instanceof Error ? err.message : 'Internal Server Error',
-        500,
-      );
+/**
+ * Higher-order function to wrap public API routes with standardized error handling and async params.
+ * @param handler The actual route logic
+ * @returns A Next.js API route handler
+ */
+export function withApiPublic<T = unknown>(handler: PublicApiHandler<T>) {
+  return async (req: Request, { params }: { params: Promise<T> }) => {
+    try {
+      const resolvedParams = await params;
+      return await handler({ params: resolvedParams, req });
+    } catch (err) {
+      return handleApiError(err, req);
     }
   };
 }
