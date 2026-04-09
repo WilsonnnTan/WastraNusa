@@ -26,8 +26,27 @@ export async function proxy(request: NextRequest) {
       request.nextUrl.searchParams.get('session_expired') === 'true'
     ) {
       const response = NextResponse.next();
-      response.cookies.delete('__Secure-better-auth.session_token');
-      response.cookies.delete('__Secure-better-auth.session_data');
+
+      const cookieOptions = {
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax' as const,
+      };
+
+      response.cookies.set(
+        '__Secure-better-auth.session_token',
+        '',
+        cookieOptions,
+      );
+      response.cookies.set(
+        '__Secure-better-auth.session_data',
+        '',
+        cookieOptions,
+      );
+
       return response;
     }
     return NextResponse.redirect(new URL('/', request.url));
