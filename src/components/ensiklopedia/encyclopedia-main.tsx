@@ -25,9 +25,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function EncyclopediaMain() {
+  const router = useRouter();
   const [currentView, setCurrentView] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 12;
@@ -66,8 +68,7 @@ export function EncyclopediaMain() {
   };
 
   const handleArticleClick = (article: EncyclopediaArticle) => {
-    console.log('Article clicked:', article.title);
-    // Implement navigation to article detail page
+    router.push(`/ensiklopedia/${article.slug}`);
   };
 
   const handlePageChange = (page: number) => {
