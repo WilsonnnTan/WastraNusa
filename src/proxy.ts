@@ -1,17 +1,19 @@
 import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 export async function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   const pathName = request.nextUrl.pathname;
 
   const authRoutes = ['/login', '/register'];
+  // TODO: add path on protected route for user's page when we have it
   const protectedRoutes = ['/admin'];
 
   const isAuthRoute = authRoutes.some((route) => pathName.startsWith(route));
 
-  // TODO: add path on protected route for user's page when we have it
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathName.startsWith(route),
   );
@@ -26,8 +28,29 @@ export async function proxy(request: NextRequest) {
       request.nextUrl.searchParams.get('session_expired') === 'true'
     ) {
       const response = NextResponse.next();
-      response.cookies.delete('__Secure-better-auth.session_token');
-      response.cookies.delete('__Secure-better-auth.session_data');
+
+      const cookieOptions = {
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax' as const,
+      };
+
+      const prefix = isProd ? '__Secure-' : '';
+
+      response.cookies.set(
+        `${prefix}better-auth.session_token`,
+        '',
+        cookieOptions,
+      );
+      response.cookies.set(
+        `${prefix}better-auth.session_data`,
+        '',
+        cookieOptions,
+      );
+
       return response;
     }
     return NextResponse.redirect(new URL('/', request.url));
