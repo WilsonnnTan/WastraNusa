@@ -1,5 +1,5 @@
 import { Prisma } from '@/generated/prisma/client';
-import { logError } from '@/logger/logger';
+import { logError } from '@/lib/logger';
 import { ZodError } from 'zod';
 
 import { AuthHelper } from './auth/auth-api-helper';
