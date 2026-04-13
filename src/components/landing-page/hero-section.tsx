@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 export function HeroSection() {
   return (
@@ -40,7 +41,7 @@ export function HeroSection() {
             asChild
             className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
           >
-            <a href="/ensiklopedia">Jelajahi Ensiklopedia</a>
+            <Link href="/ensiklopedia">Jelajahi Ensiklopedia</Link>
           </Button>
         </div>
       </div>

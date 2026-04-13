@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ChevronRight, Search } from 'lucide-react';
+import Link from 'next/link';
 
 import { latestArticles, popularSearchTags } from './data';
 
@@ -40,7 +41,7 @@ export function EncyclopediaSection() {
                 asChild
                 className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc]"
               >
-                <a href="/ensiklopedia">Cari</a>
+                <Link href="/ensiklopedia">Cari</Link>
               </Button>
             </div>
 
@@ -96,10 +97,10 @@ export function EncyclopediaSection() {
               asChild
               className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
             >
-              <a href="/ensiklopedia">
+              <Link href="/ensiklopedia">
                 Lihat semua artikel
                 <ChevronRight className="h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </aside>
         </div>
