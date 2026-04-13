@@ -6,6 +6,8 @@ import {
   ShoppingCart,
   UserRound,
 } from 'lucide-react';
+import Image from 'next/image';
+// 1. Tambahkan import Image di sini
 import Link from 'next/link';
 
 const menuItems = [
@@ -25,9 +27,15 @@ export function Header({ homeHref = '/' }: HeaderProps) {
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
         <div className="flex h-20 items-center gap-4">
           <Link href={homeHref} className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-[10px] bg-[#2f5f49] shadow-sm shadow-[#224436]/25">
-              <span className="h-4 w-4 rounded-sm bg-[#f5f2eb]" />
-            </span>
+            {/* 2. Ganti placeholder span kotak hijau dengan tag Image */}
+            <Image
+              src="/logo.png"
+              alt="WastraNusa"
+              width={44} // Sesuaikan agar pas dengan tinggi header
+              height={44}
+              priority
+              className="object-contain"
+            />
             <span className="text-3xl font-extrabold tracking-tight text-[#2f5f49]">
               WastraNusa
             </span>

@@ -18,11 +18,32 @@ export default function Sidebar({ active }: { active: string }) {
     });
   };
 
+  // 1. Tambahkan href ke masing-masing menu
   const items = [
-    { icon: <User size={16} />, label: 'Profil Saya', badge: null },
-    { icon: <ShoppingBag size={16} />, label: 'Pesanan Saya', badge: null },
-    { icon: <MapPin size={16} />, label: 'Alamat Tersimpan', badge: null },
-    { icon: <BookOpen size={16} />, label: 'Artikel Disukai', badge: null },
+    {
+      icon: <User size={16} />,
+      label: 'Profil Saya',
+      badge: null,
+      href: '/profile',
+    },
+    {
+      icon: <ShoppingBag size={16} />,
+      label: 'Pesanan Saya',
+      badge: null,
+      href: '/profile/pesanan',
+    },
+    {
+      icon: <MapPin size={16} />,
+      label: 'Alamat Tersimpan',
+      badge: null,
+      href: '/profile/alamat',
+    },
+    {
+      icon: <BookOpen size={16} />,
+      label: 'Artikel Disukai',
+      badge: null,
+      href: '/profile/artikel-disukai',
+    },
     {
       icon: <LogOut size={16} />,
       label: 'Keluar',
@@ -33,10 +54,18 @@ export default function Sidebar({ active }: { active: string }) {
 
   return (
     <div className="w-full md:w-[200px] lg:w-[220px] bg-background rounded-2xl p-2 md:p-2 shadow-sm border flex flex-row flex-wrap md:flex-col gap-1 md:self-start">
-      {items.map(({ icon, label, badge, action }) => (
+      {/* 2. Destructure href dari items */}
+      {items.map(({ icon, label, badge, action, href }) => (
         <div
           key={label}
-          onClick={action}
+          // 3. Ubah logika onClick
+          onClick={() => {
+            if (action) {
+              action(); // Jika ada action (seperti tombol Keluar), jalankan
+            } else if (href) {
+              router.push(href); // Jika ada href, pindah halaman
+            }
+          }}
           className={`flex-auto md:flex-none flex items-center justify-center md:justify-between px-3 md:px-3.5 py-2 md:py-2.5 rounded-lg cursor-pointer text-sm transition-colors whitespace-nowrap ${
             label === active
               ? 'bg-brand-muted text-brand font-medium'
