@@ -1,7 +1,7 @@
 import type { PaymentTransactionStatus } from '@/generated/prisma/client';
 import { ApiError } from '@/lib/error';
+import { logger } from '@/lib/logger';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
-import { logger } from '@/logger/logger';
 import { orderRepository } from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
