@@ -31,9 +31,9 @@ export default function ProfileBreadcrumb() {
           </BreadcrumbLink>
         </BreadcrumbItem>
 
-        {items.map((item, index) => (
-          <BreadcrumbItem key={`${item.label}-${index}`} className="contents">
-            <BreadcrumbSeparator />
+        {items.flatMap((item, index) => [
+          <BreadcrumbSeparator key={`separator-${item.label}-${index}`} />,
+          <BreadcrumbItem key={`item-${item.label}-${index}`}>
             {item.href ? (
               <BreadcrumbLink
                 href={item.href}
@@ -44,8 +44,8 @@ export default function ProfileBreadcrumb() {
             ) : (
               <BreadcrumbPage>{item.label}</BreadcrumbPage>
             )}
-          </BreadcrumbItem>
-        ))}
+          </BreadcrumbItem>,
+        ])}
       </BreadcrumbList>
     </Breadcrumb>
   );
