@@ -8,10 +8,3 @@ export interface Product {
   stock: number;
   badge?: string;
 }
-
-export interface RegionCard {
-  region: string;
-  style: string;
-  count: string;
-  bgClass: string;
-}
