@@ -1,7 +1,8 @@
 import type { JSendResponse } from '@/lib/jsend';
 import type {
-  EncyclopediaArticle,
   EncyclopediaArticleDetail,
+  EncyclopediaArticleFilters,
+  EncyclopediaArticleListResponse,
   ToggleArticleLikeResponse,
 } from '@/types/encyclopedia';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -11,8 +12,8 @@ const DEFAULT_ARTICLE_LIMIT = 50;
 export const articleKeys = {
   all: ['articles'] as const,
   lists: () => [...articleKeys.all, 'list'] as const,
-  list: (page: number, limit: number) =>
-    [...articleKeys.lists(), page, limit] as const,
+  list: (page: number, limit: number, region?: string) =>
+    [...articleKeys.lists(), page, limit, region ?? 'all'] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
 };
@@ -62,9 +63,19 @@ async function mutateArticleApi<T>(path: string, method: 'POST'): Promise<T> {
 export function fetchArticles(
   page: number = 1,
   limit: number = DEFAULT_ARTICLE_LIMIT,
+  filters: EncyclopediaArticleFilters = {},
 ) {
-  return fetchArticleApi<EncyclopediaArticle[]>(
-    `/api/articles?page=${page}&limit=${limit}`,
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (filters.region) {
+    searchParams.set('region', filters.region);
+  }
+
+  return fetchArticleApi<EncyclopediaArticleListResponse>(
+    `/api/articles?${searchParams.toString()}`,
   );
 }
 
@@ -84,10 +95,11 @@ export function toggleArticleLike(slug: string) {
 export function useArticles(
   page: number = 1,
   limit: number = DEFAULT_ARTICLE_LIMIT,
+  filters: EncyclopediaArticleFilters = {},
 ) {
   return useQuery({
-    queryKey: articleKeys.list(page, limit),
-    queryFn: () => fetchArticles(page, limit),
+    queryKey: articleKeys.list(page, limit, filters.region),
+    queryFn: () => fetchArticles(page, limit, filters),
     placeholderData: (previousData) => previousData,
   });
 }
@@ -115,9 +127,10 @@ export function useToggleArticleLike(slug: string) {
         queryClient.getQueryData<EncyclopediaArticleDetail>(
           articleKeys.detail(slug),
         );
-      const previousLists = queryClient.getQueriesData<EncyclopediaArticle[]>({
-        queryKey: articleKeys.lists(),
-      });
+      const previousLists =
+        queryClient.getQueriesData<EncyclopediaArticleListResponse>({
+          queryKey: articleKeys.lists(),
+        });
       const nextIsLiked = !(previousDetail?.isLiked ?? false);
       const nextLikes = Math.max(
         0,
@@ -136,18 +149,23 @@ export function useToggleArticleLike(slug: string) {
             : currentArticle,
       );
 
-      queryClient.setQueriesData<EncyclopediaArticle[]>(
+      queryClient.setQueriesData<EncyclopediaArticleListResponse>(
         { queryKey: articleKeys.lists() },
-        (currentArticles) =>
-          currentArticles?.map((article) =>
-            article.slug === slug
-              ? {
-                  ...article,
-                  isLiked: nextIsLiked,
-                  likes: nextLikes,
-                }
-              : article,
-          ),
+        (currentResponse) =>
+          currentResponse
+            ? {
+                ...currentResponse,
+                items: currentResponse.items.map((article) =>
+                  article.slug === slug
+                    ? {
+                        ...article,
+                        isLiked: nextIsLiked,
+                        likes: nextLikes,
+                      }
+                    : article,
+                ),
+              }
+            : currentResponse,
       );
 
       return { previousDetail, previousLists };
@@ -177,18 +195,23 @@ export function useToggleArticleLike(slug: string) {
             : currentArticle,
       );
 
-      queryClient.setQueriesData<EncyclopediaArticle[]>(
+      queryClient.setQueriesData<EncyclopediaArticleListResponse>(
         { queryKey: articleKeys.lists() },
-        (currentArticles) =>
-          currentArticles?.map((article) =>
-            article.slug === slug
-              ? {
-                  ...article,
-                  isLiked: result.isLiked,
-                  likes: result.engagement.likeCount,
-                }
-              : article,
-          ),
+        (currentResponse) =>
+          currentResponse
+            ? {
+                ...currentResponse,
+                items: currentResponse.items.map((article) =>
+                  article.slug === slug
+                    ? {
+                        ...article,
+                        isLiked: result.isLiked,
+                        likes: result.engagement.likeCount,
+                      }
+                    : article,
+                ),
+              }
+            : currentResponse,
       );
     },
   });

@@ -13,8 +13,12 @@ export const articleRepository = {
   findAll: async ({
     offset,
     limit,
-  }: { offset?: number; limit?: number } = {}) => {
+    region,
+  }: { offset?: number; limit?: number; region?: string } = {}) => {
+    const where: Prisma.ArticleWhereInput = region ? { region } : {};
+
     return prisma.article.findMany({
+      where,
       skip: offset,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -23,6 +27,24 @@ export const articleRepository = {
           select: { id: true, name: true, image: true },
         },
         engagement: true,
+      },
+    });
+  },
+
+  countAll: async ({ region }: { region?: string } = {}) => {
+    const where: Prisma.ArticleWhereInput = region ? { region } : {};
+
+    return prisma.article.count({ where });
+  },
+
+  countByRegion: async () => {
+    return prisma.article.groupBy({
+      by: ['region'],
+      _count: {
+        region: true,
+      },
+      orderBy: {
+        region: 'asc',
       },
     });
   },

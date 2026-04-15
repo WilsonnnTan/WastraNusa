@@ -65,7 +65,17 @@ afterEach(() => {
 
 describe('use-article hooks', { tags: ['frontend'] }, () => {
   it('should unwrap article list responses from JSend', async () => {
-    const articles = [{ slug: 'article-1', title: 'Article 1' }];
+    const articles = {
+      items: [{ slug: 'article-1', title: 'Article 1' }],
+      meta: {
+        page: 1,
+        limit: 10,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        regions: [{ name: 'Semua Wilayah', count: 1, active: true }],
+      },
+    };
     vi.spyOn(global, 'fetch').mockResolvedValue(
       createSuccessResponse(articles) as never,
     );
@@ -145,22 +155,60 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
     expect(result.current.isPending).toBe(true);
 
     resolveFetch?.(
-      createSuccessResponse([
-        {
-          slug: 'article-1',
-          region: 'Jawa',
-          topic: 'Sejarah',
-          motifLabel: 'Batik',
-          title: 'Article 1',
-          excerpt: 'Excerpt',
-          likes: 1,
-          views: '10',
+      createSuccessResponse({
+        items: [
+          {
+            slug: 'article-1',
+            region: 'Jawa',
+            topic: 'Sejarah',
+            motifLabel: 'Batik',
+            title: 'Article 1',
+            excerpt: 'Excerpt',
+            likes: 1,
+            views: '10',
+          },
+        ],
+        meta: {
+          page: 1,
+          limit: 50,
+          totalItems: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          regions: [{ name: 'Semua Wilayah', count: 1, active: true }],
         },
-      ]),
+      }),
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toHaveLength(1);
+    expect(result.current.data?.items).toHaveLength(1);
+    expect(result.current.data?.meta.totalPages).toBe(1);
+  });
+
+  it('should include region in the article list query', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse({
+        items: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          totalItems: 0,
+          totalPages: 1,
+          hasNextPage: false,
+          regions: [{ name: 'Semua Wilayah', count: 0, active: true }],
+        },
+      }) as never,
+    );
+
+    await fetchArticles(1, 10, { region: 'Jawa' });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles?page=1&limit=10&region=Jawa',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      }),
+    );
   });
 
   it('should expose success for useArticleDetail', async () => {

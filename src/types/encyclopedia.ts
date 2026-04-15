@@ -13,6 +13,10 @@ export interface RegionFilter {
   active?: boolean;
 }
 
+export interface EncyclopediaArticleFilters {
+  region?: string;
+}
+
 export interface EncyclopediaArticle {
   slug: string;
   region: string;
@@ -60,6 +64,20 @@ export interface EncyclopediaArticleDetail extends EncyclopediaArticle {
     title: string;
   };
   references: string[];
+}
+
+export interface EncyclopediaArticleListMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  regions: RegionFilter[];
+}
+
+export interface EncyclopediaArticleListResponse {
+  items: EncyclopediaArticle[];
+  meta: EncyclopediaArticleListMeta;
 }
 
 export interface ToggleArticleLikeResponse {

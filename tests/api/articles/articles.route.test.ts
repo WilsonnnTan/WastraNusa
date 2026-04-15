@@ -7,10 +7,20 @@ import { GET, POST } from '../../../src/app/api/articles/route';
 const mockService = vi.mocked(articleService);
 const mockAuth = vi.mocked(AuthHelper);
 
-const MOCK_ARTICLES = [
-  { id: '1', title: 'Article 1', slug: 'article-1' },
-  { id: '2', title: 'Article 2', slug: 'article-2' },
-];
+const MOCK_ARTICLES = {
+  items: [
+    { id: '1', title: 'Article 1', slug: 'article-1' },
+    { id: '2', title: 'Article 2', slug: 'article-2' },
+  ],
+  meta: {
+    page: 1,
+    limit: 10,
+    totalItems: 2,
+    totalPages: 1,
+    hasNextPage: false,
+    regions: [{ name: 'Semua Wilayah', count: 2, active: true }],
+  },
+};
 
 function createRequest(url: string, options: RequestInit = {}): Request {
   return new Request(url, options);
@@ -31,16 +41,32 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     expect(res.status).toBe(200);
     expect(body.status).toBe('success');
     expect(body.data).toEqual(MOCK_ARTICLES);
-    expect(mockService.getArticles).toHaveBeenCalledWith(1, 10);
+    expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
+      region: undefined,
+    });
   });
 
-  it('should parse page and limit from query params', async () => {
-    mockService.getArticles.mockResolvedValue([] as never);
+  it('should parse page, limit, and region from query params', async () => {
+    mockService.getArticles.mockResolvedValue({
+      items: [],
+      meta: {
+        page: 3,
+        limit: 20,
+        totalItems: 0,
+        totalPages: 1,
+        hasNextPage: false,
+        regions: [{ name: 'Semua Wilayah', count: 0, active: false }],
+      },
+    } as never);
 
-    const req = createRequest('http://localhost/api/articles?page=3&limit=20');
+    const req = createRequest(
+      'http://localhost/api/articles?page=3&limit=20&region=Jawa',
+    );
     await GET(req, { params: Promise.resolve({}) });
 
-    expect(mockService.getArticles).toHaveBeenCalledWith(3, 20);
+    expect(mockService.getArticles).toHaveBeenCalledWith(3, 20, {
+      region: 'Jawa',
+    });
   });
 });
 

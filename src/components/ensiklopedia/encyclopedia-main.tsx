@@ -13,7 +13,6 @@ import {
 import {
   ENCYCLOPEDIA_STATS,
   ENCYCLOPEDIA_TOPICS,
-  REGION_FILTERS,
 } from '@/components/ensiklopedia/constants';
 import {
   Breadcrumb,
@@ -33,16 +32,20 @@ export function EncyclopediaMain() {
   const router = useRouter();
   const [currentView, setCurrentView] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
-  const {
-    data: articles = [],
-    error,
-    isPending,
-  } = useArticles(currentPage, ARTICLES_PER_PAGE);
-  const hasNextPage = articles.length === ARTICLES_PER_PAGE;
-  const totalPages = hasNextPage ? currentPage + 1 : currentPage;
+  const [selectedRegion, setSelectedRegion] = useState<string>();
+  const { data, error, isPending } = useArticles(
+    currentPage,
+    ARTICLES_PER_PAGE,
+    {
+      region: selectedRegion,
+    },
+  );
+  const articles = data?.items ?? [];
+  const regions = data?.meta.regions ?? [];
+  const totalPages = data?.meta.totalPages ?? 0;
 
   const featuredArticle =
-    currentPage === 1
+    currentPage === 1 && !selectedRegion
       ? (articles.find((article) => article.featured) ?? articles[0])
       : undefined;
   const standardArticles = featuredArticle
@@ -54,7 +57,8 @@ export function EncyclopediaMain() {
   };
 
   const handleRegionClick = (region: string) => {
-    console.log('Selected region:', region);
+    setCurrentPage(1);
+    setSelectedRegion(region === 'Semua Wilayah' ? undefined : region);
   };
 
   const handleTopicClick = (topic: string) => {
@@ -62,7 +66,8 @@ export function EncyclopediaMain() {
   };
 
   const handleResetFilters = () => {
-    console.log('Filters reset');
+    setCurrentPage(1);
+    setSelectedRegion(undefined);
   };
 
   const handleViewChange = (view: ViewMode) => {
@@ -118,7 +123,7 @@ export function EncyclopediaMain() {
         <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
           <div className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)]">
             <EncyclopediaSidebar
-              regions={REGION_FILTERS}
+              regions={regions}
               topics={ENCYCLOPEDIA_TOPICS}
               onRegionClick={handleRegionClick}
               onTopicClick={handleTopicClick}
@@ -128,7 +133,7 @@ export function EncyclopediaMain() {
             <div>
               <EncyclopediaViewToggle
                 currentView={currentView}
-                articleCount={articles.length}
+                articleCount={data?.meta.totalItems ?? articles.length}
                 onViewChange={handleViewChange}
               />
 

@@ -74,6 +74,37 @@ describe('articleRepository', { tags: ['db'] }, () => {
       expect(page2).toHaveLength(1);
       expect(page1[0].id).not.toBe(page2[0].id);
     });
+
+    it('should filter by region', async () => {
+      const articles = await articleRepository.findAll({
+        offset: 0,
+        limit: 50,
+        region: 'Jawa',
+      });
+
+      expect(articles.length).toBeGreaterThan(0);
+      expect(articles.every((article) => article.region === 'Jawa')).toBe(true);
+    });
+  });
+
+  describe('count queries', () => {
+    it('should count all articles for a region filter', async () => {
+      const count = await articleRepository.countAll({ region: 'Jawa' });
+
+      expect(count).toBeGreaterThan(0);
+    });
+
+    it('should return grouped region counts', async () => {
+      const regionCounts = await articleRepository.countByRegion();
+
+      expect(regionCounts.length).toBeGreaterThan(0);
+      expect(
+        regionCounts.some(
+          (regionCount) =>
+            regionCount.region === 'Jawa' && regionCount._count.region > 0,
+        ),
+      ).toBe(true);
+    });
   });
 
   describe('findByIdOrSlug', () => {

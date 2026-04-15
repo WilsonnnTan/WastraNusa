@@ -52,27 +52,81 @@ describe('articleService', { tags: ['backend'] }, () => {
   describe('getArticles', () => {
     it('should call findAll with correct offset and limit', async () => {
       mockRepo.findAll.mockResolvedValue([MOCK_ARTICLE]);
+      mockRepo.countAll.mockResolvedValueOnce(1).mockResolvedValueOnce(1);
+      mockRepo.countByRegion.mockResolvedValue([
+        {
+          region: 'Pekalongan',
+          _count: { region: 1 },
+        },
+      ] as never);
 
       const result = await articleService.getArticles(2, 5);
 
-      expect(result.length).toBe(1);
-      expect(result[0].title).toBe(MOCK_ARTICLE.title);
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].title).toBe(MOCK_ARTICLE.title);
+      expect(result.meta.page).toBe(2);
+      expect(result.meta.limit).toBe(5);
     });
 
     it('should clamp limit to max 50', async () => {
       mockRepo.findAll.mockResolvedValue([]);
+      mockRepo.countAll.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+      mockRepo.countByRegion.mockResolvedValue([]);
 
       await articleService.getArticles(1, 100);
 
-      expect(mockRepo.findAll).toHaveBeenCalledWith({ offset: 0, limit: 50 });
+      expect(mockRepo.findAll).toHaveBeenCalledWith({
+        offset: 0,
+        limit: 50,
+        region: undefined,
+      });
     });
 
     it('should default to page 1 and limit 10', async () => {
       mockRepo.findAll.mockResolvedValue([]);
+      mockRepo.countAll.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+      mockRepo.countByRegion.mockResolvedValue([]);
 
       await articleService.getArticles();
 
-      expect(mockRepo.findAll).toHaveBeenCalledWith({ offset: 0, limit: 10 });
+      expect(mockRepo.findAll).toHaveBeenCalledWith({
+        offset: 0,
+        limit: 10,
+        region: undefined,
+      });
+    });
+
+    it('should apply region filter and return metadata', async () => {
+      mockRepo.findAll.mockResolvedValue([MOCK_ARTICLE]);
+      mockRepo.countAll.mockResolvedValueOnce(12).mockResolvedValueOnce(20);
+      mockRepo.countByRegion.mockResolvedValue([
+        {
+          region: 'Jawa',
+          _count: { region: 8 },
+        },
+        {
+          region: 'Sumatra',
+          _count: { region: 4 },
+        },
+      ] as never);
+
+      const result = await articleService.getArticles(1, 5, { region: 'Jawa' });
+
+      expect(mockRepo.findAll).toHaveBeenCalledWith({
+        offset: 0,
+        limit: 5,
+        region: 'Jawa',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({ region: 'Jawa' });
+      expect(mockRepo.countAll).toHaveBeenCalledWith();
+      expect(result.meta.totalItems).toBe(12);
+      expect(result.meta.totalPages).toBe(3);
+      expect(result.meta.hasNextPage).toBe(true);
+      expect(result.meta.regions).toEqual([
+        { name: 'Semua Wilayah', count: 20, active: false },
+        { name: 'Jawa', count: 8, active: true },
+        { name: 'Sumatra', count: 4, active: false },
+      ]);
     });
   });
 

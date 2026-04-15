@@ -5,20 +5,38 @@ import type {
   CreateArticleInput,
   UpdateArticleInput,
 } from '@/schemas/article.schema';
+import type {
+  EncyclopediaArticleFilters,
+  EncyclopediaArticleListResponse,
+  RegionFilter,
+} from '@/types/encyclopedia';
 
 const formatCount = (value: number) =>
   new Intl.NumberFormat('en-US').format(value);
 
 export const articleService = {
-  getArticles: async (page: number = 1, limit: number = 10) => {
+  getArticles: async (
+    page: number = 1,
+    limit: number = 10,
+    filters: EncyclopediaArticleFilters = {},
+  ): Promise<EncyclopediaArticleListResponse> => {
     const safeLimit = Math.min(Math.max(1, limit), 50);
     const offset = (Math.max(1, page) - 1) * safeLimit;
+    const region = filters.region || undefined;
 
-    const articles = await articleRepository.findAll({
-      offset,
-      limit: safeLimit,
-    });
-    return articles.map((article) => ({
+    const [articles, totalItems, globalTotalItems, regionCounts] =
+      await Promise.all([
+        articleRepository.findAll({
+          offset,
+          limit: safeLimit,
+          region,
+        }),
+        articleRepository.countAll({ region }),
+        articleRepository.countAll(),
+        articleRepository.countByRegion(),
+      ]);
+
+    const items = articles.map((article) => ({
       ...article,
       region: article.region,
       topic: article.topic,
@@ -30,6 +48,28 @@ export const articleService = {
       readMinutes: article.readMinutes,
       featured: article.featured,
     }));
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
+    const regions: RegionFilter[] = [
+      { name: 'Semua Wilayah', count: globalTotalItems, active: !region },
+      ...regionCounts.map((regionCount) => ({
+        name: regionCount.region,
+        count: regionCount._count.region,
+        active: regionCount.region === region,
+      })),
+    ];
+
+    return {
+      items,
+      meta: {
+        page: Math.max(1, page),
+        limit: safeLimit,
+        totalItems,
+        totalPages,
+        hasNextPage: Math.max(1, page) < totalPages,
+        regions,
+      },
+    };
   },
 
   getArticleDetail: async (idOrSlug: string, userId?: string) => {
