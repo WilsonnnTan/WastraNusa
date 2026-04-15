@@ -1,4 +1,4 @@
-import type { Article, Product, RegionCard } from '@/types/landing-page';
+import type { Product, RegionCard } from '@/types/landing-page';
 
 export const categories = [
   'Batik',
@@ -11,7 +11,7 @@ export const categories = [
   'Gringsing',
 ];
 
-export const sortOptions = ['Terpopuler', 'Terbaru', 'Harga ↑', 'Rating'];
+export const sortOptions = ['Terpopuler', 'Terbaru', 'Harga Naik', 'Rating'];
 
 export const products: Product[] = [
   {
@@ -86,30 +86,6 @@ export const products: Product[] = [
     price: 'Rp 250.000',
     oldPrice: 'Rp 320.000',
     stock: 38,
-  },
-];
-
-export const latestArticles: Article[] = [
-  {
-    category: 'Ikat',
-    title: 'Tenun Ikat: Teknik Kuno dari Kepulauan Nusantara',
-    meta: 'NTT • 6 mnt',
-    thumbClass:
-      'bg-[radial-gradient(circle_at_35%_35%,#f8ead2_0%,#d6b791_60%,#8a6e4d_100%)]',
-  },
-  {
-    category: 'Songket',
-    title: 'Songket: Kain Kebesaran Kerajaan Melayu',
-    meta: 'Sumatra • 7 mnt',
-    thumbClass:
-      'bg-[radial-gradient(circle_at_35%_30%,#dfc0a4_0%,#9e7559_42%,#5a3a2f_100%)]',
-  },
-  {
-    category: 'Kebaya',
-    title: 'Kebaya: Identitas Perempuan Nusantara',
-    meta: 'Jawa • 5 mnt',
-    thumbClass:
-      'bg-[radial-gradient(circle_at_35%_30%,#e4c7af_0%,#ad8264_50%,#5f4739_100%)]',
   },
 ];
 

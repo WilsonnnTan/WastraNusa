@@ -9,13 +9,6 @@ export interface Product {
   badge?: string;
 }
 
-export interface Article {
-  category: string;
-  title: string;
-  meta: string;
-  thumbClass: string;
-}
-
 export interface RegionCard {
   region: string;
   style: string;
