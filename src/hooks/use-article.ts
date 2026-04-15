@@ -2,8 +2,9 @@ import type { JSendResponse } from '@/lib/jsend';
 import type {
   EncyclopediaArticle,
   EncyclopediaArticleDetail,
+  ToggleArticleLikeResponse,
 } from '@/types/encyclopedia';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const DEFAULT_ARTICLE_LIMIT = 50;
 
@@ -47,6 +48,17 @@ async function fetchArticleApi<T>(path: string): Promise<T> {
   return parseJSend<T>(response);
 }
 
+async function mutateArticleApi<T>(path: string, method: 'POST'): Promise<T> {
+  const response = await fetch(path, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return parseJSend<T>(response);
+}
+
 export function fetchArticles(
   page: number = 1,
   limit: number = DEFAULT_ARTICLE_LIMIT,
@@ -59,6 +71,13 @@ export function fetchArticles(
 export function fetchArticleDetail(slug: string) {
   return fetchArticleApi<EncyclopediaArticleDetail>(
     `/api/articles/${encodeURIComponent(slug)}`,
+  );
+}
+
+export function toggleArticleLike(slug: string) {
+  return mutateArticleApi<ToggleArticleLikeResponse>(
+    `/api/articles/${encodeURIComponent(slug)}/like`,
+    'POST',
   );
 }
 
@@ -78,5 +97,99 @@ export function useArticleDetail(slug: string) {
     queryKey: articleKeys.detail(slug),
     queryFn: () => fetchArticleDetail(slug),
     enabled: Boolean(slug),
+  });
+}
+
+export function useToggleArticleLike(slug: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => toggleArticleLike(slug),
+    onMutate: async () => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: articleKeys.detail(slug) }),
+        queryClient.cancelQueries({ queryKey: articleKeys.lists() }),
+      ]);
+
+      const previousDetail =
+        queryClient.getQueryData<EncyclopediaArticleDetail>(
+          articleKeys.detail(slug),
+        );
+      const previousLists = queryClient.getQueriesData<EncyclopediaArticle[]>({
+        queryKey: articleKeys.lists(),
+      });
+      const nextIsLiked = !(previousDetail?.isLiked ?? false);
+      const nextLikes = Math.max(
+        0,
+        (previousDetail?.likes ?? 0) + (nextIsLiked ? 1 : -1),
+      );
+
+      queryClient.setQueryData<EncyclopediaArticleDetail>(
+        articleKeys.detail(slug),
+        (currentArticle) =>
+          currentArticle
+            ? {
+                ...currentArticle,
+                isLiked: nextIsLiked,
+                likes: nextLikes,
+              }
+            : currentArticle,
+      );
+
+      queryClient.setQueriesData<EncyclopediaArticle[]>(
+        { queryKey: articleKeys.lists() },
+        (currentArticles) =>
+          currentArticles?.map((article) =>
+            article.slug === slug
+              ? {
+                  ...article,
+                  isLiked: nextIsLiked,
+                  likes: nextLikes,
+                }
+              : article,
+          ),
+      );
+
+      return { previousDetail, previousLists };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousDetail) {
+        queryClient.setQueryData(
+          articleKeys.detail(slug),
+          context.previousDetail,
+        );
+      }
+
+      for (const [queryKey, data] of context?.previousLists ?? []) {
+        queryClient.setQueryData(queryKey, data);
+      }
+    },
+    onSuccess: (result) => {
+      queryClient.setQueryData<EncyclopediaArticleDetail>(
+        articleKeys.detail(slug),
+        (currentArticle) =>
+          currentArticle
+            ? {
+                ...currentArticle,
+                isLiked: result.isLiked,
+                likes: result.engagement.likeCount,
+              }
+            : currentArticle,
+      );
+
+      queryClient.setQueriesData<EncyclopediaArticle[]>(
+        { queryKey: articleKeys.lists() },
+        (currentArticles) =>
+          currentArticles?.map((article) =>
+            article.slug === slug
+              ? {
+                  ...article,
+                  isLiked: result.isLiked,
+                  likes: result.engagement.likeCount,
+                }
+              : article,
+          ),
+      );
+    },
   });
 }

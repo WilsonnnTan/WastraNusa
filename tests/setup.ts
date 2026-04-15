@@ -8,6 +8,7 @@ vi.mock('@/logger/logger', () => ({
 
 vi.mock('@/lib/auth/auth-api-helper', () => ({
   AuthHelper: {
+    getUser: vi.fn(),
     requireUser: vi.fn(),
     requireAdmin: vi.fn(),
   },

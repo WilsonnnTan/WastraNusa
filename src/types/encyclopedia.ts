@@ -21,6 +21,7 @@ export interface EncyclopediaArticle {
   title: string;
   excerpt: string;
   likes: number;
+  isLiked?: boolean;
   views: string;
   readMinutes?: number;
   featured?: boolean;
@@ -59,6 +60,14 @@ export interface EncyclopediaArticleDetail extends EncyclopediaArticle {
     title: string;
   };
   references: string[];
+}
+
+export interface ToggleArticleLikeResponse {
+  isLiked: boolean;
+  engagement: {
+    likeCount: number;
+    viewCount: number;
+  };
 }
 
 export type ViewMode = 'grid' | 'list';

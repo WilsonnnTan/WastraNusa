@@ -32,11 +32,16 @@ export const articleService = {
     }));
   },
 
-  getArticleDetail: async (idOrSlug: string) => {
+  getArticleDetail: async (idOrSlug: string, userId?: string) => {
     const article = await articleRepository.findByIdOrSlug(idOrSlug);
     if (!article) {
       throw new ApiError('Article not found', 404);
     }
+
+    const existingLike =
+      userId && article.id
+        ? await articleRepository.findUserLike(article.id, userId)
+        : null;
 
     // NOTE: Consider creating a dedicated endpoint for incrementing view counts instead of mixing it with getArticleDetail.
     articleRepository.incrementViewCount(idOrSlug).catch((error) => {
@@ -83,6 +88,7 @@ export const articleService = {
       title: article.title,
       excerpt: article.excerpt,
       likes: article.engagement?.likeCount || 0,
+      isLiked: Boolean(existingLike),
       views: formatCount(article.engagement?.viewCount || 0),
       readMinutes: article.readMinutes,
       featured: article.featured,

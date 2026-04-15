@@ -12,7 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useArticleDetail } from '@/hooks/use-article';
+import { useArticleDetail, useToggleArticleLike } from '@/hooks/use-article';
+import { authClient } from '@/lib/auth/auth-client';
 import {
   CalendarDays,
   ChevronRight,
@@ -24,6 +25,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 type EncyclopediaDetailMainProps = {
   slug: string;
@@ -31,6 +33,9 @@ type EncyclopediaDetailMainProps = {
 
 export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
   const { data: article, error, isPending } = useArticleDetail(slug);
+  const { data: session, isPending: isSessionPending } =
+    authClient.useSession();
+  const toggleLikeMutation = useToggleArticleLike(slug);
   const errorMessage =
     error instanceof Error
       ? error.message
@@ -59,6 +64,25 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
   const nextArticleDescription = article.nextArticle.slug
     ? 'Lanjutkan baca artikel terkait'
     : 'Kembali ke daftar ensiklopedia';
+  const isLiked = Boolean(article.isLiked);
+
+  const handleToggleLike = async () => {
+    if (!session && !isSessionPending) {
+      toast.error('Silakan login terlebih dahulu untuk menyukai artikel.');
+      return;
+    }
+
+    try {
+      await toggleLikeMutation.mutateAsync();
+    } catch (mutationError) {
+      const message =
+        mutationError instanceof Error
+          ? mutationError.message
+          : 'Gagal memperbarui status suka artikel.';
+
+      toast.error(message);
+    }
+  };
 
   return (
     <main className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-6 md:px-6 lg:px-8">
@@ -151,9 +175,17 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
             type="button"
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full border-[#d8cfbe] text-[#7f7467] hover:text-[#2f5f49]"
+            className={`h-8 w-8 rounded-full border-[#d8cfbe] ${
+              isLiked
+                ? 'text-[#2f5f49] hover:text-[#2f5f49]'
+                : 'text-[#7f7467] hover:text-[#2f5f49]'
+            }`}
+            onClick={handleToggleLike}
+            disabled={toggleLikeMutation.isPending || isSessionPending}
+            aria-pressed={isLiked}
+            aria-label={isLiked ? 'Batalkan suka artikel' : 'Sukai artikel'}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
           </Button>
         </div>
       </section>

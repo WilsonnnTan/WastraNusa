@@ -1,8 +1,11 @@
 import {
+  articleKeys,
   fetchArticleDetail,
   fetchArticles,
+  toggleArticleLike,
   useArticleDetail,
   useArticles,
+  useToggleArticleLike,
 } from '@/hooks/use-article';
 import {
   QueryClient,
@@ -95,6 +98,37 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
     );
   });
 
+  it('should post to toggle article like', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse({
+        isLiked: true,
+        engagement: {
+          likeCount: 3,
+          viewCount: 10,
+        },
+      }) as never,
+    );
+
+    const result = await toggleArticleLike('batik');
+
+    expect(result).toEqual({
+      isLiked: true,
+      engagement: {
+        likeCount: 3,
+        viewCount: 10,
+      },
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles/batik/like',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      }),
+    );
+  });
+
   it('should expose loading then success for useArticles', async () => {
     let resolveFetch: ((value: Response) => void) | undefined;
     vi.spyOn(global, 'fetch').mockImplementation(
@@ -176,5 +210,82 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error?.message).toBe('Article not found');
+  });
+
+  it('should update the detail cache when toggling like succeeds', async () => {
+    vi.spyOn(global, 'fetch')
+      .mockResolvedValueOnce(
+        createSuccessResponse({
+          slug: 'batik',
+          region: 'Jawa',
+          topic: 'Sejarah',
+          motifLabel: 'Batik',
+          title: 'Batik',
+          excerpt: 'Excerpt',
+          likes: 10,
+          views: '100',
+          author: 'Admin',
+          publishedAt: '10 Mar 2025',
+          tags: ['Batik'],
+          quote: 'Quote',
+          intro: 'Intro',
+          sections: [],
+          keyFacts: [],
+          relatedProducts: [],
+          discussionCount: 0,
+          nextArticle: {
+            slug: 'next',
+            title: 'Next',
+          },
+          references: ['[1] Wikipedia'],
+        }) as never,
+      )
+      .mockResolvedValueOnce(
+        createSuccessResponse({
+          isLiked: true,
+          engagement: {
+            likeCount: 11,
+            viewCount: 100,
+          },
+        }) as never,
+      );
+
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    const { result: detailResult } = renderHook(
+      () => useArticleDetail('batik'),
+      {
+        wrapper,
+      },
+    );
+
+    await waitFor(() => expect(detailResult.current.isSuccess).toBe(true));
+
+    const { result: likeResult } = renderHook(
+      () => useToggleArticleLike('batik'),
+      {
+        wrapper,
+      },
+    );
+
+    await likeResult.current.mutateAsync();
+
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryData(articleKeys.detail('batik')),
+      ).toMatchObject({
+        likes: 11,
+        isLiked: true,
+      }),
+    );
   });
 });

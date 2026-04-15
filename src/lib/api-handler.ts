@@ -19,6 +19,7 @@ type ApiHandler<T = unknown> = (
 type PublicApiHandlerContext<T = unknown> = {
   params: T;
   req: Request;
+  userId?: string;
 };
 
 type PublicApiHandler<T = unknown> = (
@@ -106,7 +107,13 @@ export function withApiPublic<T = unknown>(handler: PublicApiHandler<T>) {
   return async (req: Request, { params }: { params: Promise<T> }) => {
     try {
       const resolvedParams = await params;
-      return await handler({ params: resolvedParams, req });
+      const user = await AuthHelper.getUser();
+
+      return await handler({
+        params: resolvedParams,
+        req,
+        userId: user?.id,
+      });
     } catch (err) {
       return handleApiError(err, req);
     }

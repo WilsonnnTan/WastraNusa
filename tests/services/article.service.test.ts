@@ -80,12 +80,37 @@ describe('articleService', { tags: ['backend'] }, () => {
     it('should return article and increment view count', async () => {
       mockRepo.findByIdOrSlug.mockResolvedValue(MOCK_ARTICLE);
       mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);
+      mockRepo.findUserLike.mockResolvedValue(null);
 
       const result = await articleService.getArticleDetail('test-id-1');
       expect(result.title).toBe(MOCK_ARTICLE.title);
       expect(result.author).toBe('Admin');
+      expect(result.isLiked).toBe(false);
       expect(mockRepo.findByIdOrSlug).toHaveBeenCalledWith('test-id-1');
+      expect(mockRepo.findUserLike).not.toHaveBeenCalled();
       expect(mockRepo.incrementViewCount).toHaveBeenCalledWith('test-id-1');
+    });
+
+    it('should include isLiked when userId is provided', async () => {
+      mockRepo.findByIdOrSlug.mockResolvedValue(MOCK_ARTICLE);
+      mockRepo.findUserLike.mockResolvedValue({
+        id: 'like-1',
+        articleId: MOCK_ARTICLE.id,
+        userId: 'user-1',
+        createdAt: new Date(),
+      } as never);
+      mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);
+
+      const result = await articleService.getArticleDetail(
+        'test-id-1',
+        'user-1',
+      );
+
+      expect(result.isLiked).toBe(true);
+      expect(mockRepo.findUserLike).toHaveBeenCalledWith(
+        MOCK_ARTICLE.id,
+        'user-1',
+      );
     });
 
     it('should throw ApiError(404) when article not found', async () => {
