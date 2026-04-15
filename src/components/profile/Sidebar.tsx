@@ -3,10 +3,11 @@
 import { Badge } from '@/components/ui/badge';
 import { authClient } from '@/lib/auth/auth-client';
 import { BookOpen, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
-export default function Sidebar({ active }: { active: string }) {
+export default function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -54,20 +55,18 @@ export default function Sidebar({ active }: { active: string }) {
 
   return (
     <div className="w-full md:w-[200px] lg:w-[220px] bg-background rounded-2xl p-2 md:p-2 shadow-sm border flex flex-row flex-wrap md:flex-col gap-1 md:self-start">
-      {/* 2. Destructure href dari items */}
       {items.map(({ icon, label, badge, action, href }) => (
         <div
           key={label}
-          // 3. Ubah logika onClick
           onClick={() => {
             if (action) {
-              action(); // Jika ada action (seperti tombol Keluar), jalankan
+              action();
             } else if (href) {
-              router.push(href); // Jika ada href, pindah halaman
+              router.push(href);
             }
           }}
           className={`flex-auto md:flex-none flex items-center justify-center md:justify-between px-3 md:px-3.5 py-2 md:py-2.5 rounded-lg cursor-pointer text-sm transition-colors whitespace-nowrap ${
-            label === active
+            href && pathname === href
               ? 'bg-brand-muted text-brand font-medium'
               : 'bg-transparent text-gray-700 hover:bg-gray-100'
           }`}
