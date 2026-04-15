@@ -20,7 +20,6 @@ export const SEED_ARTICLE_1 = {
   gender: 'male' as const,
   wikipediaPageId: 'wp-batik-pekalongan',
   wikipediaUrl: 'https://en.wikipedia.org/wiki/Batik_Pekalongan',
-  content: 'Batik Pekalongan is a traditional textile art from Central Java.',
   summary: 'Overview of Batik Pekalongan.',
   status: 'published' as const,
 };
@@ -38,7 +37,6 @@ export const SEED_ARTICLE_2 = {
   gender: 'female' as const,
   wikipediaPageId: 'wp-ulos-batak',
   wikipediaUrl: 'https://en.wikipedia.org/wiki/Ulos',
-  content: 'Ulos is a traditional hand-woven cloth of the Batak people.',
   summary: 'Overview of Ulos Batak.',
   status: 'published' as const,
 };
@@ -56,7 +54,6 @@ export const SEED_ARTICLE_3 = {
   gender: 'female' as const,
   wikipediaPageId: 'wp-songket-palembang',
   wikipediaUrl: 'https://en.wikipedia.org/wiki/Songket',
-  content: 'Songket is a luxurious hand-woven fabric from Palembang.',
   summary: 'Overview of Songket Palembang.',
   status: 'draft' as const,
 };
