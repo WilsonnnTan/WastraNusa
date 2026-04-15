@@ -47,14 +47,23 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
 describe('POST /api/articles', { tags: ['backend'] }, () => {
   const validArticle = {
     title: 'New Article',
+    excerpt: 'New article excerpt',
     province: 'Bali',
     island: 'Bali',
     region: 'Denpasar',
+    topic: 'Teknik Pembuatan',
     clothingType: 'endek',
+    motifLabel: 'Endek',
     gender: 'female',
     wikipediaPageId: 'wp-new',
     wikipediaUrl: 'https://en.wikipedia.org/wiki/New',
-    content: 'New content',
+    sections: [
+      {
+        title: 'Pembuka',
+        content: 'New content',
+        order: 0,
+      },
+    ],
   };
 
   it('should create article as admin and return 201', async () => {
@@ -93,7 +102,7 @@ describe('POST /api/articles', { tags: ['backend'] }, () => {
     const req = createRequest('http://localhost/api/articles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: '' }), // missing required fields
+      body: JSON.stringify({ title: '' }), // missing current required fields
     });
     const res = await POST(req, { params: Promise.resolve({}) });
     const body = await res.json();

@@ -54,7 +54,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
     it('should return articles with creator and engagement', async () => {
       const articles = await articleRepository.findAll({
         offset: 0,
-        limit: 10,
+        limit: 50,
       });
 
       expect(articles.length).toBeGreaterThanOrEqual(1);
@@ -111,10 +111,13 @@ describe('articleRepository', { tags: ['db'] }, () => {
         id,
         title: 'Test Article',
         slug: `test-article-${id.slice(0, 8)}`,
+        excerpt: 'Test excerpt',
         province: 'Bali',
         island: 'Bali',
         region: 'Denpasar',
+        topic: 'Teknik Pembuatan',
         clothingType: 'endek',
+        motifLabel: 'Endek',
         gender: 'female',
         wikipediaPageId: `wp-test-${id.slice(0, 8)}`,
         wikipediaUrl: 'https://en.wikipedia.org/wiki/Test',
@@ -156,10 +159,13 @@ describe('articleRepository', { tags: ['db'] }, () => {
         id,
         title: 'To Delete',
         slug: `to-delete-${id.slice(0, 8)}`,
+        excerpt: 'Temp excerpt',
         province: 'Papua',
         island: 'Papua',
         region: 'Jayapura',
+        topic: 'Sejarah & Asal Usul',
         clothingType: 'koteka',
+        motifLabel: 'Koteka',
         gender: 'male',
         wikipediaPageId: `wp-delete-${id.slice(0, 8)}`,
         wikipediaUrl: 'https://en.wikipedia.org/wiki/Delete',
