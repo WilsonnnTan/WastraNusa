@@ -1,0 +1,180 @@
+import {
+  fetchArticleDetail,
+  fetchArticles,
+  useArticleDetail,
+  useArticles,
+} from '@/hooks/use-article';
+import {
+  QueryClient,
+  type QueryClientConfig,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+function createWrapper(config?: QueryClientConfig) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+    ...config,
+  });
+
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+  };
+}
+
+function createSuccessResponse<T>(data: T, status = 200) {
+  return new Response(
+    JSON.stringify({
+      status: 'success',
+      data,
+    }),
+    {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+}
+
+function createFailResponse(data: unknown, status = 400) {
+  return new Response(
+    JSON.stringify({
+      status: 'fail',
+      data,
+    }),
+    {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('use-article hooks', { tags: ['frontend'] }, () => {
+  it('should unwrap article list responses from JSend', async () => {
+    const articles = [{ slug: 'article-1', title: 'Article 1' }];
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(articles) as never,
+    );
+
+    const result = await fetchArticles(1, 10);
+
+    expect(result).toEqual(articles);
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles?page=1&limit=10',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      }),
+    );
+  });
+
+  it('should unwrap article detail responses from JSend', async () => {
+    const article = { slug: 'batik', title: 'Batik' };
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(article) as never,
+    );
+
+    const result = await fetchArticleDetail('batik');
+
+    expect(result).toEqual(article);
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles/batik',
+      expect.any(Object),
+    );
+  });
+
+  it('should expose loading then success for useArticles', async () => {
+    let resolveFetch: ((value: Response) => void) | undefined;
+    vi.spyOn(global, 'fetch').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }) as never,
+    );
+
+    const { result } = renderHook(() => useArticles(1, 50), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.isPending).toBe(true);
+
+    resolveFetch?.(
+      createSuccessResponse([
+        {
+          slug: 'article-1',
+          region: 'Jawa',
+          topic: 'Sejarah',
+          motifLabel: 'Batik',
+          title: 'Article 1',
+          excerpt: 'Excerpt',
+          likes: 1,
+          views: '10',
+        },
+      ]),
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toHaveLength(1);
+  });
+
+  it('should expose success for useArticleDetail', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse({
+        slug: 'batik',
+        region: 'Jawa',
+        topic: 'Sejarah',
+        motifLabel: 'Batik',
+        title: 'Batik',
+        excerpt: 'Excerpt',
+        likes: 10,
+        views: '100',
+        author: 'Admin',
+        publishedAt: '10 Mar 2025',
+        tags: ['Batik'],
+        quote: 'Quote',
+        intro: 'Intro',
+        sections: [],
+        keyFacts: [],
+        relatedProducts: [],
+        discussionCount: 0,
+        nextArticle: {
+          slug: 'next',
+          title: 'Next',
+        },
+        references: ['[1] Wikipedia'],
+      }) as never,
+    );
+
+    const { result } = renderHook(() => useArticleDetail('batik'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.slug).toBe('batik');
+  });
+
+  it('should expose error state when the API returns fail', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createFailResponse({ message: 'Article not found' }, 404) as never,
+    );
+
+    const { result } = renderHook(() => useArticleDetail('missing'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error?.message).toBe('Article not found');
+  });
+});

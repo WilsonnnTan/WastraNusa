@@ -68,14 +68,6 @@ export const articleService = {
         { label: 'Kategori', value: article.topic },
         { label: 'Jenis Wastra', value: article.motifLabel },
         { label: 'Durasi Baca', value: `${article.readMinutes} menit` },
-        {
-          label: 'Dilihat',
-          value: `${article.engagement?.viewCount || 0} kali`,
-        },
-        {
-          label: 'Disukai',
-          value: `${article.engagement?.likeCount || 0} pengguna`,
-        },
       ],
       relatedProducts: [],
       discussionCount: 0,
