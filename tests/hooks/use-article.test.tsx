@@ -2,9 +2,11 @@ import {
   articleKeys,
   fetchArticleDetail,
   fetchArticles,
+  fetchLikedArticles,
   toggleArticleLike,
   useArticleDetail,
   useArticles,
+  useLikedArticles,
   useToggleArticleLike,
 } from '@/hooks/use-article';
 import {
@@ -105,6 +107,47 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/articles/batik',
       expect.any(Object),
+    );
+  });
+
+  it('should unwrap liked article responses from JSend', async () => {
+    const likedArticles = {
+      items: [
+        {
+          id: 'article-1',
+          slug: 'batik',
+          region: 'Jawa',
+          topic: 'Sejarah',
+          motifLabel: 'Batik',
+          title: 'Batik',
+          excerpt: 'Excerpt',
+          likes: 2,
+          views: '10',
+          readMinutes: 6,
+        },
+      ],
+      meta: {
+        page: 2,
+        limit: 5,
+        totalItems: 6,
+        totalPages: 2,
+        hasNextPage: false,
+      },
+    };
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(likedArticles) as never,
+    );
+
+    const result = await fetchLikedArticles(2, 5);
+
+    expect(result).toEqual(likedArticles);
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles/liked?page=2&limit=5',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      }),
     );
   });
 
@@ -245,6 +288,42 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.slug).toBe('batik');
+  });
+
+  it('should expose success for useLikedArticles', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse({
+        items: [
+          {
+            id: 'article-1',
+            slug: 'batik',
+            region: 'Jawa',
+            topic: 'Sejarah',
+            motifLabel: 'Batik',
+            title: 'Batik',
+            excerpt: 'Excerpt',
+            likes: 2,
+            views: '10',
+            readMinutes: 6,
+          },
+        ],
+        meta: {
+          page: 2,
+          limit: 5,
+          totalItems: 6,
+          totalPages: 2,
+          hasNextPage: false,
+        },
+      }) as never,
+    );
+
+    const { result } = renderHook(() => useLikedArticles(2, 5), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.items[0]?.slug).toBe('batik');
+    expect(result.current.data?.meta.page).toBe(2);
   });
 
   it('should expose error state when the API returns fail', async () => {

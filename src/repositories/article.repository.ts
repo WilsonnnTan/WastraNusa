@@ -109,6 +109,52 @@ export const articleRepository = {
     });
   },
 
+  countLikedByUser: async (userId: string) => {
+    return prisma.userArticleLike.count({
+      where: {
+        userId,
+        article: {
+          is: {
+            status: 'published',
+          },
+        },
+      },
+    });
+  },
+
+  findLikedByUser: async ({
+    userId,
+    offset,
+    limit,
+  }: {
+    userId: string;
+    offset?: number;
+    limit?: number;
+  }) => {
+    return prisma.userArticleLike.findMany({
+      where: {
+        userId,
+        article: {
+          is: {
+            status: 'published',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip: offset,
+      take: limit,
+      include: {
+        article: {
+          include: {
+            engagement: true,
+          },
+        },
+      },
+    });
+  },
+
   toggleLike: async (idOrSlug: string, userId: string) => {
     return prisma.$transaction(async (tx) => {
       const article = await tx.article.findUnique({
