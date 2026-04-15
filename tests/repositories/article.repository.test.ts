@@ -133,6 +133,31 @@ describe('articleRepository', { tags: ['db'] }, () => {
     });
   });
 
+  describe('findLikedByUser', () => {
+    it('should return liked articles ordered by newest like first', async () => {
+      const likedArticles = await articleRepository.findLikedByUser({
+        userId: regularUserId,
+        offset: 0,
+        limit: 10,
+      });
+
+      expect(likedArticles.length).toBeGreaterThan(0);
+      expect(
+        likedArticles.some(
+          (likedArticle) => likedArticle.articleId === SEED_ARTICLE_1.id,
+        ),
+      ).toBe(true);
+      expect(likedArticles[0].article).toBeDefined();
+      expect(likedArticles[0].article.engagement).toBeDefined();
+    });
+
+    it('should count liked articles for a user', async () => {
+      const count = await articleRepository.countLikedByUser(regularUserId);
+
+      expect(count).toBeGreaterThan(0);
+    });
+  });
+
   describe('create', () => {
     it('should create article with engagement', async () => {
       const id = crypto.randomUUID();

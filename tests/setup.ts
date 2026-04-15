@@ -29,6 +29,8 @@ vi.mock('@/repositories/article.repository', () => ({
     delete: vi.fn(),
     incrementViewCount: vi.fn(),
     findUserLike: vi.fn(),
+    countLikedByUser: vi.fn(),
+    findLikedByUser: vi.fn(),
     toggleLike: vi.fn(),
   },
 }));
@@ -37,6 +39,7 @@ vi.mock('@/services/article.service', () => ({
   articleService: {
     getArticles: vi.fn(),
     getArticleDetail: vi.fn(),
+    getLikedArticles: vi.fn(),
     createArticle: vi.fn(),
     updateArticle: vi.fn(),
     deleteArticle: vi.fn(),

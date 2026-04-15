@@ -5,9 +5,11 @@ import type {
   EncyclopediaArticleListResponse,
   ToggleArticleLikeResponse,
 } from '@/types/encyclopedia';
+import type { LikedArticlesResponse } from '@/types/profile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const DEFAULT_ARTICLE_LIMIT = 50;
+const DEFAULT_LIKED_ARTICLE_LIMIT = 5;
 
 export const articleKeys = {
   all: ['articles'] as const,
@@ -16,6 +18,9 @@ export const articleKeys = {
     [...articleKeys.lists(), page, limit, region ?? 'all'] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
+  liked: () => [...articleKeys.all, 'liked'] as const,
+  likedList: (page: number, limit: number = DEFAULT_LIKED_ARTICLE_LIMIT) =>
+    [...articleKeys.liked(), page, limit] as const,
 };
 
 async function parseJSend<T>(response: Response): Promise<T> {
@@ -85,6 +90,20 @@ export function fetchArticleDetail(slug: string) {
   );
 }
 
+export function fetchLikedArticles(
+  page: number = 1,
+  limit: number = DEFAULT_LIKED_ARTICLE_LIMIT,
+) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  return fetchArticleApi<LikedArticlesResponse>(
+    `/api/articles/liked?${searchParams.toString()}`,
+  );
+}
+
 export function toggleArticleLike(slug: string) {
   return mutateArticleApi<ToggleArticleLikeResponse>(
     `/api/articles/${encodeURIComponent(slug)}/like`,
@@ -112,6 +131,17 @@ export function useArticleDetail(slug: string) {
   });
 }
 
+export function useLikedArticles(
+  page: number = 1,
+  limit: number = DEFAULT_LIKED_ARTICLE_LIMIT,
+) {
+  return useQuery({
+    queryKey: articleKeys.likedList(page, limit),
+    queryFn: () => fetchLikedArticles(page, limit),
+    placeholderData: (previousData) => previousData,
+  });
+}
+
 export function useToggleArticleLike(slug: string) {
   const queryClient = useQueryClient();
 
@@ -121,6 +151,7 @@ export function useToggleArticleLike(slug: string) {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: articleKeys.detail(slug) }),
         queryClient.cancelQueries({ queryKey: articleKeys.lists() }),
+        queryClient.cancelQueries({ queryKey: articleKeys.liked() }),
       ]);
 
       const previousDetail =
@@ -131,10 +162,16 @@ export function useToggleArticleLike(slug: string) {
         queryClient.getQueriesData<EncyclopediaArticleListResponse>({
           queryKey: articleKeys.lists(),
         });
-      const nextIsLiked = !(previousDetail?.isLiked ?? false);
+      const previousListArticle = previousLists
+        .flatMap(([, data]) => data?.items ?? [])
+        .find((article) => article.slug === slug);
+      const currentIsLiked =
+        previousDetail?.isLiked ?? previousListArticle?.isLiked ?? false;
+      const currentLikes = previousDetail?.likes ?? previousListArticle?.likes;
+      const nextIsLiked = !currentIsLiked;
       const nextLikes = Math.max(
         0,
-        (previousDetail?.likes ?? 0) + (nextIsLiked ? 1 : -1),
+        (currentLikes ?? 0) + (nextIsLiked ? 1 : -1),
       );
 
       queryClient.setQueryData<EncyclopediaArticleDetail>(
@@ -213,6 +250,8 @@ export function useToggleArticleLike(slug: string) {
               }
             : currentResponse,
       );
+
+      queryClient.invalidateQueries({ queryKey: articleKeys.liked() });
     },
   });
 }

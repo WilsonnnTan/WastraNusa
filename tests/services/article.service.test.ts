@@ -180,6 +180,48 @@ describe('articleService', { tags: ['backend'] }, () => {
     });
   });
 
+  describe('getLikedArticles', () => {
+    it('should map liked articles for the authenticated user with pagination metadata', async () => {
+      mockRepo.countLikedByUser.mockResolvedValue(6);
+      mockRepo.findLikedByUser.mockResolvedValue([
+        {
+          id: 'like-1',
+          articleId: MOCK_ARTICLE.id,
+          userId: 'user-1',
+          createdAt: new Date(),
+          article: MOCK_ARTICLE,
+        },
+      ] as never);
+
+      const result = await articleService.getLikedArticles('user-1', 2, 5);
+
+      expect(mockRepo.findLikedByUser).toHaveBeenCalledWith({
+        userId: 'user-1',
+        offset: 5,
+        limit: 5,
+      });
+      expect(mockRepo.countLikedByUser).toHaveBeenCalledWith('user-1');
+      expect(result).toEqual({
+        items: [
+          expect.objectContaining({
+            id: MOCK_ARTICLE.id,
+            slug: MOCK_ARTICLE.slug,
+            title: MOCK_ARTICLE.title,
+            likes: 2,
+            views: '5',
+          }),
+        ],
+        meta: {
+          page: 2,
+          limit: 5,
+          totalItems: 6,
+          totalPages: 2,
+          hasNextPage: false,
+        },
+      });
+    });
+  });
+
   describe('createArticle', () => {
     it('should generate UUID and slug, then call create', async () => {
       mockRepo.create.mockResolvedValue(MOCK_ARTICLE as never);

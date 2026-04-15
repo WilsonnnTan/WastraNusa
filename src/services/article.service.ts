@@ -10,6 +10,7 @@ import type {
   EncyclopediaArticleListResponse,
   RegionFilter,
 } from '@/types/encyclopedia';
+import type { LikedArticlesResponse } from '@/types/profile';
 
 const formatCount = (value: number) =>
   new Intl.NumberFormat('en-US').format(value);
@@ -132,6 +133,47 @@ export const articleService = {
       views: formatCount(article.engagement?.viewCount || 0),
       readMinutes: article.readMinutes,
       featured: article.featured,
+    };
+  },
+
+  getLikedArticles: async (
+    userId: string,
+    page: number = 1,
+    limit: number = 5,
+  ): Promise<LikedArticlesResponse> => {
+    const safeLimit = Math.min(Math.max(1, limit), 50);
+    const totalItems = await articleRepository.countLikedByUser(userId);
+    const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
+    const safePage = Math.min(Math.max(1, page), totalPages);
+    const offset = (safePage - 1) * safeLimit;
+    const likedArticles = await articleRepository.findLikedByUser({
+      userId,
+      offset,
+      limit: safeLimit,
+    });
+
+    return {
+      items: likedArticles.map(({ article }) => ({
+        id: article.id,
+        slug: article.slug,
+        region: article.region,
+        topic: article.topic,
+        motifLabel: article.motifLabel,
+        title: article.title,
+        excerpt: article.excerpt,
+        likes: article.engagement?.likeCount || 0,
+        views: formatCount(article.engagement?.viewCount || 0),
+        readMinutes: article.readMinutes,
+        featured: article.featured,
+        imageUrl: article.wikimediaImageUrl,
+      })),
+      meta: {
+        page: safePage,
+        limit: safeLimit,
+        totalItems,
+        totalPages,
+        hasNextPage: safePage < totalPages,
+      },
     };
   },
 

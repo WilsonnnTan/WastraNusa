@@ -3,10 +3,11 @@
 import { Badge } from '@/components/ui/badge';
 import { authClient } from '@/lib/auth/auth-client';
 import { BookOpen, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
-export default function Sidebar({ active }: { active: string }) {
+export default function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -18,11 +19,32 @@ export default function Sidebar({ active }: { active: string }) {
     });
   };
 
+  // 1. Tambahkan href ke masing-masing menu
   const items = [
-    { icon: <User size={16} />, label: 'Profil Saya', badge: null },
-    { icon: <ShoppingBag size={16} />, label: 'Pesanan Saya', badge: null },
-    { icon: <MapPin size={16} />, label: 'Alamat Tersimpan', badge: null },
-    { icon: <BookOpen size={16} />, label: 'Artikel Disukai', badge: null },
+    {
+      icon: <User size={16} />,
+      label: 'Profil Saya',
+      badge: null,
+      href: '/profile',
+    },
+    {
+      icon: <ShoppingBag size={16} />,
+      label: 'Pesanan Saya',
+      badge: null,
+      href: '/profile/pesanan',
+    },
+    {
+      icon: <MapPin size={16} />,
+      label: 'Alamat Tersimpan',
+      badge: null,
+      href: '/profile/alamat',
+    },
+    {
+      icon: <BookOpen size={16} />,
+      label: 'Artikel Disukai',
+      badge: null,
+      href: '/profile/artikel-disukai',
+    },
     {
       icon: <LogOut size={16} />,
       label: 'Keluar',
@@ -33,12 +55,18 @@ export default function Sidebar({ active }: { active: string }) {
 
   return (
     <div className="w-full md:w-[200px] lg:w-[220px] bg-background rounded-2xl p-2 md:p-2 shadow-sm border flex flex-row flex-wrap md:flex-col gap-1 md:self-start">
-      {items.map(({ icon, label, badge, action }) => (
+      {items.map(({ icon, label, badge, action, href }) => (
         <div
           key={label}
-          onClick={action}
+          onClick={() => {
+            if (action) {
+              action();
+            } else if (href) {
+              router.push(href);
+            }
+          }}
           className={`flex-auto md:flex-none flex items-center justify-center md:justify-between px-3 md:px-3.5 py-2 md:py-2.5 rounded-lg cursor-pointer text-sm transition-colors whitespace-nowrap ${
-            label === active
+            href && pathname === href
               ? 'bg-brand-muted text-brand font-medium'
               : 'bg-transparent text-gray-700 hover:bg-gray-100'
           }`}
