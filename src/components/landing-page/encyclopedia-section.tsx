@@ -8,8 +8,6 @@ import { useArticles } from '@/hooks/use-article';
 import { ChevronRight, Search } from 'lucide-react';
 import Link from 'next/link';
 
-import { popularSearchTags } from './data';
-
 export interface HomepageArticlePreview {
   slug: string;
   category: string;
@@ -19,6 +17,10 @@ export interface HomepageArticlePreview {
 
 export function EncyclopediaSection() {
   const { data, error, isPending } = useArticles(1, 3);
+  const regionFilters =
+    data?.meta.regions.filter((region) => region.name !== 'Semua Wilayah') ??
+    [];
+  const popularTags = regionFilters.slice(0, 5);
   const latestArticles: HomepageArticlePreview[] =
     data?.items.map((article) => ({
       slug: article.slug,
@@ -66,14 +68,18 @@ export function EncyclopediaSection() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#b1c4b5]">Populer:</span>
-              {popularSearchTags.map((tag) => (
+              <span className="text-[#b1c4b5]">Filter wilayah:</span>
+              {popularTags.map((tag) => (
                 <Button
-                  key={tag}
+                  key={tag.name}
+                  asChild
                   className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:bg-white/14"
-                  type="button"
                 >
-                  {tag}
+                  <Link
+                    href={`/ensiklopedia?region=${encodeURIComponent(tag.name)}`}
+                  >
+                    {tag.name}
+                  </Link>
                 </Button>
               ))}
             </div>

@@ -28,11 +28,15 @@ import { useState } from 'react';
 
 const ARTICLES_PER_PAGE = 10;
 
-export function EncyclopediaMain() {
+interface EncyclopediaMainProps {
+  initialRegion?: string;
+}
+
+export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
   const router = useRouter();
   const [currentView, setCurrentView] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRegion, setSelectedRegion] = useState<string>();
+  const [selectedRegion, setSelectedRegion] = useState(initialRegion);
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
@@ -57,8 +61,14 @@ export function EncyclopediaMain() {
   };
 
   const handleRegionClick = (region: string) => {
+    const nextRegion = region === 'Semua Wilayah' ? undefined : region;
     setCurrentPage(1);
-    setSelectedRegion(region === 'Semua Wilayah' ? undefined : region);
+    setSelectedRegion(nextRegion);
+    router.push(
+      nextRegion
+        ? `/ensiklopedia?region=${encodeURIComponent(nextRegion)}`
+        : '/ensiklopedia',
+    );
   };
 
   const handleTopicClick = (topic: string) => {
@@ -68,6 +78,7 @@ export function EncyclopediaMain() {
   const handleResetFilters = () => {
     setCurrentPage(1);
     setSelectedRegion(undefined);
+    router.push('/ensiklopedia');
   };
 
   const handleViewChange = (view: ViewMode) => {
