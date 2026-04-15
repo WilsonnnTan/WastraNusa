@@ -6,6 +6,9 @@ import type {
   UpdateArticleInput,
 } from '@/schemas/article.schema';
 
+const formatCount = (value: number) =>
+  new Intl.NumberFormat('en-US').format(value);
+
 export const articleService = {
   getArticles: async (page: number = 1, limit: number = 10) => {
     const safeLimit = Math.min(Math.max(1, limit), 50);
@@ -18,13 +21,14 @@ export const articleService = {
     return articles.map((article) => ({
       ...article,
       region: article.region,
-      topic: article.clothingType,
-      motifLabel: article.clothingType,
+      topic: article.topic,
+      motifLabel: article.motifLabel,
       title: article.title,
-      excerpt: article.summary || article.description || '',
+      excerpt: article.excerpt,
       likes: article.engagement?.likeCount || 0,
-      views: (article.engagement?.viewCount || 0).toString(),
-      readMinutes: 6,
+      views: formatCount(article.engagement?.viewCount || 0),
+      readMinutes: article.readMinutes,
+      featured: article.featured,
     }));
   },
 
@@ -49,15 +53,21 @@ export const articleService = {
         month: 'short',
         year: 'numeric',
       }),
-      tags: [article.clothingType, article.province, article.region],
-      quote: `${article.clothingType} merepresentasikan warisan budaya yang hidup melalui teknik, simbol, dan praktik sosial masyarakat Indonesia.`,
-      intro: article.summary || article.description || '',
-      sections: article.sections || [],
+      tags: [article.motifLabel, article.region, article.topic].filter(Boolean),
+      quote: `${article.motifLabel} merepresentasikan warisan budaya yang hidup melalui teknik, simbol, dan praktik sosial masyarakat Indonesia.`,
+      intro: article.summary || article.excerpt || article.description || '',
+      sections:
+        article.sections?.map((section) => ({
+          title: section.title,
+          content: section.content,
+          imageLabel: section.imageLabel ?? undefined,
+          imageCaption: section.imageCaption ?? undefined,
+        })) || [],
       keyFacts: [
         { label: 'Wilayah Utama', value: article.region },
-        { label: 'Kategori', value: article.clothingType },
-        { label: 'Jenis Wastra', value: article.clothingType },
-        { label: 'Durasi Baca', value: '6 menit' },
+        { label: 'Kategori', value: article.topic },
+        { label: 'Jenis Wastra', value: article.motifLabel },
+        { label: 'Durasi Baca', value: `${article.readMinutes} menit` },
         {
           label: 'Dilihat',
           value: `${article.engagement?.viewCount || 0} kali`,
@@ -76,13 +86,14 @@ export const articleService = {
       references: ['[1] Wikipedia'],
       // Base compatibility
       region: article.region,
-      topic: article.clothingType,
-      motifLabel: article.clothingType,
+      topic: article.topic,
+      motifLabel: article.motifLabel,
       title: article.title,
-      excerpt: article.summary || article.description || '',
+      excerpt: article.excerpt,
       likes: article.engagement?.likeCount || 0,
-      views: (article.engagement?.viewCount || 0).toString(),
-      readMinutes: 6,
+      views: formatCount(article.engagement?.viewCount || 0),
+      readMinutes: article.readMinutes,
+      featured: article.featured,
     };
   },
 
