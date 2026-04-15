@@ -8,6 +8,7 @@ vi.mock('@/logger/logger', () => ({
 
 vi.mock('@/lib/auth/auth-api-helper', () => ({
   AuthHelper: {
+    getUser: vi.fn(),
     requireUser: vi.fn(),
     requireAdmin: vi.fn(),
   },
@@ -20,6 +21,8 @@ vi.mock('@/lib/prisma', () => ({
 vi.mock('@/repositories/article.repository', () => ({
   articleRepository: {
     findAll: vi.fn(),
+    countAll: vi.fn(),
+    countByRegion: vi.fn(),
     findByIdOrSlug: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),

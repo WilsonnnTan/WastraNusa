@@ -54,7 +54,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
     it('should return articles with creator and engagement', async () => {
       const articles = await articleRepository.findAll({
         offset: 0,
-        limit: 10,
+        limit: 50,
       });
 
       expect(articles.length).toBeGreaterThanOrEqual(1);
@@ -73,6 +73,37 @@ describe('articleRepository', { tags: ['db'] }, () => {
       expect(page1).toHaveLength(1);
       expect(page2).toHaveLength(1);
       expect(page1[0].id).not.toBe(page2[0].id);
+    });
+
+    it('should filter by region', async () => {
+      const articles = await articleRepository.findAll({
+        offset: 0,
+        limit: 50,
+        region: 'Jawa',
+      });
+
+      expect(articles.length).toBeGreaterThan(0);
+      expect(articles.every((article) => article.region === 'Jawa')).toBe(true);
+    });
+  });
+
+  describe('count queries', () => {
+    it('should count all articles for a region filter', async () => {
+      const count = await articleRepository.countAll({ region: 'Jawa' });
+
+      expect(count).toBeGreaterThan(0);
+    });
+
+    it('should return grouped region counts', async () => {
+      const regionCounts = await articleRepository.countByRegion();
+
+      expect(regionCounts.length).toBeGreaterThan(0);
+      expect(
+        regionCounts.some(
+          (regionCount) =>
+            regionCount.region === 'Jawa' && regionCount._count.region > 0,
+        ),
+      ).toBe(true);
     });
   });
 
@@ -111,14 +142,17 @@ describe('articleRepository', { tags: ['db'] }, () => {
         id,
         title: 'Test Article',
         slug: `test-article-${id.slice(0, 8)}`,
+        excerpt: 'Test excerpt',
         province: 'Bali',
         island: 'Bali',
         region: 'Denpasar',
+        topic: 'Teknik Pembuatan',
         clothingType: 'endek',
+        motifLabel: 'Endek',
         gender: 'female',
         wikipediaPageId: `wp-test-${id.slice(0, 8)}`,
         wikipediaUrl: 'https://en.wikipedia.org/wiki/Test',
-        content: 'Test content for article creation.',
+        summary: 'Test content for article creation.',
         createdBy: adminUserId,
       });
 
@@ -156,14 +190,17 @@ describe('articleRepository', { tags: ['db'] }, () => {
         id,
         title: 'To Delete',
         slug: `to-delete-${id.slice(0, 8)}`,
+        excerpt: 'Temp excerpt',
         province: 'Papua',
         island: 'Papua',
         region: 'Jayapura',
+        topic: 'Sejarah & Asal Usul',
         clothingType: 'koteka',
+        motifLabel: 'Koteka',
         gender: 'male',
         wikipediaPageId: `wp-delete-${id.slice(0, 8)}`,
         wikipediaUrl: 'https://en.wikipedia.org/wiki/Delete',
-        content: 'Temp article.',
+        summary: 'Temp article.',
         createdBy: adminUserId,
       });
 

@@ -1,3 +1,4 @@
+import { QueryProvider } from '@/components/providers/query-provider';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
@@ -22,8 +23,10 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${plusJakartaSans.className} antialiased`}>
-        {children}
-        <Toaster />
+        <QueryProvider>
+          {children}
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );

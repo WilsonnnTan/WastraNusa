@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
@@ -10,7 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import type { EncyclopediaArticleDetail } from '@/types/encyclopedia';
+import { useArticleDetail, useToggleArticleLike } from '@/hooks/use-article';
+import { authClient } from '@/lib/auth/auth-client';
 import {
   CalendarDays,
   ChevronRight,
@@ -22,14 +25,65 @@ import {
   UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 type EncyclopediaDetailMainProps = {
-  article: EncyclopediaArticleDetail;
+  slug: string;
 };
 
-export function EncyclopediaDetailMain({
-  article,
-}: EncyclopediaDetailMainProps) {
+export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
+  const { data: article, error, isPending } = useArticleDetail(slug);
+  const { data: session, isPending: isSessionPending } =
+    authClient.useSession();
+  const toggleLikeMutation = useToggleArticleLike(slug);
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : 'Gagal memuat detail artikel. Silakan coba lagi.';
+
+  if (isPending) {
+    return (
+      <main className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-6 md:px-6 lg:px-8">
+        <p className="text-sm text-[#4d6759]">Memuat artikel ensiklopedia...</p>
+      </main>
+    );
+  }
+
+  if (error || !article) {
+    return (
+      <main className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-6 md:px-6 lg:px-8">
+        <p className="text-sm text-[#8b5e4a]">{errorMessage}</p>
+      </main>
+    );
+  }
+
+  const hasRelatedProducts = article.relatedProducts.length > 0;
+  const nextArticleHref = article.nextArticle.slug
+    ? `/ensiklopedia/${article.nextArticle.slug}`
+    : '/ensiklopedia';
+  const nextArticleDescription = article.nextArticle.slug
+    ? 'Lanjutkan baca artikel terkait'
+    : 'Kembali ke daftar ensiklopedia';
+  const isLiked = Boolean(article.isLiked);
+
+  const handleToggleLike = async () => {
+    if (!session && !isSessionPending) {
+      toast.error('Silakan login terlebih dahulu untuk menyukai artikel.');
+      return;
+    }
+
+    try {
+      await toggleLikeMutation.mutateAsync();
+    } catch (mutationError) {
+      const message =
+        mutationError instanceof Error
+          ? mutationError.message
+          : 'Gagal memperbarui status suka artikel.';
+
+      toast.error(message);
+    }
+  };
+
   return (
     <main className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-6 md:px-6 lg:px-8">
       <Breadcrumb>
@@ -121,9 +175,17 @@ export function EncyclopediaDetailMain({
             type="button"
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full border-[#d8cfbe] text-[#7f7467] hover:text-[#2f5f49]"
+            className={`h-8 w-8 rounded-full border-[#d8cfbe] ${
+              isLiked
+                ? 'text-[#2f5f49] hover:text-[#2f5f49]'
+                : 'text-[#7f7467] hover:text-[#2f5f49]'
+            }`}
+            onClick={handleToggleLike}
+            disabled={toggleLikeMutation.isPending || isSessionPending}
+            aria-pressed={isLiked}
+            aria-label={isLiked ? 'Batalkan suka artikel' : 'Sukai artikel'}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
           </Button>
         </div>
       </section>
@@ -221,33 +283,35 @@ export function EncyclopediaDetailMain({
             </div>
           </Card>
 
-          <Card className="rounded-xl border border-[#ddd2bf] bg-[#f7f3ea] p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-[#355645]">
-                Produk Terkait
-              </h3>
-              <Button
-                variant="link"
-                className="h-auto p-0 text-xs text-[#c17f61]"
-              >
-                Lihat semua
-              </Button>
-            </div>
+          {hasRelatedProducts ? (
+            <Card className="rounded-xl border border-[#ddd2bf] bg-[#f7f3ea] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-[#355645]">
+                  Produk Terkait
+                </h3>
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-xs text-[#c17f61]"
+                >
+                  Lihat semua
+                </Button>
+              </div>
 
-            <div className="space-y-3">
-              {article.relatedProducts.map((product) => (
-                <div key={product.name}>
-                  <p className="text-sm font-semibold text-[#365746]">
-                    {product.name}
-                  </p>
-                  <p className="text-xs text-[#7d7a70]">{product.location}</p>
-                  <p className="text-sm font-bold text-[#2f5f49]">
-                    {product.price}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Card>
+              <div className="space-y-3">
+                {article.relatedProducts.map((product) => (
+                  <div key={product.name}>
+                    <p className="text-sm font-semibold text-[#365746]">
+                      {product.name}
+                    </p>
+                    <p className="text-xs text-[#7d7a70]">{product.location}</p>
+                    <p className="text-sm font-bold text-[#2f5f49]">
+                      {product.price}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : null}
 
           <Card className="rounded-xl border border-[#ddd2bf] bg-[#f7f3ea] p-4">
             <h3 className="text-sm font-bold text-[#355645]">
@@ -263,9 +327,9 @@ export function EncyclopediaDetailMain({
               </div>
               <div className="rounded-md border border-[#e4dbcd] bg-[#f1ebdf] p-2 text-center">
                 <p className="text-lg font-bold text-[#2f5f49]">
-                  {article.discussionCount}
+                  {article.likes}
                 </p>
-                <p className="text-[11px] text-[#677a6e]">Diskusi</p>
+                <p className="text-[11px] text-[#677a6e]">Disukai</p>
               </div>
             </div>
           </Card>
@@ -278,7 +342,7 @@ export function EncyclopediaDetailMain({
               asChild
               className="mt-3 w-full justify-between rounded-md bg-[#ece5d9] px-3 py-2 text-sm text-[#385847] hover:bg-[#e3dbc9]"
             >
-              <Link href={`/ensiklopedia/${article.nextArticle.slug}`}>
+              <Link href={nextArticleHref}>
                 <span className="line-clamp-1 text-left">
                   {article.nextArticle.title}
                 </span>
@@ -288,7 +352,7 @@ export function EncyclopediaDetailMain({
 
             <div className="mt-2 inline-flex items-center gap-1 text-xs text-[#6f7a73]">
               <MessageCircle className="h-3.5 w-3.5" />
-              Lanjutkan baca artikel terkait
+              {nextArticleDescription}
             </div>
           </Card>
         </aside>

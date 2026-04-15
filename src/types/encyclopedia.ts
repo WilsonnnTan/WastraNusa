@@ -13,6 +13,10 @@ export interface RegionFilter {
   active?: boolean;
 }
 
+export interface EncyclopediaArticleFilters {
+  region?: string;
+}
+
 export interface EncyclopediaArticle {
   slug: string;
   region: string;
@@ -21,6 +25,7 @@ export interface EncyclopediaArticle {
   title: string;
   excerpt: string;
   likes: number;
+  isLiked?: boolean;
   views: string;
   readMinutes?: number;
   featured?: boolean;
@@ -59,6 +64,28 @@ export interface EncyclopediaArticleDetail extends EncyclopediaArticle {
     title: string;
   };
   references: string[];
+}
+
+export interface EncyclopediaArticleListMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  regions: RegionFilter[];
+}
+
+export interface EncyclopediaArticleListResponse {
+  items: EncyclopediaArticle[];
+  meta: EncyclopediaArticleListMeta;
+}
+
+export interface ToggleArticleLikeResponse {
+  isLiked: boolean;
+  engagement: {
+    likeCount: number;
+    viewCount: number;
+  };
 }
 
 export type ViewMode = 'grid' | 'list';
