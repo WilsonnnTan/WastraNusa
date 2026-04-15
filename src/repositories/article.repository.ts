@@ -35,6 +35,9 @@ export const articleRepository = {
           select: { id: true, name: true, image: true },
         },
         engagement: true,
+        sections: {
+          orderBy: { order: 'asc' },
+        },
       },
     });
   },

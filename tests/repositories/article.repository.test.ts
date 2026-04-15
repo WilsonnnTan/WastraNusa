@@ -118,7 +118,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
         gender: 'female',
         wikipediaPageId: `wp-test-${id.slice(0, 8)}`,
         wikipediaUrl: 'https://en.wikipedia.org/wiki/Test',
-        content: 'Test content for article creation.',
+        summary: 'Test content for article creation.',
         createdBy: adminUserId,
       });
 
@@ -163,7 +163,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
         gender: 'male',
         wikipediaPageId: `wp-delete-${id.slice(0, 8)}`,
         wikipediaUrl: 'https://en.wikipedia.org/wiki/Delete',
-        content: 'Temp article.',
+        summary: 'Temp article.',
         createdBy: adminUserId,
       });
 

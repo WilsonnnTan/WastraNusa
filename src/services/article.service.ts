@@ -11,7 +11,21 @@ export const articleService = {
     const safeLimit = Math.min(Math.max(1, limit), 50);
     const offset = (Math.max(1, page) - 1) * safeLimit;
 
-    return articleRepository.findAll({ offset, limit: safeLimit });
+    const articles = await articleRepository.findAll({
+      offset,
+      limit: safeLimit,
+    });
+    return articles.map((article) => ({
+      ...article,
+      region: article.region,
+      topic: article.clothingType,
+      motifLabel: article.clothingType,
+      title: article.title,
+      excerpt: article.summary || article.description || '',
+      likes: article.engagement?.likeCount || 0,
+      views: (article.engagement?.viewCount || 0).toString(),
+      readMinutes: 6,
+    }));
   },
 
   getArticleDetail: async (idOrSlug: string) => {
@@ -27,7 +41,49 @@ export const articleService = {
       });
     });
 
-    return article;
+    return {
+      ...article,
+      author: article.creator?.name || 'Admin',
+      publishedAt: article.createdAt.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }),
+      tags: [article.clothingType, article.province, article.region],
+      quote: `${article.clothingType} merepresentasikan warisan budaya yang hidup melalui teknik, simbol, dan praktik sosial masyarakat Indonesia.`,
+      intro: article.summary || article.description || '',
+      sections: article.sections || [],
+      keyFacts: [
+        { label: 'Wilayah Utama', value: article.region },
+        { label: 'Kategori', value: article.clothingType },
+        { label: 'Jenis Wastra', value: article.clothingType },
+        { label: 'Durasi Baca', value: '6 menit' },
+        {
+          label: 'Dilihat',
+          value: `${article.engagement?.viewCount || 0} kali`,
+        },
+        {
+          label: 'Disukai',
+          value: `${article.engagement?.likeCount || 0} pengguna`,
+        },
+      ],
+      relatedProducts: [],
+      discussionCount: 0,
+      nextArticle: {
+        slug: '',
+        title: 'Kembali ke Artikel Populer',
+      },
+      references: ['[1] Wikipedia'],
+      // Base compatibility
+      region: article.region,
+      topic: article.clothingType,
+      motifLabel: article.clothingType,
+      title: article.title,
+      excerpt: article.summary || article.description || '',
+      likes: article.engagement?.likeCount || 0,
+      views: (article.engagement?.viewCount || 0).toString(),
+      readMinutes: 6,
+    };
   },
 
   createArticle: async (data: CreateArticleInput, userId: string) => {
@@ -35,18 +91,30 @@ export const articleService = {
     const slug =
       data.slug || data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
+    const { sections, ...restData } = data;
+
     const article = await articleRepository.create({
-      ...data,
+      ...restData,
       id,
       slug,
       createdBy: userId,
+      sections: sections ? { create: sections } : undefined,
     });
     logger.info('Article created successfully', { articleId: id, slug });
     return article;
   },
 
   updateArticle: async (idOrSlug: string, data: UpdateArticleInput) => {
-    const article = await articleRepository.update(idOrSlug, data);
+    const { sections, ...restData } = data;
+    const article = await articleRepository.update(idOrSlug, {
+      ...restData,
+      sections: sections
+        ? {
+            deleteMany: {},
+            create: sections,
+          }
+        : undefined,
+    });
     logger.info('Article updated successfully', { articleId: idOrSlug });
     return article;
   },

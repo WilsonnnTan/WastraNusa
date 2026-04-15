@@ -20,7 +20,17 @@ export const createArticleSchema = z.object({
   wikimediaVideoUrl: z.string().url().nullish(),
   wikipediaLastSync: z.union([z.string().datetime(), z.date()]).nullish(),
 
-  content: z.string().min(1, 'Content is required'),
+  sections: z
+    .array(
+      z.object({
+        title: z.string().min(1, 'Title is required'),
+        content: z.string().min(1, 'Content is required'),
+        imageLabel: z.string().nullish(),
+        imageCaption: z.string().nullish(),
+        order: z.number().int().default(0),
+      }),
+    )
+    .optional(),
   summary: z.string().nullish(),
 
   status: z.nativeEnum(ArticleStatus).optional(),
