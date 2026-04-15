@@ -148,17 +148,22 @@ model Article {
   title       String
   slug        String  @unique
   description String?
+  excerpt     String
 
-  province    String
-  island      String
+  province    String?
+  island      String?
   region      String
+  topic       String
   ethnicGroup String?
 
-  clothingType String
-  gender       Gender
+  clothingType String?
+  motifLabel   String
+  gender       Gender?
+  readMinutes  Int      @default(6)
+  featured     Boolean  @default(false)
 
-  wikipediaPageId   String    @unique
-  wikipediaUrl      String
+  wikipediaPageId   String?   @unique
+  wikipediaUrl      String?
   wikimediaImageUrl String?
   wikimediaVideoUrl String?
   wikipediaLastSync DateTime?
