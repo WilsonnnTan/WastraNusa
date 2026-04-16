@@ -1,0 +1,25 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 7
+  },
+  "auditLog": "C:\\codes\\Kuliah\\PPL\\WastraNusa\\src\\logger\\.034e0a0d6c5750dbafba1bd2dc4793aa5d703c04-audit.json",
+  "files": [
+    {
+      "date": 1775888068820,
+      "name": "C:\\codes\\Kuliah\\PPL\\WastraNusa\\src\\logger\\combined-2026-04-11.log",
+      "hash": "0a54a3ca1fb0d6eb64c62f1accbec51771448cc38506de148a1169b504d1c3d0"
+    },
+    {
+      "date": 1775968859301,
+      "name": "C:\\codes\\Kuliah\\PPL\\WastraNusa\\src\\logger\\combined-2026-04-12.log",
+      "hash": "ee78465aaf5c9600717ff497cd3650b8ab3b57168776ad1576ca5b14e7bbe0ba"
+    },
+    {
+      "date": 1776138554247,
+      "name": "C:\\codes\\Kuliah\\PPL\\WastraNusa\\src\\logger\\combined-2026-04-14.log",
+      "hash": "0eede4b0d78201bdf53745f10c36e2128fa9fa3e892f0d11f0c5506e2a88adbf"
+    }
+  ],
+  "hashType": "sha256"
+}

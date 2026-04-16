@@ -1,3 +1,5 @@
+import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const footerColumns = [
@@ -41,35 +43,66 @@ type FooterProps = {
   year?: number;
 };
 
-export function Footer({ year = 2025 }: FooterProps) {
+const socialLinks = [
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com',
+    Icon: Instagram,
+  },
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com',
+    Icon: Facebook,
+  },
+  {
+    label: 'X (Twitter)',
+    href: 'https://x.com',
+    Icon: Twitter,
+  },
+  {
+    label: 'YouTube',
+    href: 'https://www.youtube.com',
+    Icon: Youtube,
+  },
+];
+
+export function Footer({ year = 2026 }: FooterProps) {
   return (
     <footer className="mt-4 bg-[#2d5b48] text-[#d4dfd1]">
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-14 md:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.35fr_1fr_1fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-[10px] bg-[#3a6c58] shadow-sm shadow-black/15">
-                <span className="h-3 w-3 rounded-full bg-[#f0d696]" />
-              </span>
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="WastraNusa"
+                width={60}
+                height={70}
+                className="object-contain"
+              />
               <span className="text-3xl font-extrabold text-[#edf4e8]">
                 WastraNusa
               </span>
-            </div>
+            </Link>
 
-            <p className="mt-5 max-w-sm leading-relaxed text-[#adc2b3]">
+            <p className="mt-5 max-w-sm leading-relaxed text-sm text-[#adc2b3]">
               Platform terpercaya untuk wastra tradisional Indonesia
               menghubungkan pengrajin lokal dengan pecinta budaya Nusantara.
             </p>
 
             <div className="mt-6 flex items-center gap-2.5">
-              {['IG', 'FB', 'TW', 'YT'].map((social) => (
-                <button
-                  key={social}
+              {socialLinks.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  title={label}
                   className="grid h-8 w-8 place-items-center rounded-full border border-white/15 bg-white/6 text-xs font-semibold text-[#d5e0d3] transition hover:bg-white/14"
-                  type="button"
                 >
-                  {social}
-                </button>
+                  <Icon className="h-4 w-4" />
+                </a>
               ))}
             </div>
           </div>
@@ -114,7 +147,9 @@ export function Footer({ year = 2025 }: FooterProps) {
         </div>
 
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-[#bfd0c1]">
-          <p>© {year} WastraNusa. Hak cipta dilindungi undang-undang.</p>
+          <p>
+            © {year} WastraNusa. <br /> Hak cipta dilindungi undang-undang.
+          </p>
 
           <div className="flex items-center gap-5">
             {['Syarat & Ketentuan', 'Kebijakan Privasi', 'Peta Situs'].map(
@@ -128,15 +163,6 @@ export function Footer({ year = 2025 }: FooterProps) {
                 </button>
               ),
             )}
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <span
-                key={index}
-                className="h-4 w-6 rounded-sm bg-[#3f6f5a] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
-              />
-            ))}
           </div>
         </div>
       </div>
