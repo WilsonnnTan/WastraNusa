@@ -23,7 +23,7 @@ type HeaderProps = {
 
 export function Header({ homeHref = '/' }: HeaderProps) {
   return (
-    <header className="border-b border-[#2f5f4a] bg-[#f9f7f2]">
+    <header className="border-b-4 border-[#2F4F3F] bg-[#f9f7f2]">
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
         <div className="flex h-20 items-center gap-4">
           <Link href={homeHref} className="flex items-center gap-3">
@@ -31,12 +31,12 @@ export function Header({ homeHref = '/' }: HeaderProps) {
             <Image
               src="/logo.png"
               alt="WastraNusa"
-              width={44} // Sesuaikan agar pas dengan tinggi header
-              height={44}
+              width={60} // Sesuaikan agar pas dengan tinggi header
+              height={70}
               priority
               className="object-contain"
             />
-            <span className="text-3xl font-extrabold tracking-tight text-[#2f5f49]">
+            <span className="text-2xl font-extrabold tracking-tight text-[#2f5f49]">
               WastraNusa
             </span>
           </Link>
