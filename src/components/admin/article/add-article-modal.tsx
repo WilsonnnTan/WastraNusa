@@ -1,4 +1,3 @@
-// src/components/admin/artikel/AddArticleModal.tsx
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -198,7 +197,7 @@ export default function AddArticleModal({
             </label>
             <textarea
               rows={4}
-              placeholder="Deskripsi singkat artikel yang muncul di halaman daftar ensiklopedia..."
+              placeholder="Deskripsi singkat artikel yang muncul di halaman daftar artikel..."
               className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
             />
           </div>

@@ -44,14 +44,14 @@ function TableRowSkeleton() {
   );
 }
 
-export function AdminEnsiklopediaContent() {
+export function AdminArticleContent() {
   const [page] = useState(1);
   const { data: articlesData, isLoading } = useArticles(page, 10);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
 
   const headerData = useMemo(
     () => ({
-      title: 'Manajemen Artikel Ensiklopedia',
+      title: 'Manajemen Artikel',
       subtitle: 'Kelola konten edukasi wastra nusantara',
       // Necessary fields for AdminHeader type but not used in UI
       brandName: '',

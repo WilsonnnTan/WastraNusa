@@ -164,7 +164,7 @@ function PopularArticlesCard({
           Artikel Paling Populer
         </CardTitle>
         <CardAction>
-          <SectionActionButton href="/admin/ensiklopedia" />
+          <SectionActionButton href="/admin/article" />
         </CardAction>
       </CardHeader>
       <CardContent className="px-5">
