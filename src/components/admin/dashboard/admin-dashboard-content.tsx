@@ -1,5 +1,3 @@
-'use client';
-
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
   type DashboardData,
@@ -215,7 +214,112 @@ function DashboardStatusFooter({ label }: { label: string }) {
   );
 }
 
-export function AdminDashboardContent({ data }: { data: DashboardData }) {
+function SummaryCardSkeleton() {
+  return (
+    <Card className={cn(surfaceCardClassName, 'py-5')}>
+      <CardHeader className="items-start gap-3 px-5">
+        <Skeleton className="size-10 rounded-2xl bg-[#eee2d0]" />
+        <CardAction>
+          <Skeleton className="h-5 w-16 rounded-full bg-[#eee2d0]" />
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-5">
+        <Skeleton className="h-10 w-24 bg-[#eee2d0]" />
+        <Skeleton className="mt-2 h-5 w-32 bg-[#eee2d0]" />
+        <Skeleton className="mt-1 h-4 w-28 bg-[#eee2d0]" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function StockAlertsSkeleton() {
+  return (
+    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4 px-5 py-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
+          >
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
+              <Skeleton className="h-3 w-20 bg-[#eee2d0]" />
+            </div>
+            <Skeleton className="h-6 w-16 rounded-md bg-[#eee2d0]" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PopularArticlesSkeleton() {
+  return (
+    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-5">
+        <div className="flex flex-col">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 last:border-b-0"
+            >
+              <Skeleton className="size-4 bg-[#eee2d0] pt-0.5" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-48 bg-[#eee2d0]" />
+                <Skeleton className="h-3 w-32 bg-[#eee2d0]" />
+              </div>
+              <div className="flex gap-4">
+                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
+                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function AdminDashboardContent({
+  data,
+  isLoading,
+}: {
+  data: DashboardData;
+  isLoading?: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
+        <section className="grid gap-4 xl:grid-cols-3">
+          <SummaryCardSkeleton />
+          <SummaryCardSkeleton />
+          <SummaryCardSkeleton />
+        </section>
+
+        <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+          <StockAlertsSkeleton />
+          <PopularArticlesSkeleton />
+        </section>
+
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-48 rounded-full bg-[#eee2d0]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
       <section className="grid gap-4 xl:grid-cols-3">

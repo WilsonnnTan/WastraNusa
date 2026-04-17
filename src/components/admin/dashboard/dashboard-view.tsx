@@ -10,7 +10,7 @@ import { useArticleDashboard } from '@/hooks/use-article';
 import { useMemo } from 'react';
 
 export function DashboardView() {
-  const { data: articleDashboardData } = useArticleDashboard();
+  const { data: articleDashboardData, isLoading } = useArticleDashboard();
 
   const dashboardData = useMemo(
     () => mergeArticleDashboardData(adminDashboardData, articleDashboardData),
@@ -20,7 +20,7 @@ export function DashboardView() {
   return (
     <>
       <AdminHeader data={dashboardData} />
-      <AdminDashboardContent data={dashboardData} />
+      <AdminDashboardContent data={dashboardData} isLoading={isLoading} />
     </>
   );
 }
