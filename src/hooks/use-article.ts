@@ -151,7 +151,7 @@ export function useArticleDetail(slug: string) {
 export function useArticleDashboard() {
   return useQuery({
     queryKey: articleKeys.dashboard(),
-    queryFn: fetchArticleDashboard,
+    queryFn: () => fetchArticleDashboard(),
   });
 }
 

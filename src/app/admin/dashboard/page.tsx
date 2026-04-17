@@ -1,5 +1,5 @@
-import { DashboardView } from '@/components/admin/dashboard/dashboard-view';
+import { AdminDashboardContent } from '@/components/admin/dashboard/admin-dashboard-content';
 
 export default async function DashboardPage() {
-  return <DashboardView />;
+  return <AdminDashboardContent />;
 }

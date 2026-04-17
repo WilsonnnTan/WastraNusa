@@ -44,7 +44,7 @@ function TableRowSkeleton() {
   );
 }
 
-export function AdminEnsiklopediaPage() {
+export function AdminEnsiklopediaContent() {
   const [page] = useState(1);
   const { data: articlesData, isLoading } = useArticles(page, 10);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
