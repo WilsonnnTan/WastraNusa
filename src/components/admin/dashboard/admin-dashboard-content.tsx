@@ -1,0 +1,339 @@
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import {
+  type DashboardData,
+  type DashboardStat,
+  type DashboardStatIcon,
+  type StockAlertItem,
+} from '@/types/dashboard';
+import {
+  ArrowUpRight,
+  BookOpen,
+  ChevronRight,
+  Clock3,
+  Eye,
+  Package,
+  TriangleAlert,
+} from 'lucide-react';
+import Link from 'next/link';
+
+const surfaceCardClassName =
+  'border-0 bg-[#fffdf9] shadow-[0_1px_0_rgba(60,41,15,0.06),0_18px_40px_rgba(89,69,38,0.05)] ring-1 ring-[#e8decd]';
+const sectionHeaderClassName = 'border-b border-[#eee2d0] px-5 py-4';
+const sectionActionClassName =
+  'px-0 text-[#776b5c] no-underline hover:no-underline';
+
+function SummaryIcon({ icon }: { icon: DashboardStatIcon }) {
+  const iconClassName = 'text-[#a98345]';
+
+  switch (icon) {
+    case 'package':
+      return <Package className={iconClassName} />;
+    case 'book-open':
+      return <BookOpen className={iconClassName} />;
+    default:
+      return <TriangleAlert className={iconClassName} />;
+  }
+}
+
+function SummaryTrendBadge({ stat }: { stat: DashboardStat }) {
+  return (
+    <Badge
+      variant={stat.tone === 'warning' ? 'destructive' : 'secondary'}
+      className={cn(
+        'rounded-full border-0 px-2 py-0.5 text-[11px] shadow-none',
+        stat.tone === 'warning'
+          ? 'bg-[#f5dfd8] text-[#b45843]'
+          : 'bg-[#eef5e8] text-[#5f865a]',
+      )}
+    >
+      {stat.tone === 'positive' ? (
+        <ArrowUpRight data-icon="inline-start" />
+      ) : null}
+      {stat.changeLabel}
+    </Badge>
+  );
+}
+
+function SummaryCard({ stat }: { stat: DashboardStat }) {
+  return (
+    <Card className={cn(surfaceCardClassName, 'py-5')}>
+      <CardHeader className="items-start gap-3 px-5">
+        <div className="flex size-10 items-center justify-center rounded-2xl bg-[#f8f1e4] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+          <SummaryIcon icon={stat.icon} />
+        </div>
+        <CardAction>
+          <SummaryTrendBadge stat={stat} />
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-5">
+        <div className="text-4xl font-semibold tracking-tight text-[#30251d]">
+          {stat.value}
+        </div>
+        <p className="mt-2 text-sm font-medium text-[#50463b]">
+          {stat.description}
+        </p>
+        <p className="text-xs text-[#9b8f82]">{stat.footnote}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StockStatusBadge({ item }: { item: StockAlertItem }) {
+  return item.severity === 'out' ? (
+    <Badge variant="destructive" className="bg-[#f5dfd8] text-[#b45843]">
+      {item.stockLabel}
+    </Badge>
+  ) : (
+    <Badge variant="secondary" className="bg-[#f4ead9] text-[#a56a2f]">
+      {item.stockLabel}
+    </Badge>
+  );
+}
+
+function SectionActionButton({ href }: { href: string }) {
+  return (
+    <Button variant="link" size="sm" className={sectionActionClassName} asChild>
+      <Link href={href}>
+        Kelola
+        <ChevronRight data-icon="inline-end" />
+      </Link>
+    </Button>
+  );
+}
+
+function StockAlertsCard({ items }: { items: DashboardData['stockAlerts'] }) {
+  return (
+    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <TriangleAlert className="text-[#a98345]" />
+          Peringatan Stok
+        </CardTitle>
+        <CardAction>
+          <SectionActionButton href="#" />
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4 px-5 py-4">
+        {items.map((item) => (
+          <div
+            key={item.name}
+            className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
+          >
+            <div>
+              <p className="font-medium text-[#41372c]">{item.name}</p>
+              <p className="text-xs text-[#998d80]">{item.category}</p>
+            </div>
+            <StockStatusBadge item={item} />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PopularArticlesCard({
+  articles,
+}: {
+  articles: DashboardData['popularArticles'];
+}) {
+  return (
+    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <BookOpen className="text-[#a98345]" />
+          Artikel Paling Populer
+        </CardTitle>
+        <CardAction>
+          <SectionActionButton href="/admin/ensiklopedia" />
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-5">
+        {articles.length === 0 ? (
+          <div className="py-6 text-sm text-[#8f8377]">
+            Belum ada data artikel populer.
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {articles.map((article) => (
+              <Link
+                key={article.rank}
+                href={`/ensiklopedia/${article.slug}`}
+                className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 transition-colors hover:bg-[#fdf9f4] last:border-b-0"
+              >
+                <div className="pt-0.5 text-sm font-semibold text-[#8c7f71]">
+                  {article.rank}
+                </div>
+                <div>
+                  <p className="font-medium text-[#41372c]">{article.title}</p>
+                  <p className="text-xs text-[#9a8e81]">
+                    {article.category} / {article.region}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 whitespace-nowrap text-xs text-[#8f8377]">
+                  <span className="inline-flex items-center gap-1">
+                    <Eye className="size-3.5" />
+                    {article.views.toLocaleString('id-ID')}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock3 className="size-3.5" />
+                    {article.readTimeMinutes} min
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DashboardStatusFooter({ label }: { label: string }) {
+  return (
+    <div className="flex justify-end">
+      <div className="hidden items-center gap-3 rounded-full bg-white/60 px-3 py-2 text-xs text-[#8d806f] shadow-[0_1px_0_rgba(60,41,15,0.04)] ring-1 ring-[#e8decd] md:flex">
+        <Avatar size="sm" className="size-7">
+          <AvatarFallback className="bg-[#ecd9ba] text-[#8b6b37]">
+            AD
+          </AvatarFallback>
+        </Avatar>
+        <span>{label}</span>
+      </div>
+    </div>
+  );
+}
+
+function SummaryCardSkeleton() {
+  return (
+    <Card className={cn(surfaceCardClassName, 'py-5')}>
+      <CardHeader className="items-start gap-3 px-5">
+        <Skeleton className="size-10 rounded-2xl bg-[#eee2d0]" />
+        <CardAction>
+          <Skeleton className="h-5 w-16 rounded-full bg-[#eee2d0]" />
+        </CardAction>
+      </CardHeader>
+      <CardContent className="px-5">
+        <Skeleton className="h-10 w-24 bg-[#eee2d0]" />
+        <Skeleton className="mt-2 h-5 w-32 bg-[#eee2d0]" />
+        <Skeleton className="mt-1 h-4 w-28 bg-[#eee2d0]" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function StockAlertsSkeleton() {
+  return (
+    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4 px-5 py-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
+          >
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
+              <Skeleton className="h-3 w-20 bg-[#eee2d0]" />
+            </div>
+            <Skeleton className="h-6 w-16 rounded-md bg-[#eee2d0]" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PopularArticlesSkeleton() {
+  return (
+    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-5">
+        <div className="flex flex-col">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 last:border-b-0"
+            >
+              <Skeleton className="size-4 bg-[#eee2d0] pt-0.5" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-48 bg-[#eee2d0]" />
+                <Skeleton className="h-3 w-32 bg-[#eee2d0]" />
+              </div>
+              <div className="flex gap-4">
+                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
+                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function AdminDashboardContent({
+  data,
+  isLoading,
+}: {
+  data: DashboardData;
+  isLoading?: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
+        <section className="grid gap-4 xl:grid-cols-3">
+          <SummaryCardSkeleton />
+          <SummaryCardSkeleton />
+          <SummaryCardSkeleton />
+        </section>
+
+        <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+          <StockAlertsSkeleton />
+          <PopularArticlesSkeleton />
+        </section>
+
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-48 rounded-full bg-[#eee2d0]" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
+      <section className="grid gap-4 xl:grid-cols-3">
+        {data.summary.map((stat) => (
+          <SummaryCard key={stat.title} stat={stat} />
+        ))}
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+        <StockAlertsCard items={data.stockAlerts} />
+        <PopularArticlesCard articles={data.popularArticles} />
+      </section>
+
+      <DashboardStatusFooter label={data.lastUpdatedLabel} />
+    </div>
+  );
+}

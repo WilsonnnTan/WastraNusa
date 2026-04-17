@@ -107,6 +107,35 @@ describe('articleRepository', { tags: ['db'] }, () => {
     });
   });
 
+  describe('findMostPopular', () => {
+    it('should return popular articles ordered by view count descending', async () => {
+      const popular = await articleRepository.findMostPopular(6);
+
+      expect(popular.length).toBeGreaterThan(0);
+
+      // Verify ordering logic (descending view count)
+      for (let i = 0; i < popular.length - 1; i++) {
+        expect(popular[i].viewCount).toBeGreaterThanOrEqual(
+          popular[i + 1].viewCount,
+        );
+      }
+
+      // Verify the joined article data structure
+      const item = popular[0];
+      expect(item.article).toBeDefined();
+      expect(typeof item.article.slug).toBe('string');
+      expect(typeof item.article.title).toBe('string');
+      expect(typeof item.article.topic).toBe('string');
+      expect(typeof item.article.region).toBe('string');
+      expect(typeof item.article.readMinutes).toBe('number');
+    });
+
+    it('should respect the limit parameter', async () => {
+      const limited = await articleRepository.findMostPopular(1);
+      expect(limited).toHaveLength(1);
+    });
+  });
+
   describe('findByIdOrSlug', () => {
     it('should find by UUID', async () => {
       const article = await articleRepository.findByIdOrSlug(SEED_ARTICLE_1.id);

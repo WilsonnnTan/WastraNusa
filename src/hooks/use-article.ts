@@ -1,9 +1,10 @@
 import type { JSendResponse } from '@/lib/jsend';
-import type {
-  EncyclopediaArticleDetail,
-  EncyclopediaArticleFilters,
-  EncyclopediaArticleListResponse,
-  ToggleArticleLikeResponse,
+import { type ArticleDashboardData } from '@/types/dashboard';
+import {
+  type EncyclopediaArticleDetail,
+  type EncyclopediaArticleFilters,
+  type EncyclopediaArticleListResponse,
+  type ToggleArticleLikeResponse,
 } from '@/types/encyclopedia';
 import type { LikedArticlesResponse } from '@/types/profile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,6 +19,7 @@ export const articleKeys = {
     [...articleKeys.lists(), page, limit, region ?? 'all'] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
+  dashboard: () => [...articleKeys.all, 'dashboard'] as const,
   liked: () => [...articleKeys.all, 'liked'] as const,
   likedList: (page: number, limit: number = DEFAULT_LIKED_ARTICLE_LIMIT) =>
     [...articleKeys.liked(), page, limit] as const,
@@ -90,6 +92,10 @@ export function fetchArticleDetail(slug: string) {
   );
 }
 
+export function fetchArticleDashboard() {
+  return fetchArticleApi<ArticleDashboardData>('/api/articles/dashboard');
+}
+
 export function fetchLikedArticles(
   page: number = 1,
   limit: number = DEFAULT_LIKED_ARTICLE_LIMIT,
@@ -128,6 +134,13 @@ export function useArticleDetail(slug: string) {
     queryKey: articleKeys.detail(slug),
     queryFn: () => fetchArticleDetail(slug),
     enabled: Boolean(slug),
+  });
+}
+
+export function useArticleDashboard() {
+  return useQuery({
+    queryKey: articleKeys.dashboard(),
+    queryFn: fetchArticleDashboard,
   });
 }
 

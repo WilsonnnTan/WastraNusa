@@ -130,6 +130,70 @@ describe('articleService', { tags: ['backend'] }, () => {
     });
   });
 
+  describe('getDashboardOverview', () => {
+    it('should return total articles and map popular articles from repository data', async () => {
+      mockRepo.countAll.mockResolvedValue(12);
+      mockRepo.findMostPopular.mockResolvedValue([
+        {
+          id: 'eng-1',
+          articleId: 'article-1',
+          viewCount: 2100,
+          likeCount: 12,
+          updatedAt: new Date(),
+          article: {
+            slug: 'sejarah-batik-jawa-warisan-dunia-unesco',
+            title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
+            topic: 'Sejarah & Asal Usul',
+            region: 'Jawa',
+            readMinutes: 8,
+          },
+        },
+        {
+          id: 'eng-2',
+          articleId: 'article-2',
+          viewCount: 1580,
+          likeCount: 9,
+          updatedAt: new Date(),
+          article: {
+            slug: 'tenun-ikat-teknik-kuno-dari-kepulauan-nusantara',
+            title: 'Tenun Ikat: Teknik Kuno dari Kepulauan Nusantara',
+            topic: 'Teknik Pembuatan',
+            region: 'Nusa Tenggara',
+            readMinutes: 6,
+          },
+        },
+      ] as never);
+
+      const result = await articleService.getDashboardOverview();
+
+      expect(mockRepo.countAll).toHaveBeenCalledWith();
+      expect(mockRepo.findMostPopular).toHaveBeenCalledWith(6);
+      expect(result).toEqual({
+        totalArticles: 12,
+        popularArticles: [
+          {
+            rank: 1,
+            slug: 'sejarah-batik-jawa-warisan-dunia-unesco',
+            title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
+            category: 'Sejarah & Asal Usul',
+            region: 'Jawa',
+            views: 2100,
+            readTimeMinutes: 8,
+          },
+          {
+            rank: 2,
+            slug: 'tenun-ikat-teknik-kuno-dari-kepulauan-nusantara',
+            title: 'Tenun Ikat: Teknik Kuno dari Kepulauan Nusantara',
+            category: 'Teknik Pembuatan',
+            region: 'Nusa Tenggara',
+            views: 1580,
+            readTimeMinutes: 6,
+          },
+        ],
+      });
+    });
+  });
+
   describe('getArticleDetail', () => {
     it('should return article and increment view count', async () => {
       mockRepo.findByIdOrSlug.mockResolvedValue(MOCK_ARTICLE);

@@ -1,14 +1,15 @@
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { articleRepository } from '@/repositories/article.repository';
-import type {
-  CreateArticleInput,
-  UpdateArticleInput,
+import {
+  type CreateArticleInput,
+  type UpdateArticleInput,
 } from '@/schemas/article.schema';
-import type {
-  EncyclopediaArticleFilters,
-  EncyclopediaArticleListResponse,
-  RegionFilter,
+import { type ArticleDashboardData } from '@/types/dashboard';
+import {
+  type EncyclopediaArticleFilters,
+  type EncyclopediaArticleListResponse,
+  type RegionFilter,
 } from '@/types/encyclopedia';
 import type { LikedArticlesResponse } from '@/types/profile';
 
@@ -70,6 +71,26 @@ export const articleService = {
         hasNextPage: Math.max(1, page) < totalPages,
         regions,
       },
+    };
+  },
+
+  getDashboardOverview: async (): Promise<ArticleDashboardData> => {
+    const [totalArticles, mostPopularArticles] = await Promise.all([
+      articleRepository.countAll(),
+      articleRepository.findMostPopular(6),
+    ]);
+
+    return {
+      totalArticles,
+      popularArticles: mostPopularArticles.map((item, index) => ({
+        rank: index + 1,
+        slug: item.article.slug,
+        title: item.article.title,
+        category: item.article.topic,
+        region: item.article.region,
+        views: item.viewCount,
+        readTimeMinutes: item.article.readMinutes,
+      })),
     };
   },
 
