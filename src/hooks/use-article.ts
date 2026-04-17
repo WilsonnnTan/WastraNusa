@@ -1,4 +1,5 @@
 import type { JSendResponse } from '@/lib/jsend';
+import { type CreateArticleInput } from '@/schemas/article.schema';
 import { type ArticleDashboardData } from '@/types/dashboard';
 import {
   type EncyclopediaArticleDetail,
@@ -24,6 +25,20 @@ export const articleKeys = {
   likedList: (page: number, limit: number = DEFAULT_LIKED_ARTICLE_LIMIT) =>
     [...articleKeys.liked(), page, limit] as const,
 };
+
+export async function createArticleApi(
+  data: CreateArticleInput,
+): Promise<EncyclopediaArticleDetail> {
+  const response = await fetch('/api/articles', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  return parseJSend<EncyclopediaArticleDetail>(response);
+}
 
 async function parseJSend<T>(response: Response): Promise<T> {
   const body = (await response.json()) as JSendResponse<T>;
@@ -59,6 +74,17 @@ async function fetchArticleApi<T>(path: string): Promise<T> {
 async function mutateArticleApi<T>(path: string, method: 'POST'): Promise<T> {
   const response = await fetch(path, {
     method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return parseJSend<T>(response);
+}
+
+async function deleteArticleApi<T>(path: string): Promise<T> {
+  const response = await fetch(path, {
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -140,7 +166,7 @@ export function useArticleDetail(slug: string) {
 export function useArticleDashboard() {
   return useQuery({
     queryKey: articleKeys.dashboard(),
-    queryFn: fetchArticleDashboard,
+    queryFn: () => fetchArticleDashboard(),
   });
 }
 
@@ -265,6 +291,29 @@ export function useToggleArticleLike(slug: string) {
       );
 
       queryClient.invalidateQueries({ queryKey: articleKeys.liked() });
+    },
+  });
+}
+
+export function useDeleteArticle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (idOrSlug: string) =>
+      deleteArticleApi(`/api/articles/${encodeURIComponent(idOrSlug)}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: articleKeys.all });
+    },
+  });
+}
+
+export function useCreateArticle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateArticleInput) => createArticleApi(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: articleKeys.all });
     },
   });
 }

@@ -1,3 +1,10 @@
+'use client';
+
+import { AdminHeader } from '@/components/admin/admin-header';
+import {
+  adminDashboardData,
+  mergeArticleDashboardData,
+} from '@/components/admin/dashboard/dashboard-data';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useArticleDashboard } from '@/hooks/use-article';
 import { cn } from '@/lib/utils';
 import {
   type DashboardData,
@@ -26,6 +34,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
 
 const surfaceCardClassName =
   'border-0 bg-[#fffdf9] shadow-[0_1px_0_rgba(60,41,15,0.06),0_18px_40px_rgba(89,69,38,0.05)] ring-1 ring-[#e8decd]';
@@ -155,7 +164,7 @@ function PopularArticlesCard({
           Artikel Paling Populer
         </CardTitle>
         <CardAction>
-          <SectionActionButton href="/admin/ensiklopedia" />
+          <SectionActionButton href="/admin/article" />
         </CardAction>
       </CardHeader>
       <CardContent className="px-5">
@@ -292,48 +301,55 @@ function PopularArticlesSkeleton() {
   );
 }
 
-export function AdminDashboardContent({
-  data,
-  isLoading,
-}: {
-  data: DashboardData;
-  isLoading?: boolean;
-}) {
+export function AdminDashboardContent() {
+  const { data: articleDashboardData, isLoading } = useArticleDashboard();
+
+  const dashboardData = useMemo(
+    () => mergeArticleDashboardData(adminDashboardData, articleDashboardData),
+    [articleDashboardData],
+  );
+
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
-        <section className="grid gap-4 xl:grid-cols-3">
-          <SummaryCardSkeleton />
-          <SummaryCardSkeleton />
-          <SummaryCardSkeleton />
-        </section>
+      <main className="flex flex-1 flex-col">
+        <AdminHeader data={dashboardData} />
+        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
+          <section className="grid gap-4 xl:grid-cols-3">
+            <SummaryCardSkeleton />
+            <SummaryCardSkeleton />
+            <SummaryCardSkeleton />
+          </section>
 
-        <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-          <StockAlertsSkeleton />
-          <PopularArticlesSkeleton />
-        </section>
+          <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+            <StockAlertsSkeleton />
+            <PopularArticlesSkeleton />
+          </section>
 
-        <div className="flex justify-end">
-          <Skeleton className="h-10 w-48 rounded-full bg-[#eee2d0]" />
+          <div className="flex justify-end">
+            <Skeleton className="h-10 w-48 rounded-full bg-[#eee2d0]" />
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
-      <section className="grid gap-4 xl:grid-cols-3">
-        {data.summary.map((stat) => (
-          <SummaryCard key={stat.title} stat={stat} />
-        ))}
-      </section>
+    <main className="flex flex-1 flex-col">
+      <AdminHeader data={dashboardData} />
+      <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
+        <section className="grid gap-4 xl:grid-cols-3">
+          {dashboardData.summary.map((stat) => (
+            <SummaryCard key={stat.title} stat={stat} />
+          ))}
+        </section>
 
-      <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-        <StockAlertsCard items={data.stockAlerts} />
-        <PopularArticlesCard articles={data.popularArticles} />
-      </section>
+        <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+          <StockAlertsCard items={dashboardData.stockAlerts} />
+          <PopularArticlesCard articles={dashboardData.popularArticles} />
+        </section>
 
-      <DashboardStatusFooter label={data.lastUpdatedLabel} />
-    </div>
+        <DashboardStatusFooter label={dashboardData.lastUpdatedLabel} />
+      </div>
+    </main>
   );
 }

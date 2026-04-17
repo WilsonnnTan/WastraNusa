@@ -12,7 +12,7 @@ import { usePathname } from 'next/navigation';
 
 const breadcrumbMap: Record<string, { label: string; href?: string }[]> = {
   '/profile': [{ label: 'Profil Saya' }],
-  '/profile/artikel-disukai': [
+  '/profile/liked-article': [
     { label: 'Profil Saya', href: '/profile' },
     { label: 'Artikel Disukai' },
   ],

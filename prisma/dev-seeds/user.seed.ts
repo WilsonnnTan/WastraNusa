@@ -32,21 +32,24 @@ export async function seedUsers() {
         },
       });
 
-      if (user.role === 'admin') {
-        await prisma.user.update({
-          where: { id: response.user.id },
-          data: { role: 'admin' },
-        });
-      }
+      await prisma.user.update({
+        where: { id: response.user.id },
+        data: {
+          emailVerified: true,
+          role: user.role,
+        },
+      });
+
       console.log(`Created user: ${user.email} (role: ${user.role})`);
     } else {
-      if (user.role === 'admin' && existingUser.role !== 'admin') {
-        await prisma.user.update({
-          where: { id: existingUser.id },
-          data: { role: 'admin' },
-        });
-      }
-      console.log(`User already exists: ${user.email}`);
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          emailVerified: true,
+          role: user.role,
+        },
+      });
+      console.log(`Updated existing user: ${user.email} (role: ${user.role})`);
     }
   }
 

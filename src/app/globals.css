@@ -141,6 +141,5 @@
   }
   html {
     @apply font-sans;
-    zoom: 0.9;
   }
 }

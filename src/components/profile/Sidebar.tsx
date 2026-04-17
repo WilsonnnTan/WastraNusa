@@ -43,7 +43,7 @@ export default function Sidebar() {
       icon: <BookOpen size={16} />,
       label: 'Artikel Disukai',
       badge: null,
-      href: '/profile/artikel-disukai',
+      href: '/profile/liked-article',
     },
     {
       icon: <LogOut size={16} />,

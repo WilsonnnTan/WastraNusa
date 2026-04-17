@@ -34,14 +34,14 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const navigationIcons = {
   Dashboard: LayoutDashboard,
-  Artikel: BookOpen,
+  Article: BookOpen,
   'Produk & Inventori': Package2,
   Pesanan: ShoppingBag,
 } as const;
 
 const ADMIN_NAVIGATION = [
   { title: 'Dashboard', href: '/admin/dashboard' },
-  { title: 'Artikel', href: '/admin/ensiklopedia' },
+  { title: 'Article', href: '/admin/article' },
   { title: 'Produk & Inventori', href: '/admin/inventori' },
   { title: 'Pesanan', href: '/admin/pesanan' },
 ];
