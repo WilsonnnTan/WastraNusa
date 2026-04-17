@@ -1,68 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type DashboardData } from '@/types/dashboard';
-import { Download } from 'lucide-react';
-
-function escapeCsvValue(value: string | number) {
-  const safeValue = String(value).replace(/"/g, '""');
-  return /[",\n]/.test(safeValue) ? `"${safeValue}"` : safeValue;
-}
-
-function buildDashboardCsv(data: DashboardData) {
-  const rows: Array<Array<string | number>> = [
-    ['Dashboard', data.title],
-    ['Subtitle', data.subtitle],
-    [],
-    ['Summary'],
-    ['Title', 'Value', 'Change', 'Description', 'Footnote'],
-    ...data.summary.map((item) => [
-      item.title,
-      item.value,
-      item.changeLabel,
-      item.description,
-      item.footnote,
-    ]),
-    [],
-    ['Stock Alerts'],
-    ['Product', 'Category', 'Status'],
-    ...data.stockAlerts.map((item) => [
-      item.name,
-      item.category,
-      item.stockLabel,
-    ]),
-    [],
-    ['Popular Articles'],
-    ['Rank', 'Title', 'Category', 'Region', 'Views', 'Read Time (min)'],
-    ...data.popularArticles.map((item) => [
-      item.rank,
-      item.title,
-      item.category,
-      item.region,
-      item.views,
-      item.readTimeMinutes,
-    ]),
-  ];
-
-  return rows
-    .map((row) => row.map((value) => escapeCsvValue(value ?? '')).join(','))
-    .join('\n');
-}
-
-function downloadDashboardCsv(data: DashboardData) {
-  const blob = new Blob([buildDashboardCsv(data)], {
-    type: 'text/csv;charset=utf-8;',
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-
-  link.href = url;
-  link.download = `${data.exportFileName}.csv`;
-  link.click();
-
-  URL.revokeObjectURL(url);
-}
 
 export function AdminHeader({ data }: { data: DashboardData }) {
   return (
@@ -82,17 +21,6 @@ export function AdminHeader({ data }: { data: DashboardData }) {
             <p className="text-sm text-[#8f8577]">{data.subtitle}</p>
           </div>
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => downloadDashboardCsv(data)}
-          className="border-[#dccfbf] bg-white/85 text-[#645948] shadow-none hover:bg-[#f9f4ec]"
-        >
-          <Download data-icon="inline-start" />
-          Export
-        </Button>
       </div>
     </header>
   );

@@ -7,7 +7,6 @@ import type {
 export const adminDashboardData = {
   title: 'Dashboard Overview',
   subtitle: 'WastraNusa Admin - Jumat, 10 April 2026',
-  exportFileName: 'wastranusa-dashboard-overview',
   brandName: 'WastraNusa',
   brandLabel: 'Admin Panel',
   adminName: 'Admin WastraNusa',

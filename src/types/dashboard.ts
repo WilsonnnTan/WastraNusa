@@ -40,7 +40,6 @@ export type PopularArticle = {
 export type DashboardData = {
   title: string;
   subtitle: string;
-  exportFileName: string;
   brandName: string;
   brandLabel: string;
   adminName: string;
