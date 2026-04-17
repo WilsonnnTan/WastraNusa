@@ -102,11 +102,13 @@ function StockStatusBadge({ item }: { item: StockAlertItem }) {
   );
 }
 
-function SectionActionButton() {
+function SectionActionButton({ href }: { href: string }) {
   return (
-    <Button variant="link" size="sm" className={sectionActionClassName}>
-      Kelola
-      <ChevronRight data-icon="inline-end" />
+    <Button variant="link" size="sm" className={sectionActionClassName} asChild>
+      <Link href={href}>
+        Kelola
+        <ChevronRight data-icon="inline-end" />
+      </Link>
     </Button>
   );
 }
@@ -120,7 +122,7 @@ function StockAlertsCard({ items }: { items: DashboardData['stockAlerts'] }) {
           Peringatan Stok
         </CardTitle>
         <CardAction>
-          <SectionActionButton />
+          <SectionActionButton href="#" />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 px-5 py-4">
@@ -154,7 +156,7 @@ function PopularArticlesCard({
           Artikel Paling Populer
         </CardTitle>
         <CardAction>
-          <SectionActionButton />
+          <SectionActionButton href="/admin/ensiklopedia" />
         </CardAction>
       </CardHeader>
       <CardContent className="px-5">
