@@ -23,6 +23,7 @@ vi.mock('@/repositories/article.repository', () => ({
     findAll: vi.fn(),
     countAll: vi.fn(),
     countByRegion: vi.fn(),
+    findMostPopular: vi.fn(),
     findByIdOrSlug: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
@@ -38,6 +39,7 @@ vi.mock('@/repositories/article.repository', () => ({
 vi.mock('@/services/article.service', () => ({
   articleService: {
     getArticles: vi.fn(),
+    getDashboardOverview: vi.fn(),
     getArticleDetail: vi.fn(),
     getLikedArticles: vi.fn(),
     createArticle: vi.fn(),

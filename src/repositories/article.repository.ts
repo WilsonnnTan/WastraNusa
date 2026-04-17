@@ -49,6 +49,24 @@ export const articleRepository = {
     });
   },
 
+  findMostPopular: async (limit: number = 6) => {
+    return prisma.articleEngagement.findMany({
+      take: limit,
+      orderBy: [{ viewCount: 'desc' }, { updatedAt: 'desc' }],
+      include: {
+        article: {
+          select: {
+            slug: true,
+            title: true,
+            topic: true,
+            region: true,
+            readMinutes: true,
+          },
+        },
+      },
+    });
+  },
+
   findByIdOrSlug: async (idOrSlug: string) => {
     return prisma.article.findUnique({
       where: getUniqueWhere(idOrSlug),

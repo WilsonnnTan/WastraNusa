@@ -1,9 +1,11 @@
 import {
   articleKeys,
+  fetchArticleDashboard,
   fetchArticleDetail,
   fetchArticles,
   fetchLikedArticles,
   toggleArticleLike,
+  useArticleDashboard,
   useArticleDetail,
   useArticles,
   useLikedArticles,
@@ -107,6 +109,37 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/articles/batik',
       expect.any(Object),
+    );
+  });
+
+  it('should unwrap article dashboard responses from JSend', async () => {
+    const articleDashboard = {
+      totalArticles: 12,
+      popularArticles: [
+        {
+          rank: 1,
+          title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
+          category: 'Sejarah & Asal Usul',
+          region: 'Jawa',
+          views: 2100,
+          readTimeMinutes: 8,
+        },
+      ],
+    };
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(articleDashboard) as never,
+    );
+
+    const result = await fetchArticleDashboard();
+
+    expect(result).toEqual(articleDashboard);
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles/dashboard',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      }),
     );
   });
 
@@ -288,6 +321,34 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.slug).toBe('batik');
+  });
+
+  it('should expose success for useArticleDashboard', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse({
+        totalArticles: 12,
+        popularArticles: [
+          {
+            rank: 1,
+            title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
+            category: 'Sejarah & Asal Usul',
+            region: 'Jawa',
+            views: 2100,
+            readTimeMinutes: 8,
+          },
+        ],
+      }) as never,
+    );
+
+    const { result } = renderHook(() => useArticleDashboard(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.totalArticles).toBe(12);
+    expect(result.current.data?.popularArticles[0]?.title).toBe(
+      'Sejarah Batik Jawa: Warisan Dunia UNESCO',
+    );
   });
 
   it('should expose success for useLikedArticles', async () => {
