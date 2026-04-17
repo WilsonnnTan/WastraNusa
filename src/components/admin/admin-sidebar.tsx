@@ -10,7 +10,6 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
@@ -31,7 +30,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const navigationIcons = {
   Dashboard: LayoutDashboard,
@@ -39,6 +38,13 @@ const navigationIcons = {
   'Produk & Inventori': Package2,
   Pesanan: ShoppingBag,
 } as const;
+
+const ADMIN_NAVIGATION = [
+  { title: 'Dashboard', href: '/admin/dashboard' },
+  { title: 'Artikel', href: '/admin/ensiklopedia' },
+  { title: 'Produk & Inventori', href: '/admin/inventori' },
+  { title: 'Pesanan', href: '/admin/pesanan' },
+];
 
 function countStockAlerts(data: DashboardData, severity: StockAlertSeverity) {
   return data.stockAlerts.filter((item) => item.severity === severity).length;
@@ -70,17 +76,13 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
           <span>{item.title}</span>
         </SidebarMenuButton>
       )}
-      {item.badge ? (
-        <SidebarMenuBadge className="right-2 rounded-full bg-white/10 px-1.5 text-[11px] text-[#f5e9d2] peer-data-[active=true]/menu-button:bg-[#e47d42] peer-data-[active=true]/menu-button:text-white">
-          {item.badge}
-        </SidebarMenuBadge>
-      ) : null}
     </SidebarMenuItem>
   );
 }
 
 export function AdminSidebar({ data }: { data: DashboardData }) {
   const router = useRouter();
+  const pathname = usePathname();
   const outOfStockCount = countStockAlerts(data, 'out');
   const lowStockCount = countStockAlerts(data, 'low');
 
@@ -113,9 +115,15 @@ export function AdminSidebar({ data }: { data: DashboardData }) {
       <SidebarContent className="px-3">
         <SidebarGroup className="gap-2 py-0">
           <SidebarMenu>
-            {data.navigation.map((item) => (
-              <SidebarNavigationItem key={item.title} item={item} />
-            ))}
+            {ADMIN_NAVIGATION.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <SidebarNavigationItem
+                  key={item.title}
+                  item={{ ...item, active: isActive }}
+                />
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
 

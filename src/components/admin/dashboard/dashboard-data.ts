@@ -12,12 +12,6 @@ export const adminDashboardData = {
   adminName: 'Admin WastraNusa',
   adminRole: 'Super User',
   lastUpdatedLabel: 'Ringkasan data terakhir diperbarui hari ini',
-  navigation: [
-    { title: 'Dashboard', href: '/admin/dashboard', active: true },
-    { title: 'Artikel', badge: '0', disabled: true },
-    { title: 'Produk & Inventori', badge: '12', disabled: true },
-    { title: 'Pesanan', badge: '12', disabled: true },
-  ],
   summary: [
     {
       title: 'Total Produk',
@@ -27,15 +21,6 @@ export const adminDashboardData = {
       description: 'Total produk',
       footnote: 'di seluruh kategori',
       icon: 'package',
-    },
-    {
-      title: 'Total Artikel',
-      value: 0,
-      changeLabel: 'dari article API',
-      tone: 'positive',
-      description: 'Total artikel',
-      footnote: 'ensiklopedia budaya',
-      icon: 'book-open',
     },
     {
       title: 'Stok Rendah / Habis',
@@ -72,21 +57,22 @@ export function mergeArticleDashboardData(
     return baseData;
   }
 
+  // Construct live stats from API
+  const liveStats: DashboardData['summary'] = [
+    {
+      title: 'Total Artikel',
+      value: articleData.totalArticles,
+      changeLabel: 'Live dari API',
+      tone: 'positive',
+      description: 'Total artikel',
+      footnote: 'ensiklopedia budaya',
+      icon: 'book-open',
+    },
+  ];
+
   return {
     ...baseData,
-    navigation: baseData.navigation.map((item) =>
-      item.title === 'Artikel'
-        ? { ...item, badge: String(articleData.totalArticles) }
-        : item,
-    ),
-    summary: baseData.summary.map((item) =>
-      item.title === 'Total Artikel'
-        ? {
-            ...item,
-            value: articleData.totalArticles,
-          }
-        : item,
-    ),
+    summary: [...liveStats, ...baseData.summary],
     popularArticles: articleData.popularArticles,
   };
 }

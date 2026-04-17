@@ -5,7 +5,6 @@ export type DashboardStatIcon = 'package' | 'book-open' | 'triangle-alert';
 export type DashboardNavItem = {
   title: string;
   href?: string;
-  badge?: string;
   active?: boolean;
   disabled?: boolean;
 };
@@ -45,7 +44,6 @@ export type DashboardData = {
   adminName: string;
   adminRole: string;
   lastUpdatedLabel: string;
-  navigation: DashboardNavItem[];
   summary: DashboardStat[];
   stockAlerts: StockAlertItem[];
   popularArticles: PopularArticle[];
