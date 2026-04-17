@@ -67,6 +67,17 @@ async function mutateArticleApi<T>(path: string, method: 'POST'): Promise<T> {
   return parseJSend<T>(response);
 }
 
+async function deleteArticleApi<T>(path: string): Promise<T> {
+  const response = await fetch(path, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return parseJSend<T>(response);
+}
+
 export function fetchArticles(
   page: number = 1,
   limit: number = DEFAULT_ARTICLE_LIMIT,
@@ -265,6 +276,18 @@ export function useToggleArticleLike(slug: string) {
       );
 
       queryClient.invalidateQueries({ queryKey: articleKeys.liked() });
+    },
+  });
+}
+
+export function useDeleteArticle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (idOrSlug: string) =>
+      deleteArticleApi(`/api/articles/${encodeURIComponent(idOrSlug)}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: articleKeys.all });
     },
   });
 }
