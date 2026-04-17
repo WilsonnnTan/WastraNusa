@@ -1,4 +1,4 @@
-import { ArticleStatus, Gender } from '@/generated/prisma/client';
+import { ArticleStatus, Gender } from '@/generated/prisma/enums';
 import { z } from 'zod';
 
 export const createArticleSchema = z.object({
@@ -32,7 +32,7 @@ export const createArticleSchema = z.object({
         content: z.string().min(1, 'Content is required'),
         imageLabel: z.string().nullish(),
         imageCaption: z.string().nullish(),
-        order: z.number().int().default(0),
+        order: z.number().int(),
       }),
     )
     .optional(),

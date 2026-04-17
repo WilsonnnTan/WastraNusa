@@ -10,6 +10,8 @@ import { useArticles, useDeleteArticle } from '@/hooks/use-article';
 import { MapPin, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import AddArticleModal from './add-article-modal';
+
 function TableRowSkeleton() {
   return (
     <tr className="border-t border-[#ece7de]">
@@ -46,6 +48,7 @@ function TableRowSkeleton() {
 
 export function AdminArticleContent() {
   const [page] = useState(1);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { data: articlesData, isLoading } = useArticles(page, 10);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
 
@@ -93,7 +96,7 @@ export function AdminArticleContent() {
               <p className="text-sm text-muted-foreground">
                 {isLoading ? '...' : articlesData?.meta.totalItems} artikel
               </p>
-              <Button>
+              <Button onClick={() => setIsAddModalOpen(true)}>
                 <Plus data-icon="inline-start" />
                 Tambah Artikel
               </Button>
@@ -193,6 +196,11 @@ export function AdminArticleContent() {
           </Card>
         </div>
       </section>
+
+      <AddArticleModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </main>
   );
 }
