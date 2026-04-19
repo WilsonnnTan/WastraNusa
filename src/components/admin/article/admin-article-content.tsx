@@ -8,10 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   articleKeys,
+  fetchArticleDetail,
   fetchArticles,
   useArticles,
   useDeleteArticle,
 } from '@/hooks/use-article';
+import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ChevronLeft,
@@ -23,8 +25,9 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
-import AddArticleModal from './add-article-modal';
+import AddUpdateArticleModal from './add-update-article-modal';
 
 function TableRowSkeleton() {
   return (
@@ -62,7 +65,10 @@ function TableRowSkeleton() {
 
 export function AdminArticleContent() {
   const [page, setPage] = useState(1);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] =
+    useState<EncyclopediaArticleDetail | null>(null);
+
   const { data: articlesData, isLoading } = useArticles(page, 10);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
   const queryClient = useQueryClient();
@@ -100,6 +106,24 @@ export function AdminArticleContent() {
     }
   };
 
+  const handleEdit = async (slug: string) => {
+    try {
+      const detail = await queryClient.fetchQuery({
+        queryKey: articleKeys.detail(slug),
+        queryFn: () => fetchArticleDetail(slug),
+      });
+      setEditingArticle(detail);
+      setIsModalOpen(true);
+    } catch {
+      toast.error('Gagal mengambil detail artikel');
+    }
+  };
+
+  const handleAdd = () => {
+    setEditingArticle(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <main className="flex flex-col">
       <AdminHeader data={headerData} />
@@ -121,7 +145,7 @@ export function AdminArticleContent() {
               <p className="text-sm text-muted-foreground">
                 {isLoading ? '...' : articlesData?.meta.totalItems} artikel
               </p>
-              <Button onClick={() => setIsAddModalOpen(true)}>
+              <Button onClick={handleAdd}>
                 <Plus data-icon="inline-start" />
                 Tambah Artikel
               </Button>
@@ -197,7 +221,7 @@ export function AdminArticleContent() {
                               size="icon-sm"
                               variant="secondary"
                               aria-label="Edit artikel"
-                              disabled
+                              onClick={() => handleEdit(article.slug)}
                             >
                               <Pencil />
                             </Button>
@@ -293,9 +317,10 @@ export function AdminArticleContent() {
         </div>
       </section>
 
-      <AddArticleModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+      <AddUpdateArticleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialData={editingArticle}
       />
     </main>
   );

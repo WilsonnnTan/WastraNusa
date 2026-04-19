@@ -2,28 +2,36 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useCreateArticle } from '@/hooks/use-article';
+import { useCreateArticle, useUpdateArticle } from '@/hooks/use-article';
 import {
   type CreateArticleInput,
   createArticleSchema,
+  updateArticleSchema,
 } from '@/schemas/article.schema';
+import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { type Resolver, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-interface AddArticleModalProps {
+interface AddUpdateArticleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: EncyclopediaArticleDetail | null;
 }
 
-export default function AddArticleModal({
+export default function AddUpdateArticleModal({
   isOpen,
   onClose,
-}: AddArticleModalProps) {
+  initialData,
+}: AddUpdateArticleModalProps) {
   const [showModal, setShowModal] = useState(isOpen);
-  const { mutate: createArticle, isPending } = useCreateArticle();
+  const { mutate: createArticle, isPending: isCreating } = useCreateArticle();
+  const { mutate: updateArticle, isPending: isUpdating } = useUpdateArticle();
+
+  const isEdit = !!initialData;
+  const isPending = isCreating || isUpdating;
 
   const {
     register,
@@ -32,7 +40,9 @@ export default function AddArticleModal({
     reset,
     formState: { errors },
   } = useForm<CreateArticleInput>({
-    resolver: zodResolver(createArticleSchema),
+    resolver: zodResolver(
+      isEdit ? updateArticleSchema : createArticleSchema,
+    ) as Resolver<CreateArticleInput>,
     defaultValues: {
       title: '',
       excerpt: '',
@@ -44,24 +54,75 @@ export default function AddArticleModal({
     },
   });
 
+  useEffect(() => {
+    if (isOpen && initialData) {
+      reset({
+        title: initialData.title,
+        excerpt: initialData.excerpt,
+        topic: initialData.topic,
+        region: initialData.region,
+        motifLabel: initialData.motifLabel,
+        readMinutes: initialData.readMinutes ?? 5,
+        sections: initialData.sections.map((s, i) => ({
+          title: s.title,
+          content: s.content,
+          order: i,
+        })),
+        // Add other fields from initialData if they exist or use a type cast
+        // Note: initialData might miss some fields like wikipediaPageId
+      });
+    } else if (isOpen && !initialData) {
+      reset({
+        title: '',
+        excerpt: '',
+        topic: '',
+        region: '',
+        motifLabel: '',
+        readMinutes: 5,
+        sections: [{ title: '', content: '', order: 0 }],
+      });
+    }
+  }, [isOpen, initialData, reset]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'sections',
   });
 
   const onSubmit = (data: CreateArticleInput) => {
-    createArticle(data, {
-      onSuccess: () => {
-        toast.success('Artikel berhasil ditambahkan');
-        reset();
-        onClose();
-      },
-      onError: (error) => {
-        toast.error(
-          error instanceof Error ? error.message : 'Gagal menambahkan artikel',
-        );
-      },
-    });
+    if (isEdit && initialData) {
+      updateArticle(
+        { slug: initialData.slug, data },
+        {
+          onSuccess: () => {
+            toast.success('Artikel berhasil diperbarui');
+            onClose();
+          },
+          onError: (error) => {
+            toast.error(
+              error instanceof Error
+                ? error.message
+                : 'Gagal memperbarui artikel',
+            );
+          },
+        },
+      );
+    } else {
+      createArticle(data, {
+        onSuccess: () => {
+          toast.success('Artikel berhasil ditambahkan');
+          reset();
+          onClose();
+        },
+        onError: (error) => {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : 'Gagal menambahkan artikel',
+          );
+        },
+      });
+    }
   };
 
   if (isOpen && !showModal) {
@@ -121,7 +182,9 @@ export default function AddArticleModal({
                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
               />
             </svg>
-            <h2 className="text-lg font-semibold">Tambah Artikel Baru</h2>
+            <h2 className="text-lg font-semibold">
+              {isEdit ? 'Edit Artikel' : 'Tambah Artikel Baru'}
+            </h2>
           </div>
           <Button
             type="button"
@@ -155,24 +218,6 @@ export default function AddArticleModal({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Artikel Wikipedia */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Artikel Wikipedia *
-              </label>
-              <Input
-                {...register('wikipediaPageId')}
-                type="text"
-                placeholder="Batik / Songket / Ikat"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
-              />
-              {errors.wikipediaPageId && (
-                <p className="text-xs text-red-500 mt-1 font-medium">
-                  {errors.wikipediaPageId.message}
-                </p>
-              )}
-            </div>
-
             {/* Motif Label */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
@@ -383,7 +428,11 @@ export default function AddArticleModal({
                 />
               </svg>
             )}
-            {isPending ? 'Menyimpan...' : 'Tambah Artikel'}
+            {isPending
+              ? 'Menyimpan...'
+              : isEdit
+                ? 'Simpan Perubahan'
+                : 'Tambah Artikel'}
           </Button>
           <Button
             type="button"

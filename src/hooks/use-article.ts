@@ -1,5 +1,8 @@
 import type { JSendResponse } from '@/lib/jsend';
-import { type CreateArticleInput } from '@/schemas/article.schema';
+import {
+  type CreateArticleInput,
+  type UpdateArticleInput,
+} from '@/schemas/article.schema';
 import { type ArticleDashboardData } from '@/types/dashboard';
 import {
   type EncyclopediaArticleDetail,
@@ -31,6 +34,21 @@ export async function createArticleApi(
 ): Promise<EncyclopediaArticleDetail> {
   const response = await fetch('/api/articles', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  return parseJSend<EncyclopediaArticleDetail>(response);
+}
+
+export async function updateArticleApi(
+  slug: string,
+  data: UpdateArticleInput,
+): Promise<EncyclopediaArticleDetail> {
+  const response = await fetch(`/api/articles/${encodeURIComponent(slug)}`, {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -314,6 +332,19 @@ export function useCreateArticle() {
     mutationFn: (data: CreateArticleInput) => createArticleApi(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: articleKeys.all });
+    },
+  });
+}
+
+export function useUpdateArticle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ slug, data }: { slug: string; data: UpdateArticleInput }) =>
+      updateArticleApi(slug, data),
+    onSuccess: (_, { slug }) => {
+      queryClient.invalidateQueries({ queryKey: articleKeys.all });
+      queryClient.invalidateQueries({ queryKey: articleKeys.detail(slug) });
     },
   });
 }
