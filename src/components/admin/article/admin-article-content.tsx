@@ -4,7 +4,6 @@ import { AdminHeader } from '@/components/admin/admin-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   articleKeys,
@@ -21,7 +20,6 @@ import {
   MapPin,
   Pencil,
   Plus,
-  Search,
   Trash2,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -130,17 +128,7 @@ export function AdminArticleContent() {
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="grid w-full gap-2 sm:grid-cols-2 lg:max-w-[520px]">
-              <div className="relative">
-                <Search className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground outline-none" />
-                <Input
-                  className="bg-background pl-8"
-                  placeholder="Cari judul..."
-                />
-              </div>
-              <Input className="bg-background" placeholder="Semua Wilayah" />
-            </div>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
             <div className="flex items-center justify-end gap-3">
               <p className="text-sm text-muted-foreground">
                 {isLoading ? '...' : articlesData?.meta.totalItems} artikel
