@@ -41,23 +41,6 @@ export function Header({ homeHref = '/' }: HeaderProps) {
             </span>
           </Link>
 
-          <div className="hidden flex-1 items-center md:flex">
-            <div className="ml-4 flex w-full max-w-[620px] items-center overflow-hidden rounded-xl border border-[#d8d0c1] bg-[#ece7dd]">
-              <Search className="ml-4 h-4 w-4 text-[#aca493]" />
-              <Input
-                className="h-11 w-full border-0 bg-transparent px-3 text-sm text-[#435d50] placeholder:text-[#9f998b] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Cari produk batik, tenun, atau artikel budaya..."
-                type="text"
-              />
-              <button
-                className="h-11 bg-[#2f5f49] px-7 text-sm font-semibold text-[#f1f5ee] transition hover:bg-[#264d3b]"
-                type="button"
-              >
-                Cari
-              </button>
-            </div>
-          </div>
-
           <nav className="ml-auto hidden items-center gap-5 md:flex lg:gap-6">
             {menuItems.map(({ label, icon: Icon, badge, href }) => {
               const content = (
