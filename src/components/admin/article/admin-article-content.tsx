@@ -6,9 +6,23 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useArticles, useDeleteArticle } from '@/hooks/use-article';
-import { MapPin, Pencil, Plus, Search, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  articleKeys,
+  fetchArticles,
+  useArticles,
+  useDeleteArticle,
+} from '@/hooks/use-article';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import AddArticleModal from './add-article-modal';
 
@@ -47,10 +61,21 @@ function TableRowSkeleton() {
 }
 
 export function AdminArticleContent() {
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { data: articlesData, isLoading } = useArticles(page, 10);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (articlesData?.meta.hasNextPage) {
+      const nextPage = page + 1;
+      queryClient.prefetchQuery({
+        queryKey: articleKeys.list(nextPage, 10),
+        queryFn: () => fetchArticles(nextPage, 10),
+      });
+    }
+  }, [page, articlesData, queryClient]);
 
   const headerData = useMemo(
     () => ({
@@ -194,6 +219,77 @@ export function AdminArticleContent() {
               </table>
             </div>
           </Card>
+
+          {articlesData && articlesData.meta.totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between px-2">
+              <p className="text-sm text-muted-foreground">
+                Halaman {page} dari {articlesData.meta.totalPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1 || isLoading}
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from(
+                    { length: articlesData.meta.totalPages },
+                    (_, i) => i + 1,
+                  )
+                    .filter((p) => {
+                      // Logic to show limited pages
+                      if (articlesData.meta.totalPages <= 5) return true;
+                      if (p === 1 || p === articlesData.meta.totalPages)
+                        return true;
+                      if (Math.abs(p - page) <= 1) return true;
+                      return false;
+                    })
+                    .map((p, i, arr) => {
+                      const showEllipsis = i > 0 && p - arr[i - 1] > 1;
+                      return (
+                        <div key={p} className="flex items-center gap-1">
+                          {showEllipsis && (
+                            <span className="px-1 text-[#8f8377]">...</span>
+                          )}
+                          <Button
+                            variant={page === p ? 'default' : 'outline'}
+                            size="icon"
+                            className={`size-8 rounded-lg ${
+                              page === p
+                                ? 'bg-[#3d3a34] text-white hover:bg-[#3d3a34]/90'
+                                : 'border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]'
+                            }`}
+                            onClick={() => setPage(p)}
+                            disabled={isLoading}
+                          >
+                            {p}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  onClick={() =>
+                    setPage((p) =>
+                      Math.min(articlesData.meta.totalPages, p + 1),
+                    )
+                  }
+                  disabled={page === articlesData.meta.totalPages || isLoading}
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
