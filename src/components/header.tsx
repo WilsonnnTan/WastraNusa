@@ -7,13 +7,13 @@ import {
   UserRound,
 } from 'lucide-react';
 import Image from 'next/image';
-// 1. Tambahkan import Image di sini
 import Link from 'next/link';
 
 const menuItems = [
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/ensiklopedia' },
   { label: 'Katalog', icon: Grid2X2 },
-  { label: 'Keranjang', icon: ShoppingCart, badge: '3' },
+  // 1. Tambahkan href: '/cart' di sini
+  { label: 'Keranjang', icon: ShoppingCart, badge: '3', href: '/cart' },
   { label: 'Profil', icon: UserRound, href: '/profile' },
 ];
 
@@ -27,11 +27,10 @@ export function Header({ homeHref = '/' }: HeaderProps) {
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
         <div className="flex h-20 items-center gap-4">
           <Link href={homeHref} className="flex items-center gap-3">
-            {/* 2. Ganti placeholder span kotak hijau dengan tag Image */}
             <Image
               src="/logo.png"
               alt="WastraNusa"
-              width={60} // Sesuaikan agar pas dengan tinggi header
+              width={60}
               height={70}
               priority
               className="object-contain"
@@ -60,6 +59,7 @@ export function Header({ homeHref = '/' }: HeaderProps) {
               const classes =
                 'group relative flex flex-col items-center gap-1 text-[#2f4f3f] transition hover:text-[#224233]';
 
+              // Logika ini akan otomatis menangani navigasi ke /cart
               if (href) {
                 return (
                   <Link key={label} href={href} className={classes}>
