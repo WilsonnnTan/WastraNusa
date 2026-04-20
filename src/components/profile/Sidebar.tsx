@@ -37,7 +37,7 @@ export default function Sidebar() {
       icon: <MapPin size={16} />,
       label: 'Alamat Tersimpan',
       badge: null,
-      href: '/profile/alamat',
+      href: '/profile/saved-address',
     },
     {
       icon: <BookOpen size={16} />,
