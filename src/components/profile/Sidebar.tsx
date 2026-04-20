@@ -31,7 +31,7 @@ export default function Sidebar() {
       icon: <ShoppingBag size={16} />,
       label: 'Pesanan Saya',
       badge: null,
-      href: '/profile/pesanan',
+      href: '/profile/my-order',
     },
     {
       icon: <MapPin size={16} />,
