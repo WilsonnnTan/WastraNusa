@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail, useToggleArticleLike } from '@/hooks/use-article';
 import { authClient } from '@/lib/auth/auth-client';
 import {
@@ -44,7 +45,87 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
   if (isPending) {
     return (
       <main className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-6 md:px-6 lg:px-8">
-        <p className="text-sm text-[#4d6759]">Memuat artikel ensiklopedia...</p>
+        <div className="mb-4 flex items-center gap-2">
+          <Skeleton className="h-4 w-16 bg-[#e6dfd1]" />
+          <Skeleton className="h-4 w-3 bg-[#e6dfd1]" />
+          <Skeleton className="h-4 w-28 bg-[#e6dfd1]" />
+          <Skeleton className="h-4 w-3 bg-[#e6dfd1]" />
+          <Skeleton className="h-4 w-40 bg-[#e6dfd1]" />
+        </div>
+
+        <section className="overflow-hidden rounded-2xl border border-[#dacfbf] bg-[#ece1d0]">
+          <div className="relative min-h-[340px] border-b border-dashed border-[#d8ccbb] p-5 md:p-6">
+            <div className="mt-auto flex h-full flex-col justify-end">
+              <div className="mb-3 flex gap-2">
+                <Skeleton className="h-6 w-24 rounded bg-[#d9cfbe]" />
+                <Skeleton className="h-6 w-24 rounded bg-[#d9cfbe]" />
+              </div>
+              <Skeleton className="h-9 w-full max-w-2xl bg-[#d9cfbe]" />
+              <Skeleton className="mt-2 h-9 w-full max-w-xl bg-[#d9cfbe]" />
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Skeleton className="h-4 w-24 bg-[#d9cfbe]" />
+                <Skeleton className="h-4 w-28 bg-[#d9cfbe]" />
+                <Skeleton className="h-4 w-24 bg-[#d9cfbe]" />
+                <Skeleton className="h-4 w-24 bg-[#d9cfbe]" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 bg-[#f4efe5] p-4">
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-6 w-20 rounded-full bg-[#e6dfd1]" />
+              <Skeleton className="h-6 w-24 rounded-full bg-[#e6dfd1]" />
+              <Skeleton className="h-6 w-20 rounded-full bg-[#e6dfd1]" />
+            </div>
+            <Skeleton className="size-8 rounded-full bg-[#e6dfd1]" />
+          </div>
+        </section>
+
+        <section className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <article>
+            <div className="rounded-xl border border-[#e1d8c9] bg-[#f8f3ea] p-4">
+              <Skeleton className="h-5 w-40 bg-[#e6dfd1]" />
+              <Skeleton className="mt-2 h-4 w-full bg-[#e6dfd1]" />
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
+              <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
+              <Skeleton className="h-4 w-11/12 bg-[#e6dfd1]" />
+            </div>
+
+            <div className="mt-9">
+              <Skeleton className="h-10 w-2/3 bg-[#e6dfd1]" />
+              <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,1fr)_260px]">
+                <div className="flex flex-col gap-3">
+                  <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
+                  <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
+                  <Skeleton className="h-4 w-10/12 bg-[#e6dfd1]" />
+                </div>
+                <Skeleton className="h-[220px] w-full rounded-xl bg-[#e6dfd1]" />
+              </div>
+            </div>
+          </article>
+
+          <aside className="flex flex-col gap-4">
+            <div className="rounded-xl border border-[#ddd2bf] bg-[#f7f3ea] p-4">
+              <Skeleton className="h-5 w-28 bg-[#e6dfd1]" />
+              <div className="mt-3 flex flex-col gap-2">
+                <Skeleton className="h-8 w-full bg-[#e6dfd1]" />
+                <Skeleton className="h-8 w-full bg-[#e6dfd1]" />
+                <Skeleton className="h-8 w-full bg-[#e6dfd1]" />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#ddd2bf] bg-[#f7f3ea] p-4">
+              <Skeleton className="h-5 w-32 bg-[#e6dfd1]" />
+              <div className="mt-3 flex flex-col gap-2">
+                <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
+                <Skeleton className="h-4 w-5/6 bg-[#e6dfd1]" />
+              </div>
+            </div>
+          </aside>
+        </section>
       </main>
     );
   }
