@@ -49,6 +49,18 @@ export const articleRepository = {
     });
   },
 
+  countDistinctMotifLabel: async () => {
+    const motifGroups = await prisma.article.groupBy({
+      by: ['motifLabel'],
+      _count: {
+        motifLabel: true,
+      },
+    });
+
+    return motifGroups.filter((item) => item.motifLabel.trim().length > 0)
+      .length;
+  },
+
   findMostPopular: async (limit: number = 6) => {
     return prisma.articleEngagement.findMany({
       take: limit,

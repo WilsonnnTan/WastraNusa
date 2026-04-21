@@ -4,16 +4,12 @@ import {
   EncyclopediaArticleCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
-  EncyclopediaSearch,
   EncyclopediaSidebar,
   EncyclopediaStats,
   EncyclopediaViewToggle,
   type ViewMode,
 } from '@/components/ensiklopedia';
-import {
-  ENCYCLOPEDIA_STATS,
-  ENCYCLOPEDIA_TOPICS,
-} from '@/components/ensiklopedia/constants';
+import { ENCYCLOPEDIA_TOPICS } from '@/components/ensiklopedia/constants';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,6 +19,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { useArticles } from '@/hooks/use-article';
+import type { Stat } from '@/types/encyclopedia';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -47,6 +44,24 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
   const articles = data?.items ?? [];
   const regions = data?.meta.regions ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
+  const stats: Stat[] = [
+    {
+      value: String(
+        data?.meta.stats?.totalArticles ?? data?.meta.totalItems ?? 0,
+      ),
+      label: 'Total Artikel',
+    },
+    {
+      value: String(
+        data?.meta.stats?.totalRegions ?? Math.max(regions.length - 1, 0),
+      ),
+      label: 'Provinsi Tercakup',
+    },
+    {
+      value: String(data?.meta.stats?.totalWastraTypes ?? 0),
+      label: 'Jenis Wastra',
+    },
+  ];
 
   const featuredArticle =
     currentPage === 1 && !selectedRegion
@@ -55,10 +70,6 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
   const standardArticles = featuredArticle
     ? articles.filter((article) => article.slug !== featuredArticle.slug)
     : articles;
-
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-  };
 
   const handleRegionClick = (region: string) => {
     const nextRegion = region === 'Semua Wilayah' ? undefined : region;
@@ -121,13 +132,9 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>
           </div>
-
-          <div className="w-full self-start lg:justify-self-end">
-            <EncyclopediaSearch onSearch={handleSearch} />
-          </div>
         </div>
 
-        <EncyclopediaStats stats={ENCYCLOPEDIA_STATS} />
+        <EncyclopediaStats stats={stats} />
       </section>
 
       <section className="border-y border-[#d3cbbd] bg-[#e9e4d9] py-6">

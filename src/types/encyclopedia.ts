@@ -73,6 +73,11 @@ export interface EncyclopediaArticleListMeta {
   totalPages: number;
   hasNextPage: boolean;
   regions: RegionFilter[];
+  stats?: {
+    totalArticles: number;
+    totalRegions: number;
+    totalWastraTypes: number;
+  };
 }
 
 export interface EncyclopediaArticleListResponse {

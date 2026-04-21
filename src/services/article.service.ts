@@ -26,17 +26,23 @@ export const articleService = {
     const offset = (Math.max(1, page) - 1) * safeLimit;
     const region = filters.region || undefined;
 
-    const [articles, totalItems, globalTotalItems, regionCounts] =
-      await Promise.all([
-        articleRepository.findAll({
-          offset,
-          limit: safeLimit,
-          region,
-        }),
-        articleRepository.countAll({ region }),
-        articleRepository.countAll(),
-        articleRepository.countByRegion(),
-      ]);
+    const [
+      articles,
+      totalItems,
+      globalTotalItems,
+      regionCounts,
+      totalWastraTypes,
+    ] = await Promise.all([
+      articleRepository.findAll({
+        offset,
+        limit: safeLimit,
+        region,
+      }),
+      articleRepository.countAll({ region }),
+      articleRepository.countAll(),
+      articleRepository.countByRegion(),
+      articleRepository.countDistinctMotifLabel(),
+    ]);
 
     const items = articles.map((article) => ({
       ...article,
@@ -70,6 +76,11 @@ export const articleService = {
         totalPages,
         hasNextPage: Math.max(1, page) < totalPages,
         regions,
+        stats: {
+          totalArticles: globalTotalItems,
+          totalRegions: regionCounts.length,
+          totalWastraTypes,
+        },
       },
     };
   },
