@@ -14,8 +14,17 @@ export const articleRepository = {
     offset,
     limit,
     region,
-  }: { offset?: number; limit?: number; region?: string } = {}) => {
-    const where: Prisma.ArticleWhereInput = region ? { region } : {};
+    topic,
+  }: {
+    offset?: number;
+    limit?: number;
+    region?: string;
+    topic?: string;
+  } = {}) => {
+    const where: Prisma.ArticleWhereInput = {
+      ...(region ? { region } : {}),
+      ...(topic ? { topic } : {}),
+    };
 
     return prisma.article.findMany({
       where,
@@ -31,20 +40,48 @@ export const articleRepository = {
     });
   },
 
-  countAll: async ({ region }: { region?: string } = {}) => {
-    const where: Prisma.ArticleWhereInput = region ? { region } : {};
+  countAll: async ({
+    region,
+    topic,
+  }: { region?: string; topic?: string } = {}) => {
+    const where: Prisma.ArticleWhereInput = {
+      ...(region ? { region } : {}),
+      ...(topic ? { topic } : {}),
+    };
 
     return prisma.article.count({ where });
   },
 
-  countByRegion: async () => {
+  countByRegion: async ({ topic }: { topic?: string } = {}) => {
     return prisma.article.groupBy({
       by: ['region'],
+      where: topic
+        ? {
+            topic,
+          }
+        : undefined,
       _count: {
         region: true,
       },
       orderBy: {
         region: 'asc',
+      },
+    });
+  },
+
+  countByTopic: async ({ region }: { region?: string } = {}) => {
+    return prisma.article.groupBy({
+      by: ['topic'],
+      where: region
+        ? {
+            region,
+          }
+        : undefined,
+      _count: {
+        topic: true,
+      },
+      orderBy: {
+        topic: 'asc',
       },
     });
   },

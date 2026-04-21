@@ -7,6 +7,7 @@ import { Filter } from 'lucide-react';
 interface EncyclopediaSidebarProps {
   regions: RegionFilter[];
   topics: string[];
+  selectedTopic?: string;
   onRegionClick?: (region: string) => void;
   onTopicClick?: (topic: string) => void;
   onResetFilters?: () => void;
@@ -15,6 +16,7 @@ interface EncyclopediaSidebarProps {
 export function EncyclopediaSidebar({
   regions,
   topics,
+  selectedTopic,
   onRegionClick,
   onTopicClick,
   onResetFilters,
@@ -65,7 +67,11 @@ export function EncyclopediaSidebar({
               key={topic}
               variant="outline"
               size="sm"
-              className="h-auto rounded-md border-[#d8cfbf] bg-[#efeadf] px-2.5 py-1 text-xs font-semibold text-[#5d6f62] transition hover:bg-[#e4decf]"
+              className={`h-auto rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold transition ${
+                selectedTopic === topic
+                  ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                  : 'bg-[#efeadf] text-[#5d6f62] hover:bg-[#e4decf]'
+              }`}
               onClick={() => onTopicClick?.(topic)}
             >
               {topic}

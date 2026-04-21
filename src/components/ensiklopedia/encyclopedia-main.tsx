@@ -9,7 +9,6 @@ import {
   EncyclopediaViewToggle,
   type ViewMode,
 } from '@/components/ensiklopedia';
-import { ENCYCLOPEDIA_TOPICS } from '@/components/ensiklopedia/constants';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,22 +26,29 @@ const ARTICLES_PER_PAGE = 10;
 
 interface EncyclopediaMainProps {
   initialRegion?: string;
+  initialTopic?: string;
 }
 
-export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
+export function EncyclopediaMain({
+  initialRegion,
+  initialTopic,
+}: EncyclopediaMainProps) {
   const router = useRouter();
   const [currentView, setCurrentView] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRegion, setSelectedRegion] = useState(initialRegion);
+  const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
     {
       region: selectedRegion,
+      topic: selectedTopic,
     },
   );
   const articles = data?.items ?? [];
   const regions = data?.meta.regions ?? [];
+  const topics = data?.meta.topics ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
   const stats: Stat[] = [
     {
@@ -64,32 +70,47 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
   ];
 
   const featuredArticle =
-    currentPage === 1 && !selectedRegion
+    currentPage === 1 && !selectedRegion && !selectedTopic
       ? (articles.find((article) => article.featured) ?? articles[0])
       : undefined;
   const standardArticles = featuredArticle
     ? articles.filter((article) => article.slug !== featuredArticle.slug)
     : articles;
 
+  const pushFilterQuery = (region?: string, topic?: string) => {
+    const searchParams = new URLSearchParams();
+
+    if (region) {
+      searchParams.set('region', region);
+    }
+
+    if (topic) {
+      searchParams.set('topic', topic);
+    }
+
+    const query = searchParams.toString();
+    router.push(query ? `/ensiklopedia?${query}` : '/ensiklopedia');
+  };
+
   const handleRegionClick = (region: string) => {
     const nextRegion = region === 'Semua Wilayah' ? undefined : region;
     setCurrentPage(1);
     setSelectedRegion(nextRegion);
-    router.push(
-      nextRegion
-        ? `/ensiklopedia?region=${encodeURIComponent(nextRegion)}`
-        : '/ensiklopedia',
-    );
+    pushFilterQuery(nextRegion, selectedTopic);
   };
 
   const handleTopicClick = (topic: string) => {
-    console.log('Selected topic:', topic);
+    const nextTopic = selectedTopic === topic ? undefined : topic;
+    setCurrentPage(1);
+    setSelectedTopic(nextTopic);
+    pushFilterQuery(selectedRegion, nextTopic);
   };
 
   const handleResetFilters = () => {
     setCurrentPage(1);
     setSelectedRegion(undefined);
-    router.push('/ensiklopedia');
+    setSelectedTopic(undefined);
+    pushFilterQuery(undefined, undefined);
   };
 
   const handleViewChange = (view: ViewMode) => {
@@ -142,7 +163,8 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
           <div className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)]">
             <EncyclopediaSidebar
               regions={regions}
-              topics={ENCYCLOPEDIA_TOPICS}
+              topics={topics}
+              selectedTopic={selectedTopic}
               onRegionClick={handleRegionClick}
               onTopicClick={handleTopicClick}
               onResetFilters={handleResetFilters}

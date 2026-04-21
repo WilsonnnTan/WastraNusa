@@ -8,8 +8,12 @@ export const GET = withApiPublic(async ({ req }) => {
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
   const limit = Math.max(1, Number(url.searchParams.get('limit')) || 10);
   const region = url.searchParams.get('region') || undefined;
+  const topic = url.searchParams.get('topic') || undefined;
 
-  const articles = await articleService.getArticles(page, limit, { region });
+  const articles = await articleService.getArticles(page, limit, {
+    region,
+    topic,
+  });
   return jsend.success(articles);
 });
 

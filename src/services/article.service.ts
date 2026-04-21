@@ -25,22 +25,28 @@ export const articleService = {
     const safeLimit = Math.min(Math.max(1, limit), 50);
     const offset = (Math.max(1, page) - 1) * safeLimit;
     const region = filters.region || undefined;
+    const topic = filters.topic || undefined;
 
     const [
       articles,
       totalItems,
       globalTotalItems,
+      totalItemsByTopic,
       regionCounts,
+      topicCounts,
       totalWastraTypes,
     ] = await Promise.all([
       articleRepository.findAll({
         offset,
         limit: safeLimit,
         region,
+        topic,
       }),
-      articleRepository.countAll({ region }),
+      articleRepository.countAll({ region, topic }),
       articleRepository.countAll(),
-      articleRepository.countByRegion(),
+      articleRepository.countAll({ topic }),
+      articleRepository.countByRegion({ topic }),
+      articleRepository.countByTopic({ region }),
       articleRepository.countDistinctMotifLabel(),
     ]);
 
@@ -59,13 +65,16 @@ export const articleService = {
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
     const regions: RegionFilter[] = [
-      { name: 'Semua Wilayah', count: globalTotalItems, active: !region },
+      { name: 'Semua Wilayah', count: totalItemsByTopic, active: !region },
       ...regionCounts.map((regionCount) => ({
         name: regionCount.region,
         count: regionCount._count.region,
         active: regionCount.region === region,
       })),
     ];
+    const topics = topicCounts
+      .map((topicCount) => topicCount.topic.trim())
+      .filter((topicName) => topicName.length > 0);
 
     return {
       items,
@@ -76,6 +85,7 @@ export const articleService = {
         totalPages,
         hasNextPage: Math.max(1, page) < totalPages,
         regions,
+        topics,
         stats: {
           totalArticles: globalTotalItems,
           totalRegions: regionCounts.length,

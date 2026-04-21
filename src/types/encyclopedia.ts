@@ -15,6 +15,7 @@ export interface RegionFilter {
 
 export interface EncyclopediaArticleFilters {
   region?: string;
+  topic?: string;
 }
 
 export interface EncyclopediaArticle {
@@ -73,6 +74,7 @@ export interface EncyclopediaArticleListMeta {
   totalPages: number;
   hasNextPage: boolean;
   regions: RegionFilter[];
+  topics: string[];
   stats?: {
     totalArticles: number;
     totalRegions: number;
