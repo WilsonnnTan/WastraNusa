@@ -148,23 +148,29 @@ model Article {
   title       String
   slug        String  @unique
   description String?
+  excerpt     String
 
-  province    String
-  island      String
+  province    String?
+  island      String?
   region      String
+  topic       String
   ethnicGroup String?
 
-  clothingType String
-  gender       Gender
+  clothingType String?
+  motifLabel   String
+  gender       Gender?
+  readMinutes  Int      @default(6)
+  featured     Boolean  @default(false)
 
-  wikipediaPageId   String    @unique
-  wikipediaUrl      String
+  wikipediaPageId   String?   @unique
+  wikipediaUrl      String?
   wikimediaImageUrl String?
   wikimediaVideoUrl String?
   wikipediaLastSync DateTime?
 
-  content String
   summary String?
+
+  sections ArticleSection[]
 
   status    ArticleStatus @default(published)
   createdBy String
@@ -399,4 +405,19 @@ model CartItem {
   @@index([cartId])
   @@index([productId])
   @@map("cart_item")
+}
+
+model ArticleSection {
+  id           String  @id @default(uuid())
+  articleId    String
+  title        String
+  content      String
+  imageLabel   String?
+  imageCaption String?
+  order        Int     @default(0)
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@map("article_section")
 }

@@ -8,6 +8,7 @@ vi.mock('@/logger/logger', () => ({
 
 vi.mock('@/lib/auth/auth-api-helper', () => ({
   AuthHelper: {
+    getUser: vi.fn(),
     requireUser: vi.fn(),
     requireAdmin: vi.fn(),
   },
@@ -20,12 +21,17 @@ vi.mock('@/lib/prisma', () => ({
 vi.mock('@/repositories/article.repository', () => ({
   articleRepository: {
     findAll: vi.fn(),
+    countAll: vi.fn(),
+    countByRegion: vi.fn(),
+    findMostPopular: vi.fn(),
     findByIdOrSlug: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
     incrementViewCount: vi.fn(),
     findUserLike: vi.fn(),
+    countLikedByUser: vi.fn(),
+    findLikedByUser: vi.fn(),
     toggleLike: vi.fn(),
   },
 }));
@@ -33,7 +39,9 @@ vi.mock('@/repositories/article.repository', () => ({
 vi.mock('@/services/article.service', () => ({
   articleService: {
     getArticles: vi.fn(),
+    getDashboardOverview: vi.fn(),
     getArticleDetail: vi.fn(),
+    getLikedArticles: vi.fn(),
     createArticle: vi.fn(),
     updateArticle: vi.fn(),
     deleteArticle: vi.fn(),

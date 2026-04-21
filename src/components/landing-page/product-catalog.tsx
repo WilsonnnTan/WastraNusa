@@ -27,7 +27,7 @@ export function ProductCatalog() {
           </div>
 
           <Button
-            className="inline-flex items-center gap-1 rounded-xl border border-[#89a38f] px-4 py-2 text-sm font-semibold text-[#2f5f48] transition hover:bg-[#edf3eb]"
+            className="inline-flex items-center gap-1 rounded-xl border border-[#dfd8ca] bg-[#f6f3eb] px-4 py-2 text-sm font-semibold text-[#2f5f48] transition hover:border-[#89a38f]"
             type="button"
           >
             Lihat Semua

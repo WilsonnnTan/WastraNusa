@@ -111,7 +111,9 @@ describe('withApiAdmin', { tags: ['backend'] }, () => {
 });
 
 describe('withApiPublic', { tags: ['backend'] }, () => {
-  it('should call handler without userId', async () => {
+  it('should call handler with undefined userId when session is absent', async () => {
+    mockAuth.getUser.mockResolvedValue(null);
+
     const handler = vi.fn().mockResolvedValue(new Response('ok'));
     const wrapped = withApiPublic(handler);
 
@@ -120,10 +122,27 @@ describe('withApiPublic', { tags: ['backend'] }, () => {
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({
         params: { id: 'test-id' },
+        userId: undefined,
       }),
     );
+  });
+
+  it('should pass userId when a session exists', async () => {
+    mockAuth.getUser.mockResolvedValue({
+      id: 'user-1',
+      role: 'user',
+    } as never);
+
+    const handler = vi.fn().mockResolvedValue(new Response('ok'));
+    const wrapped = withApiPublic(handler);
+
+    await wrapped(createRequest(), { params: mockParams });
+
     expect(handler).toHaveBeenCalledWith(
-      expect.not.objectContaining({ userId: expect.anything() }),
+      expect.objectContaining({
+        params: { id: 'test-id' },
+        userId: 'user-1',
+      }),
     );
   });
 });

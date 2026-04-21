@@ -1,12 +1,34 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useArticles } from '@/hooks/use-article';
 import { ChevronRight, Search } from 'lucide-react';
+import Link from 'next/link';
 
-import { latestArticles, popularSearchTags } from './data';
+export interface HomepageArticlePreview {
+  slug: string;
+  category: string;
+  title: string;
+  meta: string;
+}
 
 export function EncyclopediaSection() {
+  const { data, error, isPending } = useArticles(1, 3);
+  const regionFilters =
+    data?.meta.regions.filter((region) => region.name !== 'Semua Wilayah') ??
+    [];
+  const popularTags = regionFilters.slice(0, 5);
+  const latestArticles: HomepageArticlePreview[] =
+    data?.items.map((article) => ({
+      slug: article.slug,
+      category: article.motifLabel,
+      title: article.title,
+      meta: `${article.region} - ${article.readMinutes ?? 0} mnt`,
+    })) ?? [];
+
   return (
     <section className="mx-auto mt-14 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
       <div className="overflow-hidden rounded-2xl bg-[#2f5e48] text-[#edf3e8] shadow-[0_30px_50px_-35px_rgba(15,41,28,0.85)]">
@@ -24,9 +46,10 @@ export function EncyclopediaSection() {
             </h3>
 
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#bed0c4]">
-              Batik is a dyeing technique using wax resist. The term is also
-              used to describe patterned textiles created with that technique.
-              Batik is made by drawing or stamping wax on a cloth ...
+              Pakaian adat adalah busana tradisional yang mencerminkan identitas
+              dan budaya suatu daerah. Indonesia memiliki ratusan jenis pakaian
+              adat dari berbagai suku dan provinsi, masing-masing dengan
+              keunikan motif, bahan, dan makna simbolis yang mendalam.
             </p>
 
             <div className="mt-7 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a]">
@@ -40,19 +63,23 @@ export function EncyclopediaSection() {
                 asChild
                 className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc]"
               >
-                <a href="/ensiklopedia">Cari</a>
+                <Link href="/ensiklopedia">Cari</Link>
               </Button>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#b1c4b5]">Populer:</span>
-              {popularSearchTags.map((tag) => (
+              <span className="text-[#b1c4b5]">Filter wilayah:</span>
+              {popularTags.map((tag) => (
                 <Button
-                  key={tag}
+                  key={tag.name}
+                  asChild
                   className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:bg-white/14"
-                  type="button"
                 >
-                  {tag}
+                  <Link
+                    href={`/ensiklopedia?region=${encodeURIComponent(tag.name)}`}
+                  >
+                    {tag.name}
+                  </Link>
                 </Button>
               ))}
             </div>
@@ -64,42 +91,73 @@ export function EncyclopediaSection() {
             </h4>
 
             <div className="mt-6 space-y-3">
-              {latestArticles.map((article) => (
-                <Card
-                  key={article.title}
-                  className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5 transition hover:bg-white/11"
-                >
-                  <div
-                    className={`${article.thumbClass} grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-white/10`}
-                  >
-                    <span className="h-4 w-4 rotate-45 border border-white/55" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold leading-snug text-[#e9f2e5]">
-                      {article.title}
-                    </p>
-                    <p className="mt-1 text-xs text-[#adc0b3]">
-                      {article.meta}
-                    </p>
-                    <Badge
-                      variant="secondary"
-                      className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-[11px] font-semibold text-[#dbe5d8]"
+              {isPending
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <Card
+                      key={index}
+                      className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5"
                     >
-                      {article.category}
-                    </Badge>
-                  </div>
+                      <div className="h-14 w-14 shrink-0 rounded-lg border border-white/10 bg-white/10" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 rounded bg-white/10" />
+                        <div className="h-3 w-1/2 rounded bg-white/10" />
+                        <div className="h-5 w-16 rounded bg-white/10" />
+                      </div>
+                    </Card>
+                  ))
+                : null}
+
+              {!isPending && error ? (
+                <Card className="rounded-xl border border-white/6 bg-white/7 p-4 text-sm text-[#dbe5d8]">
+                  Gagal memuat artikel terkini.
                 </Card>
-              ))}
+              ) : null}
+
+              {!isPending && !error && latestArticles.length > 0
+                ? latestArticles.map((article) => (
+                    <Link
+                      key={article.slug}
+                      href={`/ensiklopedia/${article.slug}`}
+                      className="block"
+                    >
+                      <Card className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5 transition hover:bg-white/11">
+                        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
+                          <span className="h-4 w-4 rotate-45 border border-white/55" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold leading-snug text-[#e9f2e5]">
+                            {article.title}
+                          </p>
+                          <p className="mt-1 text-xs text-[#adc0b3]">
+                            {article.meta}
+                          </p>
+                          <Badge
+                            variant="secondary"
+                            className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-[11px] font-semibold text-[#dbe5d8]"
+                          >
+                            {article.category}
+                          </Badge>
+                        </div>
+                      </Card>
+                    </Link>
+                  ))
+                : null}
+
+              {!isPending && !error && latestArticles.length === 0 ? (
+                <Card className="rounded-xl border border-white/6 bg-white/7 p-4 text-sm text-[#dbe5d8]">
+                  Artikel ensiklopedia belum tersedia.
+                </Card>
+              ) : null}
             </div>
 
             <Button
               asChild
               className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
             >
-              <a href="/ensiklopedia">
+              <Link href="/ensiklopedia">
                 Lihat semua artikel
                 <ChevronRight className="h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </aside>
         </div>

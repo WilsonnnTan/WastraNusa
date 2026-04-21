@@ -13,8 +13,12 @@ export const articleRepository = {
   findAll: async ({
     offset,
     limit,
-  }: { offset?: number; limit?: number } = {}) => {
+    region,
+  }: { offset?: number; limit?: number; region?: string } = {}) => {
+    const where: Prisma.ArticleWhereInput = region ? { region } : {};
+
     return prisma.article.findMany({
+      where,
       skip: offset,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -27,6 +31,42 @@ export const articleRepository = {
     });
   },
 
+  countAll: async ({ region }: { region?: string } = {}) => {
+    const where: Prisma.ArticleWhereInput = region ? { region } : {};
+
+    return prisma.article.count({ where });
+  },
+
+  countByRegion: async () => {
+    return prisma.article.groupBy({
+      by: ['region'],
+      _count: {
+        region: true,
+      },
+      orderBy: {
+        region: 'asc',
+      },
+    });
+  },
+
+  findMostPopular: async (limit: number = 6) => {
+    return prisma.articleEngagement.findMany({
+      take: limit,
+      orderBy: [{ viewCount: 'desc' }, { updatedAt: 'desc' }],
+      include: {
+        article: {
+          select: {
+            slug: true,
+            title: true,
+            topic: true,
+            region: true,
+            readMinutes: true,
+          },
+        },
+      },
+    });
+  },
+
   findByIdOrSlug: async (idOrSlug: string) => {
     return prisma.article.findUnique({
       where: getUniqueWhere(idOrSlug),
@@ -35,6 +75,9 @@ export const articleRepository = {
           select: { id: true, name: true, image: true },
         },
         engagement: true,
+        sections: {
+          orderBy: { order: 'asc' },
+        },
       },
     });
   },
@@ -81,6 +124,52 @@ export const articleRepository = {
   findUserLike: async (articleId: string, userId: string) => {
     return prisma.userArticleLike.findFirst({
       where: { articleId, userId },
+    });
+  },
+
+  countLikedByUser: async (userId: string) => {
+    return prisma.userArticleLike.count({
+      where: {
+        userId,
+        article: {
+          is: {
+            status: 'published',
+          },
+        },
+      },
+    });
+  },
+
+  findLikedByUser: async ({
+    userId,
+    offset,
+    limit,
+  }: {
+    userId: string;
+    offset?: number;
+    limit?: number;
+  }) => {
+    return prisma.userArticleLike.findMany({
+      where: {
+        userId,
+        article: {
+          is: {
+            status: 'published',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip: offset,
+      take: limit,
+      include: {
+        article: {
+          include: {
+            engagement: true,
+          },
+        },
+      },
     });
   },
 

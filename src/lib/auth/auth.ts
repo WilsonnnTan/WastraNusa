@@ -34,7 +34,7 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    useSecureCookies: true,
+    useSecureCookies: process.env.NODE_ENV === 'production',
   },
   session: {
     cookieCache: {
@@ -66,13 +66,15 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
+      const verificationUrl = new URL(url);
+      verificationUrl.searchParams.set('callbackURL', '/login');
       void sendEmail({
         to: user.email,
         subject: 'Verify your email address',
         type: EmailType.VERIFICATION,
         params: {
           user_name: user.name || 'User',
-          verification_url: url,
+          verification_url: verificationUrl.toString(),
         },
       });
     },

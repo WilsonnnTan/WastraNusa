@@ -39,7 +39,6 @@ export function LoginForm() {
       {
         email: data.email,
         password: data.password,
-        callbackURL: '/login',
       },
       {
         onError: (ctx) => {
@@ -49,17 +48,21 @@ export function LoginForm() {
             });
           }
         },
+        onSuccess: async () => {
+          const session = await authClient.getSession();
+          if (session.data?.user.role === 'admin') {
+            router.push('/admin/dashboard');
+          } else {
+            router.push('/ensiklopedia');
+          }
+        },
       },
     );
 
-    if (signInError) {
-      if (signInError.status !== 403) {
-        setError('root', {
-          message: signInError.message || 'Wrong email or password',
-        });
-      }
-    } else {
-      router.push('/ensiklopedia');
+    if (signInError && signInError.status !== 403) {
+      setError('root', {
+        message: signInError.message || 'Wrong email or password',
+      });
     }
   };
 

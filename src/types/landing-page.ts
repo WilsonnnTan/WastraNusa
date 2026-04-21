@@ -8,17 +8,3 @@ export interface Product {
   stock: number;
   badge?: string;
 }
-
-export interface Article {
-  category: string;
-  title: string;
-  meta: string;
-  thumbClass: string;
-}
-
-export interface RegionCard {
-  region: string;
-  style: string;
-  count: string;
-  bgClass: string;
-}

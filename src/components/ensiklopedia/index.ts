@@ -9,6 +9,7 @@ export { EncyclopediaViewToggle } from './encyclopedia-view-toggle';
 export { EncyclopediaFeaturedCard } from './encyclopedia-featured-card';
 export { EncyclopediaArticleCard } from './encyclopedia-article-card';
 export { EncyclopediaPagination } from './encyclopedia-pagination';
+export { EncyclopediaDetailMain } from './encyclopedia-detail-main';
 
 export type {
   Stat,

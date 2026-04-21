@@ -6,6 +6,8 @@ import {
   ShoppingCart,
   UserRound,
 } from 'lucide-react';
+import Image from 'next/image';
+// 1. Tambahkan import Image di sini
 import Link from 'next/link';
 
 const menuItems = [
@@ -21,34 +23,23 @@ type HeaderProps = {
 
 export function Header({ homeHref = '/' }: HeaderProps) {
   return (
-    <header className="border-b border-[#2f5f4a] bg-[#f9f7f2]">
+    <header className="border-b-4 border-[#2F4F3F] bg-[#f9f7f2]">
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
         <div className="flex h-20 items-center gap-4">
           <Link href={homeHref} className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-[10px] bg-[#2f5f49] shadow-sm shadow-[#224436]/25">
-              <span className="h-4 w-4 rounded-sm bg-[#f5f2eb]" />
-            </span>
-            <span className="text-3xl font-extrabold tracking-tight text-[#2f5f49]">
+            {/* 2. Ganti placeholder span kotak hijau dengan tag Image */}
+            <Image
+              src="/logo.png"
+              alt="WastraNusa"
+              width={60} // Sesuaikan agar pas dengan tinggi header
+              height={70}
+              priority
+              className="object-contain"
+            />
+            <span className="text-2xl font-extrabold tracking-tight text-[#2f5f49]">
               WastraNusa
             </span>
           </Link>
-
-          <div className="hidden flex-1 items-center md:flex">
-            <div className="ml-4 flex w-full max-w-[620px] items-center overflow-hidden rounded-xl border border-[#d8d0c1] bg-[#ece7dd]">
-              <Search className="ml-4 h-4 w-4 text-[#aca493]" />
-              <Input
-                className="h-11 w-full border-0 bg-transparent px-3 text-sm text-[#435d50] placeholder:text-[#9f998b] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Cari produk batik, tenun, atau artikel budaya..."
-                type="text"
-              />
-              <button
-                className="h-11 bg-[#2f5f49] px-7 text-sm font-semibold text-[#f1f5ee] transition hover:bg-[#264d3b]"
-                type="button"
-              >
-                Cari
-              </button>
-            </div>
-          </div>
 
           <nav className="ml-auto hidden items-center gap-5 md:flex lg:gap-6">
             {menuItems.map(({ label, icon: Icon, badge, href }) => {

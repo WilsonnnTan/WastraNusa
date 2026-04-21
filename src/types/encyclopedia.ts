@@ -13,16 +13,79 @@ export interface RegionFilter {
   active?: boolean;
 }
 
+export interface EncyclopediaArticleFilters {
+  region?: string;
+}
+
 export interface EncyclopediaArticle {
+  slug: string;
   region: string;
   topic: string;
   motifLabel: string;
   title: string;
   excerpt: string;
   likes: number;
+  isLiked?: boolean;
   views: string;
   readMinutes?: number;
   featured?: boolean;
+}
+
+export interface EncyclopediaSection {
+  title: string;
+  content: string;
+  imageLabel?: string;
+  imageCaption?: string;
+}
+
+export interface EncyclopediaKeyFact {
+  label: string;
+  value: string;
+}
+
+export interface EncyclopediaRelatedProduct {
+  name: string;
+  location: string;
+  price: string;
+}
+
+export interface EncyclopediaArticleDetail extends EncyclopediaArticle {
+  author: string;
+  publishedAt: string;
+  tags: string[];
+  quote: string;
+  intro: string;
+  sections: EncyclopediaSection[];
+  keyFacts: EncyclopediaKeyFact[];
+  relatedProducts: EncyclopediaRelatedProduct[];
+  discussionCount: number;
+  nextArticle: {
+    slug: string;
+    title: string;
+  };
+  references: string[];
+}
+
+export interface EncyclopediaArticleListMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  regions: RegionFilter[];
+}
+
+export interface EncyclopediaArticleListResponse {
+  items: EncyclopediaArticle[];
+  meta: EncyclopediaArticleListMeta;
+}
+
+export interface ToggleArticleLikeResponse {
+  isLiked: boolean;
+  engagement: {
+    likeCount: number;
+    viewCount: number;
+  };
 }
 
 export type ViewMode = 'grid' | 'list';

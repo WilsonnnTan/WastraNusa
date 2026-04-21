@@ -24,6 +24,10 @@ beforeEach(() => {
 
 describe('GET /api/articles/[id]', { tags: ['backend'] }, () => {
   it('should return article detail', async () => {
+    mockAuth.getUser.mockResolvedValue({
+      id: 'user-1',
+      role: 'user',
+    } as never);
     mockService.getArticleDetail.mockResolvedValue(MOCK_ARTICLE as never);
 
     const req = createRequest('http://localhost/api/articles/article-1');
@@ -35,7 +39,10 @@ describe('GET /api/articles/[id]', { tags: ['backend'] }, () => {
     expect(res.status).toBe(200);
     expect(body.status).toBe('success');
     expect(body.data).toEqual(MOCK_ARTICLE);
-    expect(mockService.getArticleDetail).toHaveBeenCalledWith('article-1');
+    expect(mockService.getArticleDetail).toHaveBeenCalledWith(
+      'article-1',
+      'user-1',
+    );
   });
 });
 

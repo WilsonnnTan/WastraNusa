@@ -7,14 +7,19 @@ import { auth } from './auth';
  * Centralized authentication helpers for API routes
  */
 export const AuthHelper = {
-  async requireUser() {
+  async getUser() {
     const session = await auth.api.getSession({ headers: await headers() });
+    return session?.user ?? null;
+  },
 
-    if (!session || !session.user) {
+  async requireUser() {
+    const user = await this.getUser();
+
+    if (!user) {
       throw new ApiError('Unauthorized access attempt detected', 401);
     }
 
-    return session.user;
+    return user;
   },
 
   async requireAdmin() {
