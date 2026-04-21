@@ -271,6 +271,7 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
           totalPages: 1,
           hasNextPage: false,
           regions: [{ name: 'Semua Wilayah', count: 0, active: true }],
+          topics: [],
         },
       }) as never,
     );
@@ -279,6 +280,34 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/articles?page=1&limit=10&region=Jawa',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      }),
+    );
+  });
+
+  it('should include topic in the article list query', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse({
+        items: [],
+        meta: {
+          page: 1,
+          limit: 10,
+          totalItems: 0,
+          totalPages: 1,
+          hasNextPage: false,
+          regions: [{ name: 'Semua Wilayah', count: 0, active: true }],
+          topics: [],
+        },
+      }) as never,
+    );
+
+    await fetchArticles(1, 10, { topic: 'Teknik Pembuatan' });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/articles?page=1&limit=10&topic=Teknik+Pembuatan',
       expect.objectContaining({
         headers: expect.objectContaining({
           'Content-Type': 'application/json',

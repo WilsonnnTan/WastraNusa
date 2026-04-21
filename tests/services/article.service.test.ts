@@ -52,13 +52,23 @@ describe('articleService', { tags: ['backend'] }, () => {
   describe('getArticles', () => {
     it('should call findAll with correct offset and limit', async () => {
       mockRepo.findAll.mockResolvedValue([MOCK_ARTICLE]);
-      mockRepo.countAll.mockResolvedValueOnce(1).mockResolvedValueOnce(1);
+      mockRepo.countAll
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(1);
       mockRepo.countByRegion.mockResolvedValue([
         {
           region: 'Pekalongan',
           _count: { region: 1 },
         },
       ] as never);
+      mockRepo.countByTopic.mockResolvedValue([
+        {
+          topic: 'Sejarah & Asal Usul',
+          _count: { topic: 1 },
+        },
+      ] as never);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(1);
 
       const result = await articleService.getArticles(2, 5);
 
@@ -70,8 +80,13 @@ describe('articleService', { tags: ['backend'] }, () => {
 
     it('should clamp limit to max 50', async () => {
       mockRepo.findAll.mockResolvedValue([]);
-      mockRepo.countAll.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+      mockRepo.countAll
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0);
       mockRepo.countByRegion.mockResolvedValue([]);
+      mockRepo.countByTopic.mockResolvedValue([]);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
 
       await articleService.getArticles(1, 100);
 
@@ -79,13 +94,19 @@ describe('articleService', { tags: ['backend'] }, () => {
         offset: 0,
         limit: 50,
         region: undefined,
+        topic: undefined,
       });
     });
 
     it('should default to page 1 and limit 10', async () => {
       mockRepo.findAll.mockResolvedValue([]);
-      mockRepo.countAll.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+      mockRepo.countAll
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0);
       mockRepo.countByRegion.mockResolvedValue([]);
+      mockRepo.countByTopic.mockResolvedValue([]);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
 
       await articleService.getArticles();
 
@@ -93,12 +114,16 @@ describe('articleService', { tags: ['backend'] }, () => {
         offset: 0,
         limit: 10,
         region: undefined,
+        topic: undefined,
       });
     });
 
     it('should apply region filter and return metadata', async () => {
       mockRepo.findAll.mockResolvedValue([MOCK_ARTICLE]);
-      mockRepo.countAll.mockResolvedValueOnce(12).mockResolvedValueOnce(20);
+      mockRepo.countAll
+        .mockResolvedValueOnce(12)
+        .mockResolvedValueOnce(20)
+        .mockResolvedValueOnce(20);
       mockRepo.countByRegion.mockResolvedValue([
         {
           region: 'Jawa',
@@ -109,6 +134,13 @@ describe('articleService', { tags: ['backend'] }, () => {
           _count: { region: 4 },
         },
       ] as never);
+      mockRepo.countByTopic.mockResolvedValue([
+        {
+          topic: 'Sejarah & Asal Usul',
+          _count: { topic: 12 },
+        },
+      ] as never);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(3);
 
       const result = await articleService.getArticles(1, 5, { region: 'Jawa' });
 
@@ -116,9 +148,14 @@ describe('articleService', { tags: ['backend'] }, () => {
         offset: 0,
         limit: 5,
         region: 'Jawa',
+        topic: undefined,
       });
-      expect(mockRepo.countAll).toHaveBeenCalledWith({ region: 'Jawa' });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        region: 'Jawa',
+        topic: undefined,
+      });
       expect(mockRepo.countAll).toHaveBeenCalledWith();
+      expect(mockRepo.countAll).toHaveBeenCalledWith({ topic: undefined });
       expect(result.meta.totalItems).toBe(12);
       expect(result.meta.totalPages).toBe(3);
       expect(result.meta.hasNextPage).toBe(true);
@@ -127,6 +164,59 @@ describe('articleService', { tags: ['backend'] }, () => {
         { name: 'Jawa', count: 8, active: true },
         { name: 'Sumatra', count: 4, active: false },
       ]);
+      expect(result.meta.topics).toEqual(['Sejarah & Asal Usul']);
+    });
+
+    it('should apply topic filter and pass topic-aware params to repository', async () => {
+      mockRepo.findAll.mockResolvedValue([MOCK_ARTICLE]);
+      mockRepo.countAll
+        .mockResolvedValueOnce(7)
+        .mockResolvedValueOnce(20)
+        .mockResolvedValueOnce(7);
+      mockRepo.countByRegion.mockResolvedValue([
+        {
+          region: 'Jawa',
+          _count: { region: 5 },
+        },
+        {
+          region: 'Sumatra',
+          _count: { region: 2 },
+        },
+      ] as never);
+      mockRepo.countByTopic.mockResolvedValue([
+        {
+          topic: 'Teknik Pembuatan',
+          _count: { topic: 7 },
+        },
+      ] as never);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(4);
+
+      const result = await articleService.getArticles(1, 5, {
+        topic: 'Teknik Pembuatan',
+      });
+
+      expect(mockRepo.findAll).toHaveBeenCalledWith({
+        offset: 0,
+        limit: 5,
+        region: undefined,
+        topic: 'Teknik Pembuatan',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        region: undefined,
+        topic: 'Teknik Pembuatan',
+      });
+      expect(mockRepo.countByRegion).toHaveBeenCalledWith({
+        topic: 'Teknik Pembuatan',
+      });
+      expect(mockRepo.countByTopic).toHaveBeenCalledWith({
+        region: undefined,
+      });
+      expect(result.meta.regions).toEqual([
+        { name: 'Semua Wilayah', count: 7, active: true },
+        { name: 'Jawa', count: 5, active: false },
+        { name: 'Sumatra', count: 2, active: false },
+      ]);
+      expect(result.meta.topics).toEqual(['Teknik Pembuatan']);
     });
   });
 
