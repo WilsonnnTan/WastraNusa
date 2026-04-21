@@ -6,8 +6,6 @@ import {
   EncyclopediaPagination,
   EncyclopediaSidebar,
   EncyclopediaStats,
-  EncyclopediaViewToggle,
-  type ViewMode,
 } from '@/components/ensiklopedia';
 import {
   Breadcrumb,
@@ -34,7 +32,6 @@ export function EncyclopediaMain({
   initialTopic,
 }: EncyclopediaMainProps) {
   const router = useRouter();
-  const [currentView, setCurrentView] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRegion, setSelectedRegion] = useState(initialRegion);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
@@ -113,10 +110,6 @@ export function EncyclopediaMain({
     pushFilterQuery(undefined, undefined);
   };
 
-  const handleViewChange = (view: ViewMode) => {
-    setCurrentView(view);
-  };
-
   const handleArticleClick = (article: (typeof articles)[number]) => {
     router.push(`/ensiklopedia/${article.slug}`);
   };
@@ -171,11 +164,9 @@ export function EncyclopediaMain({
             />
 
             <div>
-              <EncyclopediaViewToggle
-                currentView={currentView}
-                articleCount={data?.meta.totalItems ?? articles.length}
-                onViewChange={handleViewChange}
-              />
+              <p className="mb-3 text-sm font-semibold text-[#4e6659]">
+                Menampilkan {data?.meta.totalItems ?? articles.length} artikel
+              </p>
 
               {isPending ? (
                 <div className="mt-4 rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658]">

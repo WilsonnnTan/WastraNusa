@@ -94,5 +94,3 @@ export interface ToggleArticleLikeResponse {
     viewCount: number;
   };
 }
-
-export type ViewMode = 'grid' | 'list';
