@@ -19,6 +19,7 @@ const MOCK_ARTICLES = {
     totalPages: 1,
     hasNextPage: false,
     regions: [{ name: 'Semua Wilayah', count: 2, active: true }],
+    topics: ['Sejarah & Asal Usul'],
   },
 };
 
@@ -43,6 +44,7 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     expect(body.data).toEqual(MOCK_ARTICLES);
     expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
       region: undefined,
+      topic: undefined,
     });
   });
 
@@ -56,6 +58,7 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
         totalPages: 1,
         hasNextPage: false,
         regions: [{ name: 'Semua Wilayah', count: 0, active: false }],
+        topics: [],
       },
     } as never);
 
@@ -66,6 +69,32 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
 
     expect(mockService.getArticles).toHaveBeenCalledWith(3, 20, {
       region: 'Jawa',
+      topic: undefined,
+    });
+  });
+
+  it('should parse topic from query params', async () => {
+    mockService.getArticles.mockResolvedValue({
+      items: [],
+      meta: {
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 1,
+        hasNextPage: false,
+        regions: [{ name: 'Semua Wilayah', count: 0, active: true }],
+        topics: [],
+      },
+    } as never);
+
+    const req = createRequest(
+      'http://localhost/api/articles?page=1&limit=10&topic=Teknik%20Pembuatan',
+    );
+    await GET(req, { params: Promise.resolve({}) });
+
+    expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
+      region: undefined,
+      topic: 'Teknik Pembuatan',
     });
   });
 });

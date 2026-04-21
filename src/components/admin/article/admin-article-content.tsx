@@ -17,11 +17,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   ChevronLeft,
   ChevronRight,
+  Eye,
   MapPin,
   Pencil,
   Plus,
   Trash2,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -70,6 +72,7 @@ export function AdminArticleContent() {
   const { data: articlesData, isLoading } = useArticles(page, 10);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     if (articlesData?.meta.hasNextPage) {
@@ -204,7 +207,17 @@ export function AdminArticleContent() {
                           {article.readMinutes}
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-3">
+                            <Button
+                              size="icon-sm"
+                              variant="secondary"
+                              aria-label="Kunjungi artikel"
+                              onClick={() =>
+                                router.push(`/ensiklopedia/${article.slug}`)
+                              }
+                            >
+                              <Eye />
+                            </Button>
                             <Button
                               size="icon-sm"
                               variant="secondary"

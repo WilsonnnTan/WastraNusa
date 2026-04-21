@@ -19,8 +19,14 @@ const DEFAULT_LIKED_ARTICLE_LIMIT = 5;
 export const articleKeys = {
   all: ['articles'] as const,
   lists: () => [...articleKeys.all, 'list'] as const,
-  list: (page: number, limit: number, region?: string) =>
-    [...articleKeys.lists(), page, limit, region ?? 'all'] as const,
+  list: (page: number, limit: number, region?: string, topic?: string) =>
+    [
+      ...articleKeys.lists(),
+      page,
+      limit,
+      region ?? 'all',
+      topic ?? 'all',
+    ] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
   dashboard: () => [...articleKeys.all, 'dashboard'] as const,
@@ -125,6 +131,10 @@ export function fetchArticles(
     searchParams.set('region', filters.region);
   }
 
+  if (filters.topic) {
+    searchParams.set('topic', filters.topic);
+  }
+
   return fetchArticleApi<EncyclopediaArticleListResponse>(
     `/api/articles?${searchParams.toString()}`,
   );
@@ -167,7 +177,7 @@ export function useArticles(
   filters: EncyclopediaArticleFilters = {},
 ) {
   return useQuery({
-    queryKey: articleKeys.list(page, limit, filters.region),
+    queryKey: articleKeys.list(page, limit, filters.region, filters.topic),
     queryFn: () => fetchArticles(page, limit, filters),
     placeholderData: (previousData) => previousData,
   });

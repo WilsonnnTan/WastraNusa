@@ -4,16 +4,9 @@ import {
   EncyclopediaArticleCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
-  EncyclopediaSearch,
   EncyclopediaSidebar,
   EncyclopediaStats,
-  EncyclopediaViewToggle,
-  type ViewMode,
 } from '@/components/ensiklopedia';
-import {
-  ENCYCLOPEDIA_STATS,
-  ENCYCLOPEDIA_TOPICS,
-} from '@/components/ensiklopedia/constants';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,7 +15,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
+import type { Stat } from '@/types/encyclopedia';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -30,59 +25,176 @@ const ARTICLES_PER_PAGE = 10;
 
 interface EncyclopediaMainProps {
   initialRegion?: string;
+  initialTopic?: string;
 }
 
-export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
+function EncyclopediaStatsSkeleton() {
+  return (
+    <div className="mt-7 grid grid-cols-3 gap-4 border-y border-[#d8d0c1] py-5">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="flex flex-col gap-2">
+          <Skeleton className="h-10 w-20 bg-[#e6dfd1]" />
+          <Skeleton className="h-4 w-28 bg-[#e6dfd1]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EncyclopediaSidebarSkeleton() {
+  return (
+    <aside className="flex flex-col gap-3">
+      <div className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
+        <Skeleton className="mb-3 h-5 w-28 bg-[#e6dfd1]" />
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-9 w-full bg-[#e6dfd1]" />
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
+        <Skeleton className="mb-3 h-5 w-20 bg-[#e6dfd1]" />
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-7 w-24 bg-[#e6dfd1]" />
+          ))}
+        </div>
+      </div>
+
+      <Skeleton className="h-10 w-full rounded-xl bg-[#e6dfd1]" />
+    </aside>
+  );
+}
+
+function EncyclopediaFeaturedSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2]">
+      <div className="grid md:grid-cols-[320px_minmax(0,1fr)]">
+        <Skeleton className="h-[220px] w-full rounded-none bg-[#ece1d0]" />
+        <div className="p-5">
+          <div className="mb-3 flex gap-2">
+            <Skeleton className="h-6 w-20 bg-[#e6dfd1]" />
+            <Skeleton className="h-6 w-24 bg-[#e6dfd1]" />
+          </div>
+          <Skeleton className="h-9 w-4/5 bg-[#e6dfd1]" />
+          <Skeleton className="mt-2 h-9 w-3/5 bg-[#e6dfd1]" />
+          <Skeleton className="mt-3 h-4 w-full bg-[#e6dfd1]" />
+          <Skeleton className="mt-2 h-4 w-5/6 bg-[#e6dfd1]" />
+          <Skeleton className="mt-4 h-10 w-40 rounded-xl bg-[#e6dfd1]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EncyclopediaArticleGridSkeleton() {
+  return (
+    <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div
+          key={index}
+          className="overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2]"
+        >
+          <Skeleton className="h-44 w-full rounded-none bg-[#ece1d0]" />
+          <div className="p-4">
+            <div className="flex gap-1">
+              <Skeleton className="h-5 w-20 bg-[#e6dfd1]" />
+              <Skeleton className="h-5 w-20 bg-[#e6dfd1]" />
+            </div>
+            <Skeleton className="mt-2 h-8 w-11/12 bg-[#e6dfd1]" />
+            <Skeleton className="mt-2 h-8 w-3/4 bg-[#e6dfd1]" />
+            <Skeleton className="mt-3 h-4 w-full bg-[#e6dfd1]" />
+            <Skeleton className="mt-2 h-4 w-5/6 bg-[#e6dfd1]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function EncyclopediaMain({
+  initialRegion,
+  initialTopic,
+}: EncyclopediaMainProps) {
   const router = useRouter();
-  const [currentView, setCurrentView] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRegion, setSelectedRegion] = useState(initialRegion);
+  const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
     {
       region: selectedRegion,
+      topic: selectedTopic,
     },
   );
   const articles = data?.items ?? [];
   const regions = data?.meta.regions ?? [];
+  const topics = data?.meta.topics ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
+  const showLoadingSkeleton = isPending && !data;
+  const stats: Stat[] = [
+    {
+      value: String(
+        data?.meta.stats?.totalArticles ?? data?.meta.totalItems ?? 0,
+      ),
+      label: 'Total Artikel',
+    },
+    {
+      value: String(
+        data?.meta.stats?.totalRegions ?? Math.max(regions.length - 1, 0),
+      ),
+      label: 'Provinsi Tercakup',
+    },
+    {
+      value: String(data?.meta.stats?.totalWastraTypes ?? 0),
+      label: 'Jenis Wastra',
+    },
+  ];
 
   const featuredArticle =
-    currentPage === 1 && !selectedRegion
+    currentPage === 1 && !selectedRegion && !selectedTopic
       ? (articles.find((article) => article.featured) ?? articles[0])
       : undefined;
   const standardArticles = featuredArticle
     ? articles.filter((article) => article.slug !== featuredArticle.slug)
     : articles;
 
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
+  const pushFilterQuery = (region?: string, topic?: string) => {
+    const searchParams = new URLSearchParams();
+
+    if (region) {
+      searchParams.set('region', region);
+    }
+
+    if (topic) {
+      searchParams.set('topic', topic);
+    }
+
+    const query = searchParams.toString();
+    router.push(query ? `/ensiklopedia?${query}` : '/ensiklopedia');
   };
 
   const handleRegionClick = (region: string) => {
     const nextRegion = region === 'Semua Wilayah' ? undefined : region;
     setCurrentPage(1);
     setSelectedRegion(nextRegion);
-    router.push(
-      nextRegion
-        ? `/ensiklopedia?region=${encodeURIComponent(nextRegion)}`
-        : '/ensiklopedia',
-    );
+    pushFilterQuery(nextRegion, selectedTopic);
   };
 
   const handleTopicClick = (topic: string) => {
-    console.log('Selected topic:', topic);
+    const nextTopic = selectedTopic === topic ? undefined : topic;
+    setCurrentPage(1);
+    setSelectedTopic(nextTopic);
+    pushFilterQuery(selectedRegion, nextTopic);
   };
 
   const handleResetFilters = () => {
     setCurrentPage(1);
     setSelectedRegion(undefined);
-    router.push('/ensiklopedia');
-  };
-
-  const handleViewChange = (view: ViewMode) => {
-    setCurrentView(view);
+    setSelectedTopic(undefined);
+    pushFilterQuery(undefined, undefined);
   };
 
   const handleArticleClick = (article: (typeof articles)[number]) => {
@@ -121,34 +233,41 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>
           </div>
-
-          <div className="w-full self-start lg:justify-self-end">
-            <EncyclopediaSearch onSearch={handleSearch} />
-          </div>
         </div>
 
-        <EncyclopediaStats stats={ENCYCLOPEDIA_STATS} />
+        {showLoadingSkeleton ? (
+          <EncyclopediaStatsSkeleton />
+        ) : (
+          <EncyclopediaStats stats={stats} />
+        )}
       </section>
 
       <section className="border-y border-[#d3cbbd] bg-[#e9e4d9] py-6">
         <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
           <div className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)]">
-            <EncyclopediaSidebar
-              regions={regions}
-              topics={ENCYCLOPEDIA_TOPICS}
-              onRegionClick={handleRegionClick}
-              onTopicClick={handleTopicClick}
-              onResetFilters={handleResetFilters}
-            />
+            {showLoadingSkeleton ? (
+              <EncyclopediaSidebarSkeleton />
+            ) : (
+              <EncyclopediaSidebar
+                regions={regions}
+                topics={topics}
+                selectedTopic={selectedTopic}
+                onRegionClick={handleRegionClick}
+                onTopicClick={handleTopicClick}
+                onResetFilters={handleResetFilters}
+              />
+            )}
 
             <div>
-              <EncyclopediaViewToggle
-                currentView={currentView}
-                articleCount={data?.meta.totalItems ?? articles.length}
-                onViewChange={handleViewChange}
-              />
+              {showLoadingSkeleton ? (
+                <Skeleton className="mb-3 h-5 w-44 bg-[#e6dfd1]" />
+              ) : (
+                <p className="mb-3 text-sm font-semibold text-[#4e6659]">
+                  Menampilkan {data?.meta.totalItems ?? articles.length} artikel
+                </p>
+              )}
 
-              {isPending ? (
+              {isPending && !showLoadingSkeleton ? (
                 <div className="mt-4 rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658]">
                   Memuat artikel ensiklopedia...
                 </div>
@@ -160,12 +279,16 @@ export function EncyclopediaMain({ initialRegion }: EncyclopediaMainProps) {
                 </div>
               ) : null}
 
+              {showLoadingSkeleton ? <EncyclopediaFeaturedSkeleton /> : null}
+
               {!isPending && !error && featuredArticle ? (
                 <EncyclopediaFeaturedCard
                   article={featuredArticle}
                   onReadMore={handleArticleClick}
                 />
               ) : null}
+
+              {showLoadingSkeleton ? <EncyclopediaArticleGridSkeleton /> : null}
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {!isPending &&

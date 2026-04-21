@@ -15,6 +15,7 @@ export interface RegionFilter {
 
 export interface EncyclopediaArticleFilters {
   region?: string;
+  topic?: string;
 }
 
 export interface EncyclopediaArticle {
@@ -73,6 +74,12 @@ export interface EncyclopediaArticleListMeta {
   totalPages: number;
   hasNextPage: boolean;
   regions: RegionFilter[];
+  topics: string[];
+  stats?: {
+    totalArticles: number;
+    totalRegions: number;
+    totalWastraTypes: number;
+  };
 }
 
 export interface EncyclopediaArticleListResponse {
@@ -87,5 +94,3 @@ export interface ToggleArticleLikeResponse {
     viewCount: number;
   };
 }
-
-export type ViewMode = 'grid' | 'list';
