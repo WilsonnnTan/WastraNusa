@@ -87,6 +87,29 @@ vi.mock('@/services/payment.service', () => ({
   },
 }));
 
+vi.mock('@/repositories/address.repository', () => ({
+  addressRepository: {
+    findAllByUser: vi.fn(),
+    findById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    clearDefaultsByUser: vi.fn(),
+    setDefault: vi.fn(),
+    countByUser: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/address.service', () => ({
+  addressService: {
+    getAddresses: vi.fn(),
+    createAddress: vi.fn(),
+    updateAddress: vi.fn(),
+    deleteAddress: vi.fn(),
+    setDefaultAddress: vi.fn(),
+  },
+}));
+
 vi.mock('@/lib/midtrans', () => ({
   createMidtransTransaction: vi.fn(),
   verifySignatureKey: vi.fn(),
