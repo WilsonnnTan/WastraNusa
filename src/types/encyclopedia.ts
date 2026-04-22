@@ -1,3 +1,5 @@
+import { ArticleStatus, Gender } from '@/generated/prisma/enums';
+
 /**
  * Type definitions for Encyclopedia components
  */
@@ -28,8 +30,16 @@ export interface EncyclopediaArticle {
   likes: number;
   isLiked?: boolean;
   views: string;
-  readMinutes?: number;
-  featured?: boolean;
+  readMinutes: number;
+  featured: boolean;
+  province?: string | null;
+  island?: string | null;
+  ethnicGroup?: string | null;
+  clothingType?: string | null;
+  gender?: Gender | null;
+  status: ArticleStatus;
+  summary?: string | null;
+  description?: string | null;
 }
 
 export interface EncyclopediaSection {

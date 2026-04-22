@@ -135,6 +135,7 @@ export const articleService = {
 
     return {
       ...article,
+      gender: article.gender,
       author: article.creator?.name || 'Admin',
       publishedAt: article.createdAt.toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -207,6 +208,7 @@ export const articleService = {
         views: formatCount(article.engagement?.viewCount || 0),
         readMinutes: article.readMinutes,
         featured: article.featured,
+        status: article.status,
         imageUrl: article.wikimediaImageUrl,
       })),
       meta: {

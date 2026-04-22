@@ -2,6 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ArticleStatus } from '@/generated/prisma/enums';
 import { useCreateArticle, useUpdateArticle } from '@/hooks/use-article';
 import {
   type CreateArticleInput,
@@ -12,7 +20,12 @@ import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { type Resolver, useFieldArray, useForm } from 'react-hook-form';
+import {
+  Controller,
+  type Resolver,
+  useFieldArray,
+  useForm,
+} from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface AddUpdateArticleModalProps {
@@ -33,6 +46,31 @@ export default function AddUpdateArticleModal({
   const isEdit = !!initialData;
   const isPending = isCreating || isUpdating;
 
+  const defaultValues: CreateArticleInput = {
+    title: initialData?.title ?? '',
+    excerpt: initialData?.excerpt ?? '',
+    topic: initialData?.topic ?? '',
+    region: initialData?.region ?? '',
+    province: initialData?.province ?? '',
+    island: initialData?.island ?? '',
+    ethnicGroup: initialData?.ethnicGroup ?? '',
+    clothingType: initialData?.clothingType ?? '',
+    motifLabel: initialData?.motifLabel ?? '',
+    gender: initialData?.gender ?? null,
+    readMinutes: initialData?.readMinutes ?? 6,
+    featured: initialData?.featured ?? false,
+    status: initialData?.status ?? ArticleStatus.published,
+    summary: initialData?.summary ?? '',
+    description: initialData?.description ?? '',
+    sections: initialData?.sections?.length
+      ? initialData.sections.map((s, i) => ({
+          title: s.title,
+          content: s.content,
+          order: i,
+        }))
+      : [{ title: '', content: '', order: 0 }],
+  };
+
   const {
     register,
     control,
@@ -43,46 +81,8 @@ export default function AddUpdateArticleModal({
     resolver: zodResolver(
       isEdit ? updateArticleSchema : createArticleSchema,
     ) as Resolver<CreateArticleInput>,
-    defaultValues: {
-      title: '',
-      excerpt: '',
-      topic: '',
-      region: '',
-      motifLabel: '',
-      readMinutes: 5,
-      sections: [{ title: '', content: '', order: 0 }],
-    },
+    defaultValues,
   });
-
-  useEffect(() => {
-    if (isOpen && initialData) {
-      reset({
-        title: initialData.title,
-        excerpt: initialData.excerpt,
-        topic: initialData.topic,
-        region: initialData.region,
-        motifLabel: initialData.motifLabel,
-        readMinutes: initialData.readMinutes ?? 5,
-        sections: initialData.sections.map((s, i) => ({
-          title: s.title,
-          content: s.content,
-          order: i,
-        })),
-        // Add other fields from initialData if they exist or use a type cast
-        // Note: initialData might miss some fields like wikipediaPageId
-      });
-    } else if (isOpen && !initialData) {
-      reset({
-        title: '',
-        excerpt: '',
-        topic: '',
-        region: '',
-        motifLabel: '',
-        readMinutes: 5,
-        sections: [{ title: '', content: '', order: 0 }],
-      });
-    }
-  }, [isOpen, initialData, reset]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -257,7 +257,7 @@ export default function AddUpdateArticleModal({
             {/* Pulau / Wilayah */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Pulau / Wilayah
+                Pulau / Wilayah (Opsional)
               </label>
               <Input
                 {...register('island')}
@@ -265,12 +265,17 @@ export default function AddUpdateArticleModal({
                 placeholder="Jawa / Sumatera"
                 className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
               />
+              {errors.island && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.island.message}
+                </p>
+              )}
             </div>
 
             {/* Provinsi */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Provinsi
+                Provinsi (Opsional)
               </label>
               <Input
                 {...register('province')}
@@ -278,6 +283,11 @@ export default function AddUpdateArticleModal({
                 placeholder="DI Yogyakarta"
                 className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
               />
+              {errors.province && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.province.message}
+                </p>
+              )}
             </div>
 
             {/* Region / Daerah */}
@@ -298,36 +308,168 @@ export default function AddUpdateArticleModal({
               )}
             </div>
 
-            {/* Estimasi Waktu Baca */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Estimasi Waktu Baca (menit)
-              </label>
-              <Input
-                {...register('readMinutes', { valueAsNumber: true })}
-                type="number"
-                placeholder="5"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
-              />
+            {/* Read Minutes, Gender, Featured, Status */}
+            <div className="block text-sm font-medium text-gray-600 mb-1.5">
+              {/* Estimasi Waktu Baca */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                  Estimasi Waktu Baca (menit) *
+                </label>
+                <Input
+                  {...register('readMinutes', { valueAsNumber: true })}
+                  type="number"
+                  placeholder="6"
+                  className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700"
+                />
+                {errors.readMinutes && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.readMinutes.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-5">
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                  Gender (Opsional)
+                </label>
+                <Controller
+                  control={control}
+                  name="gender"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? undefined}
+                    >
+                      <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                        <SelectValue placeholder="Pilih Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Laki-laki</SelectItem>
+                        <SelectItem value="female">Perempuan</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.gender && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.gender.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5">
+              {/* Featured Toggle */}
+              <div className="flex items-end pb-2">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      {...register('featured')}
+                      type="checkbox"
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#c26a3d]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c26a3d]"></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors">
+                    Tampilkan di Featured
+                  </span>
+                </label>
+              </div>
             </div>
           </div>
 
-          {/* Ringkasan / Summary */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1.5">
-              Ringkasan / Summary *
-            </label>
-            <textarea
-              {...register('excerpt')}
-              rows={3}
-              placeholder="Deskripsi singkat artikel yang muncul di halaman daftar artikel..."
-              className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
-            />
-            {errors.excerpt && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.excerpt.message}
-              </p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Ethnic Group */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                Suku / Kelompok Etnis (Opsional)
+              </label>
+              <Input
+                {...register('ethnicGroup')}
+                type="text"
+                placeholder="Contoh: Jawa / Dayak"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700"
+              />
+              {errors.ethnicGroup && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.ethnicGroup.message}
+                </p>
+              )}
+            </div>
+
+            {/* Clothing Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                Jenis Pakaian (Opsional)
+              </label>
+              <Input
+                {...register('clothingType')}
+                type="text"
+                placeholder="Contoh: Kebaya / Batik"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700"
+              />
+              {errors.clothingType && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.clothingType.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Excerpt, Summary, Description */}
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                Excerpt (Ringkasan Pendek) *
+              </label>
+              <textarea
+                {...register('excerpt')}
+                rows={2}
+                placeholder="Teaser singkat yang muncul di kartu artikel..."
+                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+              />
+              {errors.excerpt && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.excerpt.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                Ringkasan (Summary) (Opsional)
+              </label>
+              <textarea
+                {...register('summary')}
+                rows={3}
+                placeholder="Ringkasan lengkap tentang isi artikel..."
+                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+              />
+              {errors.summary && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.summary.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                Deskripsi Tambahan (Opsional)
+              </label>
+              <textarea
+                {...register('description')}
+                rows={3}
+                placeholder="Detail informasi tambahan lainnya..."
+                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+              />
+              {errors.description && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <hr className="border-[#ebdxc2]" />
@@ -405,7 +547,7 @@ export default function AddUpdateArticleModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[#ebdxc2] flex items-center gap-3 bg-[#fefdfb] rounded-b-2xl">
+        <div className="px-6 py-4 border-t border-[#ebd8c2] flex items-center gap-3 bg-[#fefdfb] rounded-b-2xl">
           <Button
             type="submit"
             disabled={isPending}
