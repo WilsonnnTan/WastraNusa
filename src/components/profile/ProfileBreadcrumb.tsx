@@ -16,6 +16,10 @@ const breadcrumbMap: Record<string, { label: string; href?: string }[]> = {
     { label: 'Profil Saya', href: '/profile' },
     { label: 'Artikel Disukai' },
   ],
+  '/profile/saved-address': [
+    { label: 'Profil Saya', href: '/profile' },
+    { label: 'Alamat Tersimpan' },
+  ],
 };
 
 export default function ProfileBreadcrumb() {
