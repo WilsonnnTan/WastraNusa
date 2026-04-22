@@ -276,13 +276,19 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
           <Card className="rounded-xl border border-[#e1d8c9] bg-[#f8f3ea] p-4">
             <p className="inline-flex items-start gap-2 text-sm leading-relaxed text-[#5f6c63] italic">
               <Quote className="mt-0.5 h-4 w-4 shrink-0 text-[#97a694]" />
-              {article.quote}
+              {article.excerpt}
             </p>
           </Card>
 
           <p className="mt-6 text-[15px] leading-8 text-[#3d5449]">
             {article.intro}
           </p>
+
+          {article.description && (
+            <p className="mt-4 text-[15px] leading-8 text-[#4d6058]">
+              {article.description}
+            </p>
+          )}
 
           {article.sections.map((section, index) => {
             const showVisual = Boolean(section.imageCaption);

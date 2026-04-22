@@ -18,7 +18,7 @@ const MOCK_ARTICLES = {
     totalItems: 2,
     totalPages: 1,
     hasNextPage: false,
-    regions: [{ name: 'Semua Wilayah', count: 2, active: true }],
+    islands: [{ name: 'Semua Pulau', count: 2, active: true }],
     topics: ['Sejarah & Asal Usul'],
   },
 };
@@ -43,12 +43,12 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     expect(body.status).toBe('success');
     expect(body.data).toEqual(MOCK_ARTICLES);
     expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
-      region: undefined,
+      island: undefined,
       topic: undefined,
     });
   });
 
-  it('should parse page, limit, and region from query params', async () => {
+  it('should parse page, limit, and island from query params', async () => {
     mockService.getArticles.mockResolvedValue({
       items: [],
       meta: {
@@ -57,18 +57,18 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
         totalItems: 0,
         totalPages: 1,
         hasNextPage: false,
-        regions: [{ name: 'Semua Wilayah', count: 0, active: false }],
+        islands: [{ name: 'Semua Pulau', count: 0, active: false }],
         topics: [],
       },
     } as never);
 
     const req = createRequest(
-      'http://localhost/api/articles?page=3&limit=20&region=Jawa',
+      'http://localhost/api/articles?page=3&limit=20&island=Jawa',
     );
     await GET(req, { params: Promise.resolve({}) });
 
     expect(mockService.getArticles).toHaveBeenCalledWith(3, 20, {
-      region: 'Jawa',
+      island: 'Jawa',
       topic: undefined,
     });
   });
@@ -82,7 +82,7 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
         totalItems: 0,
         totalPages: 1,
         hasNextPage: false,
-        regions: [{ name: 'Semua Wilayah', count: 0, active: true }],
+        islands: [{ name: 'Semua Pulau', count: 0, active: true }],
         topics: [],
       },
     } as never);
@@ -93,7 +93,7 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     await GET(req, { params: Promise.resolve({}) });
 
     expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
-      region: undefined,
+      island: undefined,
       topic: 'Teknik Pembuatan',
     });
   });

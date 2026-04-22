@@ -319,6 +319,7 @@ export function AdminArticleContent() {
       </section>
 
       <AddUpdateArticleModal
+        key={editingArticle?.slug ?? 'new'}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={editingArticle}

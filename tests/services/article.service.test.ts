@@ -56,10 +56,10 @@ describe('articleService', { tags: ['backend'] }, () => {
         .mockResolvedValueOnce(1)
         .mockResolvedValueOnce(1)
         .mockResolvedValueOnce(1);
-      mockRepo.countByRegion.mockResolvedValue([
+      mockRepo.countByIsland.mockResolvedValue([
         {
-          region: 'Pekalongan',
-          _count: { region: 1 },
+          island: 'Pekalongan',
+          _count: { island: 1 },
         },
       ] as never);
       mockRepo.countByTopic.mockResolvedValue([
@@ -84,7 +84,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0);
-      mockRepo.countByRegion.mockResolvedValue([]);
+      mockRepo.countByIsland.mockResolvedValue([]);
       mockRepo.countByTopic.mockResolvedValue([]);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
 
@@ -93,7 +93,7 @@ describe('articleService', { tags: ['backend'] }, () => {
       expect(mockRepo.findAll).toHaveBeenCalledWith({
         offset: 0,
         limit: 50,
-        region: undefined,
+        island: undefined,
         topic: undefined,
       });
     });
@@ -104,7 +104,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(0);
-      mockRepo.countByRegion.mockResolvedValue([]);
+      mockRepo.countByIsland.mockResolvedValue([]);
       mockRepo.countByTopic.mockResolvedValue([]);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
 
@@ -113,25 +113,25 @@ describe('articleService', { tags: ['backend'] }, () => {
       expect(mockRepo.findAll).toHaveBeenCalledWith({
         offset: 0,
         limit: 10,
-        region: undefined,
+        island: undefined,
         topic: undefined,
       });
     });
 
-    it('should apply region filter and return metadata', async () => {
+    it('should apply island filter and return metadata', async () => {
       mockRepo.findAll.mockResolvedValue([MOCK_ARTICLE]);
       mockRepo.countAll
         .mockResolvedValueOnce(12)
         .mockResolvedValueOnce(20)
         .mockResolvedValueOnce(20);
-      mockRepo.countByRegion.mockResolvedValue([
+      mockRepo.countByIsland.mockResolvedValue([
         {
-          region: 'Jawa',
-          _count: { region: 8 },
+          island: 'Jawa',
+          _count: { island: 8 },
         },
         {
-          region: 'Sumatra',
-          _count: { region: 4 },
+          island: 'Sumatra',
+          _count: { island: 4 },
         },
       ] as never);
       mockRepo.countByTopic.mockResolvedValue([
@@ -142,16 +142,16 @@ describe('articleService', { tags: ['backend'] }, () => {
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(3);
 
-      const result = await articleService.getArticles(1, 5, { region: 'Jawa' });
+      const result = await articleService.getArticles(1, 5, { island: 'Jawa' });
 
       expect(mockRepo.findAll).toHaveBeenCalledWith({
         offset: 0,
         limit: 5,
-        region: 'Jawa',
+        island: 'Jawa',
         topic: undefined,
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
-        region: 'Jawa',
+        island: 'Jawa',
         topic: undefined,
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith();
@@ -159,8 +159,8 @@ describe('articleService', { tags: ['backend'] }, () => {
       expect(result.meta.totalItems).toBe(12);
       expect(result.meta.totalPages).toBe(3);
       expect(result.meta.hasNextPage).toBe(true);
-      expect(result.meta.regions).toEqual([
-        { name: 'Semua Wilayah', count: 20, active: false },
+      expect(result.meta.islands).toEqual([
+        { name: 'Semua Pulau', count: 20, active: false },
         { name: 'Jawa', count: 8, active: true },
         { name: 'Sumatra', count: 4, active: false },
       ]);
@@ -173,14 +173,14 @@ describe('articleService', { tags: ['backend'] }, () => {
         .mockResolvedValueOnce(7)
         .mockResolvedValueOnce(20)
         .mockResolvedValueOnce(7);
-      mockRepo.countByRegion.mockResolvedValue([
+      mockRepo.countByIsland.mockResolvedValue([
         {
-          region: 'Jawa',
-          _count: { region: 5 },
+          island: 'Jawa',
+          _count: { island: 5 },
         },
         {
-          region: 'Sumatra',
-          _count: { region: 2 },
+          island: 'Sumatra',
+          _count: { island: 2 },
         },
       ] as never);
       mockRepo.countByTopic.mockResolvedValue([
@@ -198,21 +198,21 @@ describe('articleService', { tags: ['backend'] }, () => {
       expect(mockRepo.findAll).toHaveBeenCalledWith({
         offset: 0,
         limit: 5,
-        region: undefined,
+        island: undefined,
         topic: 'Teknik Pembuatan',
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
-        region: undefined,
+        island: undefined,
         topic: 'Teknik Pembuatan',
       });
-      expect(mockRepo.countByRegion).toHaveBeenCalledWith({
+      expect(mockRepo.countByIsland).toHaveBeenCalledWith({
         topic: 'Teknik Pembuatan',
       });
       expect(mockRepo.countByTopic).toHaveBeenCalledWith({
-        region: undefined,
+        island: undefined,
       });
-      expect(result.meta.regions).toEqual([
-        { name: 'Semua Wilayah', count: 7, active: true },
+      expect(result.meta.islands).toEqual([
+        { name: 'Semua Pulau', count: 7, active: true },
         { name: 'Jawa', count: 5, active: false },
         { name: 'Sumatra', count: 2, active: false },
       ]);

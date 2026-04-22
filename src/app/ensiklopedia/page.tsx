@@ -4,7 +4,7 @@ import { Header } from '@/components/header';
 
 type EncyclopediaPageProps = {
   searchParams: Promise<{
-    region?: string;
+    island?: string;
     topic?: string;
   }>;
 };
@@ -12,14 +12,14 @@ type EncyclopediaPageProps = {
 export default async function EncyclopediaPage({
   searchParams,
 }: EncyclopediaPageProps) {
-  const { region, topic } = await searchParams;
+  const { island, topic } = await searchParams;
 
   return (
     <div className="min-h-screen bg-[#f5f3ec] text-[#2d4f3f]">
       <Header homeHref="/" />
       <EncyclopediaMain
-        key={`${region ?? 'all'}-${topic ?? 'all'}`}
-        initialRegion={region}
+        key={`${island ?? 'all'}-${topic ?? 'all'}`}
+        initialIsland={island}
         initialTopic={topic}
       />
       <Footer />

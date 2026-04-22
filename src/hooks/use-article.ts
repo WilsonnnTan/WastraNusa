@@ -19,12 +19,12 @@ const DEFAULT_LIKED_ARTICLE_LIMIT = 5;
 export const articleKeys = {
   all: ['articles'] as const,
   lists: () => [...articleKeys.all, 'list'] as const,
-  list: (page: number, limit: number, region?: string, topic?: string) =>
+  list: (page: number, limit: number, island?: string, topic?: string) =>
     [
       ...articleKeys.lists(),
       page,
       limit,
-      region ?? 'all',
+      island ?? 'all',
       topic ?? 'all',
     ] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
@@ -127,8 +127,8 @@ export function fetchArticles(
     limit: String(limit),
   });
 
-  if (filters.region) {
-    searchParams.set('region', filters.region);
+  if (filters.island) {
+    searchParams.set('island', filters.island);
   }
 
   if (filters.topic) {
@@ -177,7 +177,7 @@ export function useArticles(
   filters: EncyclopediaArticleFilters = {},
 ) {
   return useQuery({
-    queryKey: articleKeys.list(page, limit, filters.region, filters.topic),
+    queryKey: articleKeys.list(page, limit, filters.island, filters.topic),
     queryFn: () => fetchArticles(page, limit, filters),
     placeholderData: (previousData) => previousData,
   });

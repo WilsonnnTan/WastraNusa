@@ -12,6 +12,6 @@ export { EncyclopediaDetailMain } from './encyclopedia-detail-main';
 
 export type {
   Stat,
-  RegionFilter,
+  IslandFilter,
   EncyclopediaArticle,
 } from '@/types/encyclopedia';

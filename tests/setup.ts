@@ -22,7 +22,7 @@ vi.mock('@/repositories/article.repository', () => ({
   articleRepository: {
     findAll: vi.fn(),
     countAll: vi.fn(),
-    countByRegion: vi.fn(),
+    countByIsland: vi.fn(),
     countByTopic: vi.fn(),
     countDistinctMotifLabel: vi.fn(),
     findMostPopular: vi.fn(),
