@@ -18,15 +18,49 @@ import {
 } from '@/schemas/article.schema';
 import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { kabupaten, provinsi } from 'daftar-wilayah-indonesia';
 import { Plus, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Controller,
   type Resolver,
   useFieldArray,
   useForm,
+  useWatch,
 } from 'react-hook-form';
 import { toast } from 'sonner';
+
+const MAJOR_ISLANDS = [
+  'Jawa',
+  'Sumatera',
+  'Kalimantan',
+  'Sulawesi',
+  'Papua',
+  'Bali',
+  'Nusa Tenggara Barat',
+  'Nusa Tenggara Timur',
+  'Maluku',
+  'Maluku Utara',
+  'Kepulauan Riau',
+  'Bangka Belitung',
+];
+
+const ALL_PROVINCES = provinsi();
+
+const ISLAND_TO_PROVINCE_CODES: Record<string, string[]> = {
+  Jawa: ['31', '32', '33', '34', '35', '36'],
+  Sumatera: ['11', '12', '13', '14', '15', '16', '17', '18'],
+  Kalimantan: ['61', '62', '63', '64', '65'],
+  Sulawesi: ['71', '72', '73', '74', '75', '76'],
+  Papua: ['91', '92', '93', '94', '95', '96'],
+  Bali: ['51'],
+  'Nusa Tenggara Barat': ['52'],
+  'Nusa Tenggara Timur': ['53'],
+  Maluku: ['81'],
+  'Maluku Utara': ['82'],
+  'Kepulauan Riau': ['21'],
+  'Bangka Belitung': ['19'],
+};
 
 interface AddUpdateArticleModalProps {
   isOpen: boolean;
@@ -76,6 +110,7 @@ export default function AddUpdateArticleModal({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<CreateArticleInput>({
     resolver: zodResolver(
@@ -83,6 +118,20 @@ export default function AddUpdateArticleModal({
     ) as Resolver<CreateArticleInput>,
     defaultValues,
   });
+
+  const watchedIsland = useWatch({ control, name: 'island' });
+  const watchedProvince = useWatch({ control, name: 'province' });
+
+  const filteredProvinces = useMemo(() => {
+    if (!watchedIsland) return ALL_PROVINCES;
+    const codes = ISLAND_TO_PROVINCE_CODES[watchedIsland] ?? [];
+    return ALL_PROVINCES.filter((p) => codes.includes(p.kode));
+  }, [watchedIsland]);
+
+  const filteredKabupaten = useMemo(() => {
+    const found = ALL_PROVINCES.find((p) => p.nama === watchedProvince);
+    return found ? kabupaten(found.kode) : [];
+  }, [watchedProvince]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -254,16 +303,35 @@ export default function AddUpdateArticleModal({
               )}
             </div>
 
-            {/* Pulau / Wilayah */}
+            {/* Pulau */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Pulau / Wilayah (Opsional)
+                Pulau *
               </label>
-              <Input
-                {...register('island')}
-                type="text"
-                placeholder="Jawa / Sumatera"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+              <Controller
+                control={control}
+                name="island"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      setValue('province', '');
+                      setValue('region', '');
+                    }}
+                    value={field.value || undefined}
+                  >
+                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                      <SelectValue placeholder="Pilih Pulau" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MAJOR_ISLANDS.map((island) => (
+                        <SelectItem key={island} value={island}>
+                          {island}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               {errors.island && (
                 <p className="text-xs text-red-500 mt-1">
@@ -275,13 +343,38 @@ export default function AddUpdateArticleModal({
             {/* Provinsi */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Provinsi (Opsional)
+                Provinsi *
               </label>
-              <Input
-                {...register('province')}
-                type="text"
-                placeholder="DI Yogyakarta"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+              <Controller
+                control={control}
+                name="province"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      setValue('region', '');
+                    }}
+                    value={field.value || undefined}
+                    disabled={!watchedIsland}
+                  >
+                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                      <SelectValue
+                        placeholder={
+                          watchedIsland
+                            ? 'Pilih Provinsi'
+                            : 'Pilih Pulau terlebih dahulu'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredProvinces.map((p) => (
+                        <SelectItem key={p.kode} value={p.nama}>
+                          {p.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               {errors.province && (
                 <p className="text-xs text-red-500 mt-1">
@@ -290,16 +383,38 @@ export default function AddUpdateArticleModal({
               )}
             </div>
 
-            {/* Region / Daerah */}
+            {/* Daerah */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                Region / Daerah *
+                Daerah *
               </label>
-              <Input
-                {...register('region')}
-                type="text"
-                placeholder="Yogyakarta"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+              <Controller
+                control={control}
+                name="region"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                    disabled={!watchedProvince}
+                  >
+                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                      <SelectValue
+                        placeholder={
+                          watchedProvince
+                            ? 'Pilih Daerah'
+                            : 'Pilih Provinsi terlebih dahulu'
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredKabupaten.map((k) => (
+                        <SelectItem key={k.kode} value={k.nama}>
+                          {k.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
               {errors.region && (
                 <p className="text-xs text-red-500 mt-1">

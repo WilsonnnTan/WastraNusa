@@ -7,8 +7,8 @@ export const createArticleSchema = z.object({
   description: z.string().nullish(),
   excerpt: z.string().min(1, 'Ringkasan pendek (excerpt) wajib diisi'),
 
-  province: z.string().nullish(),
-  island: z.string().nullish(),
+  province: z.string().min(1, 'Provinsi wajib diisi'),
+  island: z.string().min(1, 'Pulau wajib diisi'),
   region: z.string().min(1, 'Region atau daerah wajib diisi'),
   topic: z.string().min(1, 'Topik artikel wajib diisi'),
   ethnicGroup: z.string().nullish(),

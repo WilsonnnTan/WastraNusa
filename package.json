@@ -31,6 +31,7 @@
     "better-auth": "^1.4.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "daftar-wilayah-indonesia": "^4.0.3",
     "dotenv": "^17.3.1",
     "lucide-react": "^0.577.0",
     "midtrans-client": "^1.4.3",
