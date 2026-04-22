@@ -1,23 +1,23 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import type { RegionFilter } from '@/types/encyclopedia';
+import type { IslandFilter } from '@/types/encyclopedia';
 import { Filter } from 'lucide-react';
 
 interface EncyclopediaSidebarProps {
-  regions: RegionFilter[];
+  islands: IslandFilter[];
   topics: string[];
   selectedTopic?: string;
-  onRegionClick?: (region: string) => void;
+  onIslandClick?: (island: string) => void;
   onTopicClick?: (topic: string) => void;
   onResetFilters?: () => void;
 }
 
 export function EncyclopediaSidebar({
-  regions,
+  islands,
   topics,
   selectedTopic,
-  onRegionClick,
+  onIslandClick,
   onTopicClick,
   onResetFilters,
 }: EncyclopediaSidebarProps) {
@@ -27,30 +27,30 @@ export function EncyclopediaSidebar({
       <Card className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#587061]">
           <Filter className="h-4 w-4" />
-          Filter Wilayah
+          Filter Pulau
         </h2>
         <ul className="space-y-1.5">
-          {regions.map((region) => (
-            <li key={region.name}>
+          {islands.map((island) => (
+            <li key={island.name}>
               <Button
                 variant="ghost"
                 className={`flex h-auto w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
-                  region.active
+                  island.active
                     ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
                     : 'text-[#4c6457] hover:bg-[#ece5d8]'
                 }`}
-                onClick={() => onRegionClick?.(region.name)}
+                onClick={() => onIslandClick?.(island.name)}
               >
-                <span>{region.name}</span>
+                <span>{island.name}</span>
                 <Badge
                   variant="secondary"
                   className={`rounded-full px-2 py-0.5 text-xs font-normal ${
-                    region.active
+                    island.active
                       ? 'bg-white/20 text-[#f4f7f1]'
                       : 'bg-[#e5decf] text-[#839386]'
                   }`}
                 >
-                  {region.count}
+                  {island.count}
                 </Badge>
               </Button>
             </li>

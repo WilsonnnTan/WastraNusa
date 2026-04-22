@@ -9,14 +9,14 @@ export interface Stat {
   label: string;
 }
 
-export interface RegionFilter {
+export interface IslandFilter {
   name: string;
   count: number;
   active?: boolean;
 }
 
 export interface EncyclopediaArticleFilters {
-  region?: string;
+  island?: string;
   topic?: string;
 }
 
@@ -83,11 +83,11 @@ export interface EncyclopediaArticleListMeta {
   totalItems: number;
   totalPages: number;
   hasNextPage: boolean;
-  regions: RegionFilter[];
+  islands: IslandFilter[];
   topics: string[];
   stats?: {
     totalArticles: number;
-    totalRegions: number;
+    totalIslands: number;
     totalWastraTypes: number;
   };
 }

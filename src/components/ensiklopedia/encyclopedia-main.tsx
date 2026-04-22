@@ -24,7 +24,7 @@ import { useState } from 'react';
 const ARTICLES_PER_PAGE = 10;
 
 interface EncyclopediaMainProps {
-  initialRegion?: string;
+  initialIsland?: string;
   initialTopic?: string;
 }
 
@@ -114,23 +114,23 @@ function EncyclopediaArticleGridSkeleton() {
 }
 
 export function EncyclopediaMain({
-  initialRegion,
+  initialIsland,
   initialTopic,
 }: EncyclopediaMainProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRegion, setSelectedRegion] = useState(initialRegion);
+  const [selectedIsland, setSelectedIsland] = useState(initialIsland);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
     {
-      region: selectedRegion,
+      island: selectedIsland,
       topic: selectedTopic,
     },
   );
   const articles = data?.items ?? [];
-  const regions = data?.meta.regions ?? [];
+  const islands = data?.meta.islands ?? [];
   const topics = data?.meta.topics ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
   const showLoadingSkeleton = isPending && !data;
@@ -143,9 +143,9 @@ export function EncyclopediaMain({
     },
     {
       value: String(
-        data?.meta.stats?.totalRegions ?? Math.max(regions.length - 1, 0),
+        data?.meta.stats?.totalIslands ?? Math.max(islands.length - 1, 0),
       ),
-      label: 'Provinsi Tercakup',
+      label: 'Pulau Tercakup',
     },
     {
       value: String(data?.meta.stats?.totalWastraTypes ?? 0),
@@ -154,18 +154,18 @@ export function EncyclopediaMain({
   ];
 
   const featuredArticle =
-    currentPage === 1 && !selectedRegion && !selectedTopic
+    currentPage === 1 && !selectedIsland && !selectedTopic
       ? (articles.find((article) => article.featured) ?? articles[0])
       : undefined;
   const standardArticles = featuredArticle
     ? articles.filter((article) => article.slug !== featuredArticle.slug)
     : articles;
 
-  const pushFilterQuery = (region?: string, topic?: string) => {
+  const pushFilterQuery = (island?: string, topic?: string) => {
     const searchParams = new URLSearchParams();
 
-    if (region) {
-      searchParams.set('region', region);
+    if (island) {
+      searchParams.set('island', island);
     }
 
     if (topic) {
@@ -176,23 +176,23 @@ export function EncyclopediaMain({
     router.push(query ? `/ensiklopedia?${query}` : '/ensiklopedia');
   };
 
-  const handleRegionClick = (region: string) => {
-    const nextRegion = region === 'Semua Wilayah' ? undefined : region;
+  const handleIslandClick = (island: string) => {
+    const nextIsland = island === 'Semua Pulau' ? undefined : island;
     setCurrentPage(1);
-    setSelectedRegion(nextRegion);
-    pushFilterQuery(nextRegion, selectedTopic);
+    setSelectedIsland(nextIsland);
+    pushFilterQuery(nextIsland, selectedTopic);
   };
 
   const handleTopicClick = (topic: string) => {
     const nextTopic = selectedTopic === topic ? undefined : topic;
     setCurrentPage(1);
     setSelectedTopic(nextTopic);
-    pushFilterQuery(selectedRegion, nextTopic);
+    pushFilterQuery(selectedIsland, nextTopic);
   };
 
   const handleResetFilters = () => {
     setCurrentPage(1);
-    setSelectedRegion(undefined);
+    setSelectedIsland(undefined);
     setSelectedTopic(undefined);
     pushFilterQuery(undefined, undefined);
   };
@@ -249,10 +249,10 @@ export function EncyclopediaMain({
               <EncyclopediaSidebarSkeleton />
             ) : (
               <EncyclopediaSidebar
-                regions={regions}
+                islands={islands}
                 topics={topics}
                 selectedTopic={selectedTopic}
-                onRegionClick={handleRegionClick}
+                onIslandClick={handleIslandClick}
                 onTopicClick={handleTopicClick}
                 onResetFilters={handleResetFilters}
               />
