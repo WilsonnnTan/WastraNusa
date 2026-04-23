@@ -26,4 +26,38 @@ export const orderRepository = {
       data,
     });
   },
+
+  findOrdersByUserId: async (
+    userId: string,
+    filters: Prisma.OrderWhereInput,
+    skip?: number,
+    take?: number,
+  ) => {
+    return prisma.order.findMany({
+      where: { userId, ...filters },
+      skip,
+      take,
+      include: {
+        product: {
+          select: {
+            name: true,
+            province: true,
+            clothingType: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  },
+
+  countOrdersByUserId: async (
+    userId: string,
+    filters: Prisma.OrderWhereInput,
+  ) => {
+    return prisma.order.count({
+      where: { userId, ...filters },
+    });
+  },
 };
