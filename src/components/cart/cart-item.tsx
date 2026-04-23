@@ -10,7 +10,7 @@ export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
       className={`p-5 flex gap-5 transition-colors ${isSelected ? 'bg-brand/5' : 'bg-white'}`}
     >
       {/* Checkbox Produk */}
-      <div className="flex items-start pt-2">
+      <div className="flex items-center">
         <Checkbox checked={isSelected} onChange={onToggle} />
       </div>
 
@@ -23,7 +23,7 @@ export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
       </div>
 
       {/* Info Detail */}
-      <div className="flex-1 flex justify-between items-start gap-4">
+      <div className="flex-1 flex justify-between items-center gap-4">
         <div>
           <h3 className="font-bold text-[#3d5446] text-sm leading-tight hover:text-brand cursor-pointer">
             {item.name}
