@@ -1,9 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import 'swiper/css';
-@import 'swiper/css/navigation';
-@import 'swiper/css/pagination';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -145,30 +142,4 @@
   html {
     @apply font-sans;
   }
-}
-
-.hero-swiper-pagination {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  position: absolute;
-  left: 50% !important;
-  bottom: 1.25rem !important;
-  z-index: 20;
-  width: auto !important;
-  transform: translateX(-50%);
-}
-
-.hero-swiper-pagination .swiper-pagination-bullet {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 9999px;
-  background: rgb(255 255 255 / 55%);
-  opacity: 1;
-  transition: all 220ms ease;
-}
-
-.hero-swiper-pagination .swiper-pagination-bullet-active {
-  width: 1.75rem;
-  background: rgb(255 255 255 / 100%);
 }

@@ -9,6 +9,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -22,6 +23,7 @@ type HeroSlide = {
   description: string;
   backgroundClassName: string;
   slug: string;
+  isSkeleton?: boolean;
 };
 
 const HERO_BACKGROUNDS = [
@@ -48,6 +50,7 @@ export function HeroSection() {
           backgroundClassName:
             HERO_BACKGROUNDS[index % HERO_BACKGROUNDS.length],
           slug: '',
+          isSkeleton: true,
         }))
       : data.items.slice(0, 4).map((article, index) => ({
           id: article.slug,
@@ -112,38 +115,67 @@ export function HeroSection() {
                 />
 
                 <div className="relative z-10">
-                  <Badge
-                    variant="outline"
-                    className="mb-3 w-fit rounded-lg border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur"
-                  >
-                    {slide.badge}
-                  </Badge>
+                  {slide.isSkeleton ? (
+                    <Skeleton className="mb-3 h-[26px] w-32 rounded-lg bg-white/20" />
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="mb-3 w-fit rounded-lg border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur"
+                    >
+                      {slide.badge}
+                    </Badge>
+                  )}
 
-                  <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
-                    {slide.title}
-                    <br />
-                    {slide.subtitle}
-                  </h1>
+                  {slide.isSkeleton ? (
+                    <div className="mb-4 mt-1 space-y-2">
+                      <Skeleton className="h-10 w-64 bg-white/20 md:h-12 md:w-80" />
+                      <Skeleton className="h-10 w-48 bg-white/20 md:h-12 md:w-64" />
+                    </div>
+                  ) : (
+                    <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
+                      {slide.title}
+                      <br />
+                      {slide.subtitle}
+                    </h1>
+                  )}
 
-                  <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
-                    {slide.description}
-                  </p>
+                  {slide.isSkeleton ? (
+                    <div className="mt-4 max-w-xl space-y-2">
+                      <Skeleton className="h-5 w-full bg-white/20" />
+                      <Skeleton className="h-5 w-5/6 bg-white/20" />
+                    </div>
+                  ) : (
+                    <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
+                      {slide.description}
+                    </p>
+                  )}
 
                   <div className="mt-7 flex flex-wrap gap-3">
-                    <Button
-                      asChild
-                      className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
-                    >
-                      <Link href={`/ensiklopedia/${slide.slug}`}>
-                        Baca Artikel
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
-                    >
-                      <Link href="/ensiklopedia">Jelajahi Ensiklopedia</Link>
-                    </Button>
+                    {slide.isSkeleton ? (
+                      <>
+                        <Skeleton className="h-[42px] w-32 rounded-xl bg-white/20" />
+                        <Skeleton className="h-[42px] w-48 rounded-xl bg-white/20" />
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          asChild
+                          className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
+                        >
+                          <Link href={`/ensiklopedia/${slide.slug}`}>
+                            Baca Artikel
+                          </Link>
+                        </Button>
+                        <Button
+                          asChild
+                          className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
+                        >
+                          <Link href="/ensiklopedia">
+                            Jelajahi Ensiklopedia
+                          </Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
