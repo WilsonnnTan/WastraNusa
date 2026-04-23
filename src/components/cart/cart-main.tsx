@@ -9,96 +9,75 @@ import { CartList } from './cart-list';
 import { CartSummary } from './cart-summary';
 
 const dummyCart = [
-  // Toko 1: Batik Mataram Solo (3 Produk)
   {
     id: '1',
-    title: 'Batik Tulis Kawung Klasik',
-    shopName: 'Batik Mataram Solo',
-    location: 'Solo, Jawa Tengah',
+    name: 'Batik Tulis Kawung Klasik',
     price: 350000,
-    originalPrice: 420000,
     size: 'M',
     stock: 48,
     quantity: 1,
-    category: 'Batik',
-    origin: 'Solo, Jawa Tengah',
+    clothingType: 'Batik',
+    province: 'Jawa Tengah',
   },
   {
     id: '1-2',
-    title: 'Batik Cap Parang Kusumo',
-    shopName: 'Batik Mataram Solo',
-    location: 'Solo, Jawa Tengah',
+    name: 'Batik Cap Parang Kusumo',
     price: 150000,
     size: 'L',
     stock: 20,
     quantity: 1,
-    category: 'Batik',
-    origin: 'Solo, Jawa Tengah',
+    clothingType: 'Batik',
+    province: 'Jawa Tengah',
   },
   {
     id: '1-3',
-    title: 'Kemeja Batik Sogan Premium',
-    shopName: 'Batik Mataram Solo',
-    location: 'Solo, Jawa Tengah',
+    name: 'Kemeja Batik Sogan Premium',
     price: 550000,
-    originalPrice: 600000,
     size: 'XL',
     stock: 10,
     quantity: 1,
-    category: 'Batik',
-    origin: 'Solo, Jawa Tengah',
+    clothingType: 'Batik',
+    province: 'Jawa Tengah',
   },
-
-  // Toko 2: Tenun Nusantara NTT (2 Produk)
   {
     id: '2',
-    title: 'Tenun Ikat Flores Indigo',
-    shopName: 'Tenun Nusantara NTT',
-    location: 'Ende, NTT',
+    name: 'Tenun Ikat Flores Indigo',
     price: 1160000,
     size: 'M',
     stock: 24,
     quantity: 1,
-    category: 'Tenun',
-    origin: 'Flores, NTT',
+    clothingType: 'Tenun',
+    province: 'Nusa Tenggara Timur',
   },
   {
     id: '2-2',
-    title: 'Selendang Tenun Sumba',
-    shopName: 'Tenun Nusantara NTT',
-    location: 'Ende, NTT',
+    name: 'Selendang Tenun Sumba',
     price: 450000,
     size: 'All Size',
     stock: 15,
     quantity: 1,
-    category: 'Tenun',
-    origin: 'Sumba, NTT',
+    clothingType: 'Tenun',
+    province: 'Nusa Tenggara Timur',
   },
-
-  // Toko 3: Griya Songket Palembang (2 Produk)
   {
     id: '3',
-    title: 'Songket Palembang Lepus',
-    shopName: 'Griya Songket Palembang',
-    location: 'Palembang, Sumatera Selatan',
+    name: 'Songket Palembang Lepus',
     price: 1200000,
     size: 'M',
     stock: 15,
     quantity: 1,
-    category: 'Songket',
-    origin: 'Palembang, Sumatera Selatan',
+    clothingType: 'Songket',
+    province: 'Sumatera Selatan',
   },
   {
     id: '3-2',
-    title: 'Tanjak Songket Tradisional',
-    shopName: 'Griya Songket Palembang',
-    location: 'Palembang, Sumatera Selatan',
+    name: 'Tanjak Songket Tradisional',
     price: 250000,
     size: 'All Size',
     stock: 30,
     quantity: 1,
-    category: 'Songket',
-    origin: 'Palembang, Sumatera Selatan',
+    clothingType: 'Songket',
+    province: 'Sumatera Selatan',
   },
 ];
 
@@ -134,6 +113,11 @@ export function CartMain() {
     }
   };
 
+  const handleDeleteSelected = () => {
+    setItems((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
+    setSelectedIds([]);
+  };
+
   // PERBAIKAN: Memisahkan totals dan data item yang dipilih untuk sidebar
   const { totals, selectedItemsForSummary } = useMemo(() => {
     // 1. Ambil data mentah item yang sedang dicentang
@@ -149,7 +133,7 @@ export function CartMain() {
     // 3. Format data agar sesuai dengan interface CartSummary
     const formattedItems = selectedItems.map((item) => ({
       id: item.id,
-      name: item.title, // Mapping properti title ke name
+      name: item.name,
       variant: item.size, // Mapping properti size ke variant
       price: item.price,
       quantity: item.quantity,
@@ -188,6 +172,7 @@ export function CartMain() {
               onToggleItem={toggleItem}
               onToggleAll={toggleAll}
               onUpdateQty={updateQuantity}
+              onDeleteSelected={handleDeleteSelected}
             />
           </div>
           <div className="lg:col-span-4">

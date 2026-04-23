@@ -35,12 +35,12 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
 
   if (!mounted) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm sticky top-24 animate-pulse h-[350px]"></div>
+      <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm animate-pulse h-[350px]"></div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm sticky top-24">
+    <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-[#3d5446] text-sm">Ringkasan Pesanan</h3>

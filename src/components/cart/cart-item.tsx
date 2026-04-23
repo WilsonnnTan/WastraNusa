@@ -1,7 +1,7 @@
 'use client';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import { Heart, Hexagon, Minus, Plus, Trash2 } from 'lucide-react';
+import { Hexagon, Minus, Plus } from 'lucide-react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
@@ -18,55 +18,33 @@ export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
       <div className="w-20 h-20 shrink-0 bg-[#f4efe6] border border-[#e8e2d5] rounded-xl flex flex-col items-center justify-center text-[#8e8476]">
         <Hexagon className="w-7 h-7 stroke-[1.5]" />
         <span className="text-[9px] font-bold mt-1 uppercase tracking-wider">
-          {item.category}
+          {item.clothingType}
         </span>
       </div>
 
       {/* Info Detail */}
-      <div className="flex-1 flex flex-col justify-between">
-        <div className="flex justify-between items-start gap-4">
-          <div>
-            <h3 className="font-bold text-[#3d5446] text-sm leading-tight hover:text-brand cursor-pointer">
-              {item.title}
-            </h3>
-            <p className="text-[11px] text-[#8e8476] mt-1 italic">
-              {item.origin}
-            </p>
-            <div className="mt-2 flex items-center gap-3">
-              <span className="px-2 py-0.5 bg-[#f0ede6] rounded text-[10px] font-bold text-[#726759]">
-                Size {item.size}
-              </span>
-              <span className="text-[10px] text-[#aca493]">
-                Stok: {item.stock}
-              </span>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            <p className="font-bold text-brand text-[15px]">
-              Rp {item.price.toLocaleString('id-ID')}
-            </p>
-            {item.originalPrice && (
-              <p className="text-[11px] text-[#aca493] line-through">
-                Rp {item.originalPrice.toLocaleString('id-ID')}
-              </p>
-            )}
+      <div className="flex-1 flex justify-between items-start gap-4">
+        <div>
+          <h3 className="font-bold text-[#3d5446] text-sm leading-tight hover:text-brand cursor-pointer">
+            {item.name}
+          </h3>
+          <p className="text-[11px] text-[#8e8476] mt-1 italic">
+            {item.province}
+          </p>
+          <div className="mt-2 flex items-center gap-3">
+            <span className="px-2 py-0.5 bg-[#f0ede6] rounded text-[10px] font-bold text-[#726759]">
+              Size {item.size}
+            </span>
+            <span className="text-[10px] text-[#aca493]">
+              Stok: {item.stock}
+            </span>
           </div>
         </div>
 
-        {/* Footer Item: Simpan/Hapus & Stepper */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-4 text-[#7a887f]">
-            <button className="flex items-center gap-1.5 text-[11px] font-bold hover:text-brand transition-colors">
-              <Heart size={14} />{' '}
-              <span className="hidden sm:inline">Simpan</span>
-            </button>
-            <button className="flex items-center gap-1.5 text-[11px] font-bold hover:text-red-500 transition-colors">
-              <Trash2 size={14} />{' '}
-              <span className="hidden sm:inline">Hapus</span>
-            </button>
-          </div>
-
+        <div className="flex flex-col items-end gap-3 shrink-0">
+          <p className="font-bold text-brand text-[15px]">
+            Rp {item.price.toLocaleString('id-ID')}
+          </p>
           <div className="flex items-center border border-[#d8cfbf] rounded-lg overflow-hidden h-8 bg-white shadow-sm">
             <button
               onClick={() => onUpdateQty(-1)}
