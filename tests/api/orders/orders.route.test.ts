@@ -20,15 +20,14 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
           id: 'ORD-123',
           date: '14 Mar 2025',
           totalPrice: 'Rp 100.000',
-          status: 'Menunggu Bayar',
-          statusInfo: 'Menunggu pembayaran',
+          status: 'Menunggu Bayar' as const,
           product: {
             category: 'Batik',
             name: 'Batik Kawung',
             location: 'Solo',
             quantity: 1,
           },
-          actions: ['Detail'],
+          actions: ['Detail'] as ('Detail' | 'Lacak Pesanan')[],
         },
       ],
       meta: {
@@ -39,8 +38,7 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
       },
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockService.getUserOrders.mockResolvedValue(mockOrderResult as any);
+    mockService.getUserOrders.mockResolvedValue(mockOrderResult);
 
     const req = new Request('http://localhost/api/orders');
 
@@ -63,11 +61,10 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
   it('should pass status, page, and limit query parameters correctly', async () => {
     mockAuth.requireUser.mockResolvedValue({ id: 'user-1' } as never);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockService.getUserOrders.mockResolvedValue({
       data: [],
       meta: { total: 0, page: 2, limit: 5, totalPages: 0 },
-    } as any);
+    });
 
     const req = new Request(
       'http://localhost/api/orders?status=Dikirim&page=2&limit=5',
