@@ -93,4 +93,43 @@ describe('orderRepository', { tags: ['db'] }, () => {
       expect(updated.orderStatus).toBe('confirmed');
     });
   });
+
+  describe('findOrdersByUserId', () => {
+    it('should correctly pass skip, take, and filters to prisma', async () => {
+      const spy = vi.spyOn(prisma.order, 'findMany').mockResolvedValue([]);
+
+      const filters = { orderStatus: 'pending' as const };
+      await orderRepository.findOrdersByUserId(userId, filters, 10, 5);
+
+      expect(spy).toHaveBeenCalledWith({
+        where: { userId, orderStatus: 'pending' },
+        skip: 10,
+        take: 5,
+        include: {
+          product: {
+            select: { name: true, province: true, clothingType: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('countOrdersByUserId', () => {
+    it('should correctly pass filters to prisma count', async () => {
+      const spy = vi.spyOn(prisma.order, 'count').mockResolvedValue(42);
+
+      const filters = { orderStatus: 'confirmed' as const };
+      const count = await orderRepository.countOrdersByUserId(userId, filters);
+
+      expect(spy).toHaveBeenCalledWith({
+        where: { userId, orderStatus: 'confirmed' },
+      });
+      expect(count).toBe(42);
+
+      spy.mockRestore();
+    });
+  });
 });

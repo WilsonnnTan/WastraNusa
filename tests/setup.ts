@@ -56,6 +56,14 @@ vi.mock('@/repositories/order.repository', () => ({
     createOrder: vi.fn(),
     findOrderById: vi.fn(),
     updateOrderPaymentStatus: vi.fn(),
+    findOrdersByUserId: vi.fn(),
+    countOrdersByUserId: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/order.service', () => ({
+  orderService: {
+    getUserOrders: vi.fn(),
   },
 }));
 
