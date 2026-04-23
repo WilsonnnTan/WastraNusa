@@ -56,13 +56,6 @@ export default function ProfileCard() {
           )}
         </div>
       </div>
-
-      <div className="text-center w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0 border-border">
-        <div className="text-3xl md:text-4xl font-extrabold text-foreground">
-          0
-        </div>
-        <div className="text-[13px] text-muted-foreground">Total Pesanan</div>
-      </div>
     </div>
   );
 }
