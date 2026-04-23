@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   Carousel,
   type CarouselApi,
@@ -98,7 +99,7 @@ export function HeroSection() {
   }, [carouselApi]);
 
   return (
-    <article className="relative min-h-[420px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)]">
+    <Card className="relative min-h-[420px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] p-0 text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)] ring-0">
       <Carousel
         setApi={setCarouselApi}
         opts={{
@@ -106,10 +107,10 @@ export function HeroSection() {
         }}
         className="h-full"
       >
-        <CarouselContent className="-ml-0">
+        <CarouselContent className="-ml-0 h-full">
           {HERO_SLIDES.map((slide) => (
-            <CarouselItem key={slide.id} className="pl-0">
-              <div className="relative flex h-full min-h-[420px] flex-col justify-end py-6 pr-6 pl-20 md:py-8 md:pr-8 md:pl-20">
+            <CarouselItem key={slide.id} className="pl-0 h-full">
+              <div className="relative flex h-full min-h-[420px] flex-col justify-end pb-12 pt-6 pr-6 pl-20 md:pb-14 md:pt-8 md:pr-8 md:pl-20">
                 <div
                   className={`absolute inset-0 ${slide.backgroundClassName}`}
                   aria-hidden="true"
@@ -179,7 +180,7 @@ export function HeroSection() {
         <ChevronRight className="h-4 w-4" />
       </Button>
 
-      <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+      <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2.5">
         {HERO_SLIDES.map((slide, index) => {
           const isActive = activeSlide === index;
 
@@ -189,14 +190,16 @@ export function HeroSection() {
               type="button"
               aria-label={`Go to slide ${index + 1}`}
               aria-current={isActive}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                isActive ? 'w-7 bg-white' : 'w-2 bg-white/55 hover:bg-white/75'
+              className={`pointer-events-auto h-1.5 rounded-full transition-all duration-300 ${
+                isActive
+                  ? 'w-8 bg-white shadow-[0_0_12px_rgba(255,255,255,0.4)]'
+                  : 'w-1.5 bg-white/40 hover:bg-white/60'
               }`}
               onClick={() => carouselApi?.scrollTo(index)}
             />
           );
         })}
       </div>
-    </article>
+    </Card>
   );
 }
