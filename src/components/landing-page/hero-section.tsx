@@ -9,65 +9,56 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import { useArticles } from '@/hooks/use-article';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 type HeroSlide = {
-  id: number;
+  id: string | number;
   badge: string;
   title: string;
   subtitle: string;
   description: string;
   backgroundClassName: string;
+  slug: string;
 };
 
-const HERO_SLIDES: HeroSlide[] = [
-  {
-    id: 1,
-    badge: 'Kain Kebesaran Kerajaan',
-    title: 'Songket Palembang',
-    subtitle: 'Emas dalam Tenunan',
-    description:
-      'Songket adalah kain mewah berbenang emas atau perak, simbol kejayaan kerajaan Melayu dan Minangkabau.',
-    backgroundClassName:
-      'bg-[radial-gradient(circle_at_65%_60%,rgba(190,140,56,0.66),rgba(31,26,20,0.05)_38%,transparent_70%),linear-gradient(132deg,#02040d_0%,#0e1019_42%,#51371d_100%)]',
-  },
-  {
-    id: 2,
-    badge: 'Warisan Pesisir Sumatra',
-    title: 'Songket Lepus',
-    subtitle: 'Motif Rapat Berkilau',
-    description:
-      'Lepus dikenal dengan sebaran benang emas yang padat dan ritmis, dipakai pada upacara adat penting.',
-    backgroundClassName:
-      'bg-[radial-gradient(circle_at_30%_26%,rgba(242,179,91,0.6),transparent_38%),linear-gradient(130deg,#121620_0%,#223d4e_42%,#926328_100%)]',
-  },
-  {
-    id: 3,
-    badge: 'Motif Fauna Klasik',
-    title: 'Nago Besaung',
-    subtitle: 'Legenda dalam Simbol',
-    description:
-      'Motif naga pada songket melambangkan keberanian, pelindung, dan kemegahan keluarga bangsawan.',
-    backgroundClassName:
-      'bg-[radial-gradient(circle_at_80%_20%,rgba(224,152,69,0.42),transparent_40%),linear-gradient(120deg,#10141d_0%,#3c2a24_52%,#744924_100%)]',
-  },
-  {
-    id: 4,
-    badge: 'Kriya Nusantara',
-    title: 'Tenun Tawar Modern',
-    subtitle: 'Tradisi Bertemu Gaya Baru',
-    description:
-      'Perajin muda mengadaptasi teknik songket untuk busana kontemporer tanpa menghilangkan makna tradisi.',
-    backgroundClassName:
-      'bg-[radial-gradient(circle_at_50%_22%,rgba(207,168,108,0.46),transparent_46%),linear-gradient(132deg,#0a1018_0%,#253040_40%,#5b3c1f_100%)]',
-  },
+const HERO_BACKGROUNDS = [
+  'bg-[radial-gradient(circle_at_65%_60%,rgba(190,140,56,0.66),rgba(31,26,20,0.05)_38%,transparent_70%),linear-gradient(132deg,#02040d_0%,#0e1019_42%,#51371d_100%)]',
+  'bg-[radial-gradient(circle_at_30%_26%,rgba(242,179,91,0.6),transparent_38%),linear-gradient(130deg,#121620_0%,#223d4e_42%,#926328_100%)]',
+  'bg-[radial-gradient(circle_at_80%_20%,rgba(224,152,69,0.42),transparent_40%),linear-gradient(120deg,#10141d_0%,#3c2a24_52%,#744924_100%)]',
+  'bg-[radial-gradient(circle_at_50%_22%,rgba(207,168,108,0.46),transparent_46%),linear-gradient(132deg,#0a1018_0%,#253040_40%,#5b3c1f_100%)]',
 ];
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+
+  const { data, isPending } = useArticles(1, 4);
+
+  const slides: HeroSlide[] =
+    isPending || !data?.items || data.items.length === 0
+      ? Array.from({ length: 4 }).map((_, index) => ({
+          id: `skeleton-${index}`,
+          badge: 'Memuat...',
+          title: 'Memuat Artikel...',
+          subtitle: 'Harap tunggu sebentar',
+          description: 'Sedang mengambil data artikel terbaru...',
+          backgroundClassName:
+            HERO_BACKGROUNDS[index % HERO_BACKGROUNDS.length],
+          slug: '',
+        }))
+      : data.items.slice(0, 4).map((article, index) => ({
+          id: article.slug,
+          badge: article.topic,
+          title: article.title,
+          subtitle: article.motifLabel || article.region,
+          description: article.excerpt || article.title,
+          backgroundClassName:
+            HERO_BACKGROUNDS[index % HERO_BACKGROUNDS.length],
+          slug: article.slug,
+        }));
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -108,7 +99,7 @@ export function HeroSection() {
         className="h-full"
       >
         <CarouselContent className="-ml-0 h-full">
-          {HERO_SLIDES.map((slide) => (
+          {slides.map((slide) => (
             <CarouselItem key={slide.id} className="pl-0 h-full">
               <div className="relative flex h-full min-h-[420px] flex-col justify-end pb-12 pt-6 pr-6 pl-20 md:pb-14 md:pt-8 md:pr-8 md:pl-20">
                 <div
@@ -140,10 +131,12 @@ export function HeroSection() {
 
                   <div className="mt-7 flex flex-wrap gap-3">
                     <Button
+                      asChild
                       className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
-                      type="button"
                     >
-                      Lihat Songket
+                      <Link href={`/ensiklopedia/${slide.slug}`}>
+                        Baca Artikel
+                      </Link>
                     </Button>
                     <Button
                       asChild
@@ -163,7 +156,7 @@ export function HeroSection() {
         className="absolute right-4 top-4 rounded-md bg-black/40 px-2.5 py-1 text-xs font-semibold text-[#e8e2d5]"
         variant="secondary"
       >
-        {activeSlide + 1} / {HERO_SLIDES.length}
+        {activeSlide + 1} / {slides.length}
       </Badge>
       <Button
         className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
@@ -181,7 +174,7 @@ export function HeroSection() {
       </Button>
 
       <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2.5">
-        {HERO_SLIDES.map((slide, index) => {
+        {slides.map((slide, index) => {
           const isActive = activeSlide === index;
 
           return (
