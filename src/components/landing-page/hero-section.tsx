@@ -2,12 +2,15 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import type { Swiper as SwiperType } from 'swiper';
-import { Autoplay, Pagination } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { useEffect, useState } from 'react';
 
 type HeroSlide = {
   id: number;
@@ -63,79 +66,97 @@ const HERO_SLIDES: HeroSlide[] = [
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const onSelect = () => {
+      setActiveSlide(carouselApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    carouselApi.on('select', onSelect);
+    carouselApi.on('reInit', onSelect);
+
+    return () => {
+      carouselApi.off('select', onSelect);
+      carouselApi.off('reInit', onSelect);
+    };
+  }, [carouselApi]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const autoplayTimer = window.setInterval(() => {
+      carouselApi.scrollNext();
+    }, 5000);
+
+    return () => {
+      window.clearInterval(autoplayTimer);
+    };
+  }, [carouselApi]);
 
   return (
     <article className="relative min-h-[420px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)]">
-      <Swiper
-        modules={[Autoplay, Pagination]}
-        className="hero-swiper h-full"
-        slidesPerView={1}
-        allowTouchMove
-        grabCursor
-        onSwiper={setSwiperInstance}
-        autoplay={{
-          delay: 5000,
-          disableOnInteraction: false,
+      <Carousel
+        setApi={setCarouselApi}
+        opts={{
+          loop: true,
         }}
-        loop
-        pagination={{
-          clickable: true,
-          el: '.hero-swiper-pagination',
-        }}
-        onRealIndexChange={(swiper) => {
-          setActiveSlide(swiper.realIndex);
-        }}
+        className="h-full"
       >
-        {HERO_SLIDES.map((slide) => (
-          <SwiperSlide key={slide.id}>
-            <div className="relative flex h-full min-h-[420px] flex-col justify-end py-6 pr-6 pl-20 md:py-8 md:pr-8 md:pl-20">
-              <div
-                className={`absolute inset-0 ${slide.backgroundClassName}`}
-                aria-hidden="true"
-              />
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-black/25"
-                aria-hidden="true"
-              />
+        <CarouselContent className="-ml-0">
+          {HERO_SLIDES.map((slide) => (
+            <CarouselItem key={slide.id} className="pl-0">
+              <div className="relative flex h-full min-h-[420px] flex-col justify-end py-6 pr-6 pl-20 md:py-8 md:pr-8 md:pl-20">
+                <div
+                  className={`absolute inset-0 ${slide.backgroundClassName}`}
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-black/25"
+                  aria-hidden="true"
+                />
 
-              <div className="relative z-10">
-                <Badge
-                  variant="outline"
-                  className="mb-3 w-fit rounded-lg border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur"
-                >
-                  {slide.badge}
-                </Badge>
-
-                <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
-                  {slide.title}
-                  <br />
-                  {slide.subtitle}
-                </h1>
-
-                <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
-                  {slide.description}
-                </p>
-
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <Button
-                    className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
-                    type="button"
+                <div className="relative z-10">
+                  <Badge
+                    variant="outline"
+                    className="mb-3 w-fit rounded-lg border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur"
                   >
-                    Lihat Songket
-                  </Button>
-                  <Button
-                    asChild
-                    className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
-                  >
-                    <Link href="/ensiklopedia">Jelajahi Ensiklopedia</Link>
-                  </Button>
+                    {slide.badge}
+                  </Badge>
+
+                  <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
+                    {slide.title}
+                    <br />
+                    {slide.subtitle}
+                  </h1>
+
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
+                    {slide.description}
+                  </p>
+
+                  <div className="mt-7 flex flex-wrap gap-3">
+                    <Button
+                      className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
+                      type="button"
+                    >
+                      Lihat Songket
+                    </Button>
+                    <Button
+                      asChild
+                      className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
+                    >
+                      <Link href="/ensiklopedia">Jelajahi Ensiklopedia</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
 
       <Badge
         className="absolute right-4 top-4 rounded-md bg-black/40 px-2.5 py-1 text-xs font-semibold text-[#e8e2d5]"
@@ -144,21 +165,38 @@ export function HeroSection() {
         {activeSlide + 1} / {HERO_SLIDES.length}
       </Badge>
       <Button
-        className="hero-swiper-prev absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
+        className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
         type="button"
-        onClick={() => swiperInstance?.slidePrev()}
+        onClick={() => carouselApi?.scrollPrev()}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Button
-        className="hero-swiper-next absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
+        className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
         type="button"
-        onClick={() => swiperInstance?.slideNext()}
+        onClick={() => carouselApi?.scrollNext()}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
 
-      <div className="hero-swiper-pagination" />
+      <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+        {HERO_SLIDES.map((slide, index) => {
+          const isActive = activeSlide === index;
+
+          return (
+            <button
+              key={slide.id}
+              type="button"
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={isActive}
+              className={`h-2 rounded-full transition-all duration-200 ${
+                isActive ? 'w-7 bg-white' : 'w-2 bg-white/55 hover:bg-white/75'
+              }`}
+              onClick={() => carouselApi?.scrollTo(index)}
+            />
+          );
+        })}
+      </div>
     </article>
   );
 }
