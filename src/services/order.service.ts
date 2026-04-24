@@ -1,5 +1,52 @@
 import type { Prisma } from '@/generated/prisma/client';
+import { ApiError } from '@/lib/error';
 import { orderRepository } from '@/repositories/order.repository';
+
+type UiOrderStatus =
+  | 'Menunggu Bayar'
+  | 'Dikonfirmasi'
+  | 'Pengemasan'
+  | 'Dikirim'
+  | 'Diterima'
+  | 'Dibatalkan';
+
+function mapToUiOrderStatus(order: {
+  orderStatus: string;
+  paymentStatus: string;
+}): UiOrderStatus {
+  if (order.orderStatus === 'cancelled' || order.paymentStatus === 'failed') {
+    return 'Dibatalkan';
+  }
+  if (order.orderStatus === 'delivered') {
+    return 'Diterima';
+  }
+  if (order.orderStatus === 'shipped') {
+    return 'Dikirim';
+  }
+  if (order.orderStatus === 'processing') {
+    return 'Pengemasan';
+  }
+  if (order.orderStatus === 'confirmed') {
+    return 'Dikonfirmasi';
+  }
+  return 'Menunggu Bayar';
+}
+
+function formatOrderDate(date: Date): string {
+  return new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(date));
+}
+
+function formatOrderCurrency(amount: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(amount);
+}
 
 export const orderService = {
   getUserOrders: async (
@@ -49,50 +96,13 @@ export const orderService = {
     const totalPages = Math.ceil(totalItems / limit);
 
     const formattedOrders = orders.map((order) => {
-      let uiStatus:
-        | 'Menunggu Bayar'
-        | 'Dikonfirmasi'
-        | 'Pengemasan'
-        | 'Dikirim'
-        | 'Diterima'
-        | 'Dibatalkan' = 'Menunggu Bayar';
-
-      if (
-        order.orderStatus === 'cancelled' ||
-        order.paymentStatus === 'failed'
-      ) {
-        uiStatus = 'Dibatalkan';
-      } else if (order.orderStatus === 'delivered') {
-        uiStatus = 'Diterima';
-      } else if (order.orderStatus === 'shipped') {
-        uiStatus = 'Dikirim';
-      } else if (order.orderStatus === 'processing') {
-        uiStatus = 'Pengemasan';
-      } else if (order.orderStatus === 'confirmed') {
-        uiStatus = 'Dikonfirmasi';
-      } else if (
-        order.orderStatus === 'pending' ||
-        order.paymentStatus === 'unpaid'
-      ) {
-        uiStatus = 'Menunggu Bayar';
-      }
-
-      const formattedDate = new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }).format(new Date(order.createdAt));
-
-      const formattedPrice = new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-      }).format(Number(order.totalAmount));
+      const uiStatus = mapToUiOrderStatus(order);
 
       return {
+        orderId: order.id,
         id: order.orderNumber || order.id,
-        date: formattedDate,
-        totalPrice: formattedPrice,
+        date: formatOrderDate(order.createdAt),
+        totalPrice: formatOrderCurrency(Number(order.totalAmount)),
         status: uiStatus,
         product: {
           category: order.product.clothingType,
@@ -115,6 +125,66 @@ export const orderService = {
         limit,
         totalPages,
       },
+    };
+  },
+
+  getUserOrderDetail: async (userId: string, identifier: string) => {
+    const order = await orderRepository.findOrderDetailByIdentifier(
+      userId,
+      identifier,
+    );
+
+    if (!order) {
+      throw new ApiError('Pesanan tidak ditemukan', 404);
+    }
+
+    const latestPayment = order.paymentTransactions[0] || null;
+
+    return {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      orderDate: formatOrderDate(order.createdAt),
+      orderStatus: mapToUiOrderStatus(order),
+      paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      totals: {
+        subtotal: formatOrderCurrency(Number(order.subtotal)),
+        shippingCost: formatOrderCurrency(Number(order.shippingCost)),
+        totalAmount: formatOrderCurrency(Number(order.totalAmount)),
+      },
+      product: {
+        id: order.product.id,
+        name: order.product.name,
+        category: order.product.clothingType,
+        location: order.product.province,
+        quantity: order.quantity,
+        unitPrice: formatOrderCurrency(Number(order.productPrice)),
+      },
+      shipping: {
+        courier: order.courier,
+        courierService: order.courierService,
+        trackingNumber: order.trackingNumber,
+        estimatedDelivery: order.estimatedDelivery,
+        recipientName: order.shippingAddress.recipientName,
+        recipientPhone: order.shippingAddress.phone,
+        fullAddress: order.shippingAddress.fullAddress,
+        city: order.shippingAddress.city,
+        province: order.shippingAddress.province,
+        district: order.shippingAddress.district,
+        subdistrict: order.shippingAddress.subdistrict,
+        postalCode: order.shippingAddress.postalCode,
+      },
+      paymentTransaction: latestPayment
+        ? {
+            id: latestPayment.id,
+            status: latestPayment.status,
+            paymentUrl: latestPayment.paymentUrl,
+            vaNumber: latestPayment.vaNumber,
+            paidAt: latestPayment.paidAt,
+            createdAt: latestPayment.createdAt,
+          }
+        : null,
+      customerNotes: order.customerNotes,
     };
   },
 };

@@ -15,6 +15,50 @@ export const orderRepository = {
     });
   },
 
+  findOrderDetailByIdentifier: async (userId: string, identifier: string) => {
+    return prisma.order.findFirst({
+      where: {
+        userId,
+        OR: [{ id: identifier }, { orderNumber: identifier }],
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            province: true,
+            clothingType: true,
+          },
+        },
+        shippingAddress: {
+          select: {
+            recipientName: true,
+            phone: true,
+            province: true,
+            city: true,
+            district: true,
+            subdistrict: true,
+            postalCode: true,
+            fullAddress: true,
+          },
+        },
+        paymentTransactions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            id: true,
+            status: true,
+            paymentUrl: true,
+            vaNumber: true,
+            paidAt: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  },
+
   updateOrderPaymentStatus: async (
     orderId: string,
     data: {

@@ -17,6 +17,7 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
     const mockOrderResult = {
       data: [
         {
+          orderId: 'order-id-1',
           id: 'ORD-123',
           date: '14 Mar 2025',
           totalPrice: 'Rp 100.000',

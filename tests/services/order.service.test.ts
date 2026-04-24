@@ -1,3 +1,4 @@
+import { ApiError } from '@/lib/error';
 import { orderRepository } from '@/repositories/order.repository';
 import { orderService } from '@/services/order.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,6 +50,7 @@ describe('orderService', { tags: ['backend'] }, () => {
 
       expect(result.data).toHaveLength(1);
       expect(result.data[0].id).toBe('ORD-1');
+      expect(result.data[0].orderId).toBe('1');
       expect(result.data[0].status).toBe('Menunggu Bayar');
 
       expect(result.meta.page).toBe(2);
@@ -69,6 +71,75 @@ describe('orderService', { tags: ['backend'] }, () => {
         0,
         10,
       );
+    });
+  });
+
+  describe('getUserOrderDetail', () => {
+    it('should return formatted order detail', async () => {
+      mockRepo.findOrderDetailByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'confirmed',
+        paymentStatus: 'paid',
+        paymentMethod: 'bank_transfer',
+        subtotal: 120000,
+        shippingCost: 30000,
+        totalAmount: 150000,
+        productPrice: 120000,
+        quantity: 1,
+        courier: 'JNE',
+        courierService: 'REG',
+        trackingNumber: 'RESI-1',
+        estimatedDelivery: null,
+        customerNotes: null,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+        paymentTransactions: [
+          {
+            id: 'trx-1',
+            status: 'success',
+            paymentUrl: null,
+            vaNumber: '123456',
+            paidAt: null,
+            createdAt: new Date('2025-03-14T00:00:00.000Z'),
+          },
+        ],
+      } as never);
+
+      const result = await orderService.getUserOrderDetail('user-1', 'ORD-1');
+
+      expect(mockRepo.findOrderDetailByIdentifier).toHaveBeenCalledWith(
+        'user-1',
+        'ORD-1',
+      );
+      expect(result.orderId).toBe('order-id-1');
+      expect(result.orderNumber).toBe('ORD-1');
+      expect(result.orderStatus).toBe('Dikonfirmasi');
+      expect(result.paymentStatus).toBe('paid');
+      expect(result.totals.totalAmount).toContain('Rp');
+    });
+
+    it('should throw ApiError when order not found', async () => {
+      mockRepo.findOrderDetailByIdentifier.mockResolvedValue(null);
+
+      await expect(
+        orderService.getUserOrderDetail('user-1', 'ORD-404'),
+      ).rejects.toThrow(ApiError);
     });
   });
 });

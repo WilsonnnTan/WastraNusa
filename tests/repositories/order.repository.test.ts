@@ -117,6 +117,58 @@ describe('orderRepository', { tags: ['db'] }, () => {
     });
   });
 
+  describe('findOrderDetailByIdentifier', () => {
+    it('should query by user and identifier with required relations', async () => {
+      const spy = vi.spyOn(prisma.order, 'findFirst').mockResolvedValue(null);
+
+      await orderRepository.findOrderDetailByIdentifier(userId, 'ORD-1');
+
+      expect(spy).toHaveBeenCalledWith({
+        where: {
+          userId,
+          OR: [{ id: 'ORD-1' }, { orderNumber: 'ORD-1' }],
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              province: true,
+              clothingType: true,
+            },
+          },
+          shippingAddress: {
+            select: {
+              recipientName: true,
+              phone: true,
+              province: true,
+              city: true,
+              district: true,
+              subdistrict: true,
+              postalCode: true,
+              fullAddress: true,
+            },
+          },
+          paymentTransactions: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              status: true,
+              paymentUrl: true,
+              vaNumber: true,
+              paidAt: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      spy.mockRestore();
+    });
+  });
+
   describe('countOrdersByUserId', () => {
     it('should correctly pass filters to prisma count', async () => {
       const spy = vi.spyOn(prisma.order, 'count').mockResolvedValue(42);
