@@ -145,26 +145,6 @@ export function CheckoutMain() {
                 onSelect={setSelectedShippingId}
               />
 
-              <div className="bg-white rounded-2xl border border-[#e8e2d5] p-5 shadow-sm">
-                <h4 className="text-sm font-bold text-[#3d5446] mb-3">
-                  Data Item yang akan dikirim ke backend
-                </h4>
-                <div className="space-y-2 text-xs text-[#3d5446]">
-                  {selectedItems.map((item) => (
-                    <div
-                      key={item.cartItemId}
-                      className="rounded-lg bg-[#fbf8f2] p-3"
-                    >
-                      <p>ID Produk: {item.productId}</p>
-                      <p>Jumlah: {item.quantity}</p>
-                      <p>
-                        Harga Frontend: Rp {item.price.toLocaleString('id-ID')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               <div className="mt-10 pt-6 border-t border-[#e8e2d5] flex flex-col sm:flex-row justify-between items-center gap-4">
                 <Link href="/cart">
                   <Button
@@ -191,7 +171,7 @@ export function CheckoutMain() {
               </div>
             </div>
 
-            <aside className="lg:col-span-4 lg:sticky lg:top-24">
+            <aside className="lg:col-span-4">
               <CheckoutSummary totals={totals} items={selectedItems} />
             </aside>
           </div>

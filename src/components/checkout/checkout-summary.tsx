@@ -40,7 +40,7 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
   if (!totals) return null;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm sticky top-24">
+    <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-[#3d5446] text-sm">Ringkasan Pesanan</h3>
         <span className="text-[11px] text-[#3d5446]">

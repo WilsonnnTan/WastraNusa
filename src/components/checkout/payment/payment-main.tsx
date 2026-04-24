@@ -141,7 +141,7 @@ export function PaymentMain() {
               </div>
             </div>
 
-            <aside className="lg:col-span-4 lg:sticky lg:top-24">
+            <aside className="lg:col-span-4">
               <CheckoutSummary totals={totals} items={items} />
             </aside>
           </div>
