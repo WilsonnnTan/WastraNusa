@@ -143,6 +143,18 @@ describe('articleRepository', { tags: ['db'] }, () => {
       expect(article).toBeDefined();
       expect(article?.id).toBe(SEED_ARTICLE_1.id);
       expect(article?.title).toBe(SEED_ARTICLE_1.title);
+      expect(article?.products).toBeDefined();
+      expect(Array.isArray(article?.products)).toBe(true);
+      if (article && article.products.length > 0) {
+        expect(article.products[0]).toEqual(
+          expect.objectContaining({
+            name: expect.any(String),
+            province: expect.any(String),
+            island: expect.any(String),
+            price: expect.anything(),
+          }),
+        );
+      }
     });
 
     it('should find by slug', async () => {
@@ -152,6 +164,18 @@ describe('articleRepository', { tags: ['db'] }, () => {
 
       expect(article).toBeDefined();
       expect(article?.slug).toBe(SEED_ARTICLE_2.slug);
+      expect(article?.products).toBeDefined();
+      expect(Array.isArray(article?.products)).toBe(true);
+      if (article && article.products.length > 0) {
+        expect(article.products[0]).toEqual(
+          expect.objectContaining({
+            name: expect.any(String),
+            province: expect.any(String),
+            island: expect.any(String),
+            price: expect.anything(),
+          }),
+        );
+      }
     });
 
     it('should return null for non-existent', async () => {
