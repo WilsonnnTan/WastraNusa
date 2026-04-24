@@ -140,10 +140,7 @@ function isOrderEditable(order: AdminOrderItem) {
 
 function isEditableTargetStatus(
   status: OrderStatus,
-): status is
-  | OrderStatus.processing
-  | OrderStatus.shipped
-  | OrderStatus.delivered {
+): status is 'processing' | 'shipped' | 'delivered' {
   return (
     status === OrderStatus.processing ||
     status === OrderStatus.shipped ||
