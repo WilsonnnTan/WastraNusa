@@ -1,5 +1,6 @@
 import { ApiError } from '@/lib/error';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
+import { addressRepository } from '@/repositories/address.repository';
 import { orderRepository } from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
@@ -17,9 +18,7 @@ describe('paymentService', () => {
   describe('checkout', () => {
     const mockUserId = 'user-123';
     const mockInput = {
-      productId: 'prod-1',
-      variantId: 'var-1',
-      quantity: 2,
+      items: [{ productId: 'prod-1', variantId: 'var-1', quantity: 2 }],
       shippingAddressId: 'addr-1',
       courier: 'JNE',
       courierService: 'REG',
@@ -27,6 +26,11 @@ describe('paymentService', () => {
     };
 
     it('should successfully checkout with variant', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
@@ -62,27 +66,132 @@ describe('paymentService', () => {
     });
 
     it('should throw error if product not found', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
       vi.mocked(productRepository.findProductById).mockResolvedValue(null);
 
       await expect(
         paymentService.checkout(mockInput, mockUserId),
-      ).rejects.toThrow(new ApiError('Product not found', 404));
+      ).rejects.toThrow(new ApiError('Product not found: prod-1', 404));
     });
 
     it('should throw error if insufficient stock', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        name: 'Product 1',
         price: 100000,
         stock: 1, // Only 1 in stock
       } as never);
 
       await expect(
         paymentService.checkout(
-          { ...mockInput, variantId: undefined },
+          {
+            ...mockInput,
+            items: [{ productId: 'prod-1', quantity: 2, variantId: undefined }],
+          },
           mockUserId,
         ),
-      ).rejects.toThrow(new ApiError('Insufficient product stock', 400));
+      ).rejects.toThrow(
+        new ApiError('Insufficient product stock for Product 1', 400),
+      );
+    });
+
+    it('should fallback to product checkout when variant is not found', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        price: 100000,
+        name: 'Product 1',
+        stock: 10,
+      } as never);
+
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue(
+        null,
+      );
+
+      vi.mocked(createMidtransTransaction).mockResolvedValue({
+        token: 'snap-token',
+        redirect_url: 'https://checkout.midtrans.com/snap-token',
+      });
+
+      const result = await paymentService.checkout(mockInput, mockUserId);
+
+      expect(result.token).toBe('snap-token');
+      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variantId: null,
+          variantName: null,
+          productPrice: 200000,
+          subtotal: 200000,
+          totalAmount: 215000,
+        }),
+      );
+      expect(
+        productVariantRepository.decrementVariantStock,
+      ).not.toHaveBeenCalled();
+      expect(productRepository.decrementProductStock).toHaveBeenCalledWith(
+        'prod-1',
+        2,
+      );
+    });
+
+    it('should use default address when shippingAddressId is not provided', async () => {
+      vi.mocked(addressRepository.findDefaultByUser).mockResolvedValue({
+        id: 'addr-default',
+        userId: mockUserId,
+      } as never);
+
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        price: 100000,
+        name: 'Product 1',
+        stock: 10,
+      } as never);
+
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
+        id: 'var-1',
+        productId: 'prod-1',
+        name: 'Variant 1',
+        price: 120000,
+        stock: 5,
+      } as never);
+
+      vi.mocked(createMidtransTransaction).mockResolvedValue({
+        token: 'snap-token',
+        redirect_url: 'https://checkout.midtrans.com/snap-token',
+      });
+
+      const result = await paymentService.checkout(
+        {
+          ...mockInput,
+          shippingAddressId: undefined,
+        },
+        mockUserId,
+      );
+
+      expect(result.token).toBe('snap-token');
+      expect(addressRepository.findDefaultByUser).toHaveBeenCalledWith(
+        mockUserId,
+      );
+      expect(addressRepository.findById).not.toHaveBeenCalled();
+      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          shippingAddressId: 'addr-default',
+        }),
+      );
     });
   });
 

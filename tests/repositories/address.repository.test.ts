@@ -41,6 +41,24 @@ describe('addressRepository', { tags: ['db'] }, () => {
     });
   });
 
+  describe('findDefaultByUser', () => {
+    it('should return the default address for a user', async () => {
+      const address = await addressRepository.findDefaultByUser(regularUserId);
+
+      expect(address).toBeDefined();
+      expect(address?.id).toBe(SEED_ADDRESS_USER.id);
+      expect(address?.isDefault).toBe(true);
+    });
+
+    it('should return null when user has no default address', async () => {
+      const address = await addressRepository.findDefaultByUser(
+        'user-without-addresses',
+      );
+
+      expect(address).toBeNull();
+    });
+  });
+
   describe('create', () => {
     it('should create a new address', async () => {
       const id = crypto.randomUUID();
