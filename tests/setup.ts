@@ -78,6 +78,12 @@ vi.mock('@/repositories/product.repository', () => ({
   productRepository: {
     findProductById: vi.fn(),
     decrementProductStock: vi.fn(),
+    findAll: vi.fn(),
+    countAll: vi.fn(),
+    findByIdOrSlug: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -85,6 +91,16 @@ vi.mock('@/repositories/productVariant.repository', () => ({
   productVariantRepository: {
     findVariantById: vi.fn(),
     decrementVariantStock: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/product.service', () => ({
+  productService: {
+    getProducts: vi.fn(),
+    getProductDetail: vi.fn(),
+    createProduct: vi.fn(),
+    updateProduct: vi.fn(),
+    deleteProduct: vi.fn(),
   },
 }));
 
