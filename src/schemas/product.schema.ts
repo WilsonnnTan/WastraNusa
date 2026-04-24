@@ -17,7 +17,7 @@ const productVariantInputSchema = z
 const productPayloadSchema = z.object({
   articleId: z.string().min(1, 'Artikel wajib dipilih'),
   name: z.string().min(1, 'Nama produk wajib diisi'),
-  slug: z.string().optional(),
+  slug: z.string().min(1, 'Slug produk wajib diisi'),
   description: z.string().nullish(),
   price: decimalNumberSchema,
   stock: z.number().int().min(0, 'Stok produk tidak boleh negatif'),
@@ -34,7 +34,12 @@ const productPayloadSchema = z.object({
 
 export const createProductSchema = productPayloadSchema.strict();
 
-export const updateProductSchema = productPayloadSchema.partial().strict();
+export const updateProductSchema = productPayloadSchema
+  .partial()
+  .extend({
+    slug: z.string().min(1, 'Slug produk wajib diisi'),
+  })
+  .strict();
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;

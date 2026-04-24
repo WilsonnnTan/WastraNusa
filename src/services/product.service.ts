@@ -13,13 +13,6 @@ import {
   type ProductInventoryListResponse,
 } from '@/types/product';
 
-const toSlug = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
 const mapVariant = (variant: {
   id: string;
   name: string;
@@ -163,7 +156,7 @@ export const productService = {
       id: crypto.randomUUID(),
       articleId: data.articleId,
       name: data.name,
-      slug: data.slug || toSlug(data.name),
+      slug: data.slug,
       description: data.description ?? null,
       price: data.price,
       stock: data.stock,
