@@ -99,6 +99,7 @@ vi.mock('@/repositories/address.repository', () => ({
   addressRepository: {
     findAllByUser: vi.fn(),
     findById: vi.fn(),
+    findDefaultByUser: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -121,4 +122,29 @@ vi.mock('@/services/address.service', () => ({
 vi.mock('@/lib/midtrans', () => ({
   createMidtransTransaction: vi.fn(),
   verifySignatureKey: vi.fn(),
+}));
+
+vi.mock('@/repositories/cart.repository', () => ({
+  cartRepository: {
+    findOrCreateByUser: vi.fn(),
+    findByUserId: vi.fn(),
+    addItem: vi.fn(),
+    updateItemQuantity: vi.fn(),
+    removeItem: vi.fn(),
+    clearCart: vi.fn(),
+    removeItems: vi.fn(),
+    getCartItemCount: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/cart.service', () => ({
+  cartService: {
+    getCart: vi.fn(),
+    addToCart: vi.fn(),
+    updateCartItemQuantity: vi.fn(),
+    removeFromCart: vi.fn(),
+    removeMultipleFromCart: vi.fn(),
+    clearCart: vi.fn(),
+    getCartCount: vi.fn(),
+  },
 }));
