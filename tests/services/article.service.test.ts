@@ -29,6 +29,7 @@ const MOCK_ARTICLE = {
   wikimediaVideoUrl: null,
   wikipediaLastSync: null,
   sections: [],
+  products: [],
   summary: 'Test summary',
   status: 'published' as const,
   createdBy: 'user-1',
@@ -319,6 +320,32 @@ describe('articleService', { tags: ['backend'] }, () => {
         MOCK_ARTICLE.id,
         'user-1',
       );
+    });
+
+    it('should map linked products into relatedProducts', async () => {
+      mockRepo.findByIdOrSlug.mockResolvedValue({
+        ...MOCK_ARTICLE,
+        products: [
+          {
+            name: 'Batik Tulis Kawung Premium',
+            province: 'DI Yogyakarta',
+            island: 'Jawa',
+            price: 450000,
+          },
+        ],
+      } as never);
+      mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);
+      mockRepo.findUserLike.mockResolvedValue(null);
+
+      const result = await articleService.getArticleDetail('test-id-1');
+
+      expect(result.relatedProducts).toEqual([
+        {
+          name: 'Batik Tulis Kawung Premium',
+          location: 'DI Yogyakarta, Jawa',
+          price: 'Rp 450.000',
+        },
+      ]);
     });
 
     it('should throw ApiError(404) when article not found', async () => {

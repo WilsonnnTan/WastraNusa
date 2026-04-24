@@ -15,6 +15,12 @@ import type { LikedArticlesResponse } from '@/types/profile';
 
 const formatCount = (value: number) =>
   new Intl.NumberFormat('en-US').format(value);
+const formatRupiah = (value: number) =>
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(value);
 
 export const articleService = {
   getArticles: async (
@@ -160,7 +166,11 @@ export const articleService = {
         { label: 'Jenis Wastra', value: article.motifLabel },
         { label: 'Durasi Baca', value: `${article.readMinutes} menit` },
       ],
-      relatedProducts: [],
+      relatedProducts: (article.products ?? []).map((product) => ({
+        name: product.name,
+        location: [product.province, product.island].filter(Boolean).join(', '),
+        price: formatRupiah(Number(product.price)),
+      })),
       discussionCount: 0,
       nextArticle: {
         slug: '',
