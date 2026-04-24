@@ -197,8 +197,7 @@ model Product {
   slug        String  @unique
   description String?
 
-  price          Decimal
-  compareAtPrice Decimal?
+  price Decimal
 
   stock Int    @default(0)
   sku   String @unique

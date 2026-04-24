@@ -9,7 +9,6 @@ CREATE TABLE "product" (
     "slug" TEXT NOT NULL,
     "description" TEXT,
     "price" DECIMAL(65,30) NOT NULL,
-    "compareAtPrice" DECIMAL(65,30),
     "stock" INTEGER NOT NULL DEFAULT 0,
     "sku" TEXT NOT NULL,
     "weight" INTEGER NOT NULL,
