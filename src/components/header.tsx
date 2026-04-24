@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 const menuItems = [
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/ensiklopedia' },
-  { label: 'Katalog', icon: Grid2X2 },
+  { label: 'Katalog', icon: Grid2X2, href: '/katalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
   { label: 'Profil', icon: UserRound, href: '/profile' },
 ];
