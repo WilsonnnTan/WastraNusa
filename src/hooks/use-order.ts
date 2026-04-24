@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 export interface OrderItem {
+  orderId: string;
   id: string;
   date: string;
   totalPrice: string;
@@ -20,6 +21,57 @@ export interface OrderItem {
   actions: ('Lacak Pesanan' | 'Detail')[];
 }
 
+export interface OrderDetail {
+  orderId: string;
+  orderNumber: string;
+  orderDate: string;
+  orderStatus:
+    | 'Dikirim'
+    | 'Diterima'
+    | 'Dibatalkan'
+    | 'Menunggu Bayar'
+    | 'Dikonfirmasi'
+    | 'Pengemasan';
+  paymentStatus: 'unpaid' | 'paid' | 'failed' | 'refunded';
+  paymentMethod: string | null;
+  totals: {
+    subtotal: string;
+    shippingCost: string;
+    totalAmount: string;
+  };
+  product: {
+    id: string;
+    name: string;
+    category: string;
+    location: string;
+    quantity: number;
+    unitPrice: string;
+  };
+  shipping: {
+    courier: string;
+    courierService: string;
+    trackingNumber: string | null;
+    estimatedDelivery: string | null;
+    recipientName: string;
+    recipientPhone: string;
+    fullAddress: string;
+    city: string;
+    province: string;
+    district: string;
+    subdistrict: string | null;
+    postalCode: string;
+  };
+  paymentTransaction: {
+    id: string;
+    status: 'pending' | 'success' | 'failed' | 'expired';
+    paymentUrl: string | null;
+    vaNumber: string | null;
+    paidAt: string | null;
+    createdAt: string;
+  } | null;
+  customerNotes: string | null;
+}
+
 export interface PaginatedOrders {
   data: OrderItem[];
   meta: {
@@ -28,6 +80,15 @@ export interface PaginatedOrders {
     limit: number;
     totalPages: number;
   };
+}
+
+async function parseOrderResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    throw new Error('Gagal mengambil data pesanan');
+  }
+
+  const result = await response.json();
+  return result.data as T;
 }
 
 export function useOrders(
@@ -46,12 +107,20 @@ export function useOrders(
       queryParams.set('limit', limit.toString());
 
       const response = await fetch(`/api/orders?${queryParams.toString()}`);
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data pesanan');
-      }
-
-      const result = await response.json();
-      return result.data;
+      return parseOrderResponse<PaginatedOrders>(response);
     },
+  });
+}
+
+export function useOrderDetail(identifier: string) {
+  return useQuery({
+    queryKey: ['order-detail', identifier],
+    queryFn: async (): Promise<OrderDetail> => {
+      const response = await fetch(
+        `/api/orders/${encodeURIComponent(identifier)}`,
+      );
+      return parseOrderResponse<OrderDetail>(response);
+    },
+    enabled: Boolean(identifier),
   });
 }
