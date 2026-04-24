@@ -1,6 +1,6 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
-import { KatalogMain } from '@/components/katalog/katalog-main';
+import { KatalogMain } from '@/components/katalog/main/katalog-main';
 
 export default function KatalogPage() {
   return (

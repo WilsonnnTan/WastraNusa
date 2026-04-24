@@ -1,6 +1,6 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
-import { KatalogDetailMain } from '@/components/katalog/katalog-detail-main';
+import { KatalogDetailMain } from '@/components/katalog/detail/katalog-detail-main';
 
 type Props = {
   params: Promise<{ slug: string }>;
