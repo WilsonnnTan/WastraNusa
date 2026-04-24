@@ -34,7 +34,9 @@ export function PaymentMain() {
     () => null,
   ) as CheckoutSessionData | null;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { mutateAsync: checkout, isPending: isSubmitting } = useCheckout();
+  const isProcessing = isSubmitting || isRedirecting;
 
   const items = useMemo(() => sessionData?.items ?? [], [sessionData]);
   const shipping = useMemo(
@@ -61,9 +63,10 @@ export function PaymentMain() {
   }, [items, shipping]);
 
   const handleConfirmAndPay = async () => {
-    if (items.length === 0 || isSubmitting) return;
+    if (items.length === 0 || isProcessing) return;
 
     setErrorMessage(null);
+    setIsRedirecting(true);
 
     try {
       const result = await checkout({
@@ -83,6 +86,7 @@ export function PaymentMain() {
 
       window.location.href = result.redirect_url;
     } catch (error) {
+      setIsRedirecting(false);
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -136,10 +140,10 @@ export function PaymentMain() {
 
                 <Button
                   onClick={handleConfirmAndPay}
-                  disabled={isSubmitting}
+                  disabled={isProcessing}
                   className="w-full sm:w-auto bg-[#cc6644] hover:bg-[#b3593b] text-white px-8 py-6 rounded-xl font-bold shadow-lg shadow-[#cc6644]/20 transition-all active:scale-95 gap-2"
                 >
-                  {isSubmitting ? (
+                  {isProcessing ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />{' '}
                       Memproses...
