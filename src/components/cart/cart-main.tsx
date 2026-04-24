@@ -2,88 +2,122 @@
 
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
-import { ShoppingCart } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  useCart,
+  useRemoveMultipleFromCart,
+  useUpdateCartItem,
+} from '@/hooks/use-cart';
+import { Loader2, ShoppingCart } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { CartProduct } from './cart-list';
 import { CartList } from './cart-list';
 import { CartSummary } from './cart-summary';
 
-const dummyCart = [
-  {
-    id: '1',
-    name: 'Batik Tulis Kawung Klasik',
-    price: 350000,
-    size: 'M',
-    stock: 48,
-    quantity: 1,
-    clothingType: 'Batik',
-    province: 'Jawa Tengah',
-  },
-  {
-    id: '1-2',
-    name: 'Batik Cap Parang Kusumo',
-    price: 150000,
-    size: 'L',
-    stock: 20,
-    quantity: 1,
-    clothingType: 'Batik',
-    province: 'Jawa Tengah',
-  },
-  {
-    id: '1-3',
-    name: 'Kemeja Batik Sogan Premium',
-    price: 550000,
-    size: 'XL',
-    stock: 10,
-    quantity: 1,
-    clothingType: 'Batik',
-    province: 'Jawa Tengah',
-  },
-  {
-    id: '2',
-    name: 'Tenun Ikat Flores Indigo',
-    price: 1160000,
-    size: 'M',
-    stock: 24,
-    quantity: 1,
-    clothingType: 'Tenun',
-    province: 'Nusa Tenggara Timur',
-  },
-  {
-    id: '2-2',
-    name: 'Selendang Tenun Sumba',
-    price: 450000,
-    size: 'All Size',
-    stock: 15,
-    quantity: 1,
-    clothingType: 'Tenun',
-    province: 'Nusa Tenggara Timur',
-  },
-  {
-    id: '3',
-    name: 'Songket Palembang Lepus',
-    price: 1200000,
-    size: 'M',
-    stock: 15,
-    quantity: 1,
-    clothingType: 'Songket',
-    province: 'Sumatera Selatan',
-  },
-  {
-    id: '3-2',
-    name: 'Tanjak Songket Tradisional',
-    price: 250000,
-    size: 'All Size',
-    stock: 30,
-    quantity: 1,
-    clothingType: 'Songket',
-    province: 'Sumatera Selatan',
-  },
-];
-
 export function CartMain() {
-  const [items, setItems] = useState(dummyCart);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [localQuantities, setLocalQuantities] = useState<
+    Record<string, number>
+  >({});
+  const pendingQuantityUpdatesRef = useRef<Map<string, number>>(new Map());
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fetch cart data using TanStack Query
+  const { data: cart, isLoading, error } = useCart();
+  const { mutate: updateQuantity } = useUpdateCartItem();
+  const { mutate: removeMultiple } = useRemoveMultipleFromCart();
+
+  const flushPendingQuantityUpdates = useCallback(
+    (options?: { keepalive?: boolean }) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+
+      const updates = Array.from(pendingQuantityUpdatesRef.current.entries());
+      if (updates.length === 0) return;
+
+      pendingQuantityUpdatesRef.current.clear();
+
+      setLocalQuantities((prev) => {
+        const next = { ...prev };
+        updates.forEach(([id]) => {
+          delete next[id];
+        });
+        return next;
+      });
+
+      if (options?.keepalive) {
+        updates.forEach(([id, quantity]) => {
+          void fetch(`/api/cart/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity }),
+            keepalive: true,
+          });
+        });
+        return;
+      }
+
+      updates.forEach(([id, quantity]) => {
+        updateQuantity({ id, data: { quantity } });
+      });
+    },
+    [updateQuantity],
+  );
+
+  const scheduleDebouncedQuantityUpdate = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      flushPendingQuantityUpdates();
+    }, 5000);
+  }, [flushPendingQuantityUpdates]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      flushPendingQuantityUpdates({ keepalive: true });
+    };
+
+    const handlePageHide = () => {
+      flushPendingQuantityUpdates({ keepalive: true });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushPendingQuantityUpdates({ keepalive: true });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      flushPendingQuantityUpdates();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [flushPendingQuantityUpdates]);
+
+  // Transform cart items to CartProduct interface
+  const items: CartProduct[] = useMemo(() => {
+    if (!cart || !cart.items) return [];
+
+    return cart.items.map((cartItem) => ({
+      id: cartItem.id,
+      name: cartItem.product.name,
+      price: Number(cartItem.product.price),
+      size: cartItem.variant?.name || 'Default',
+      stock: cartItem.product.stock,
+      quantity: localQuantities[cartItem.id] ?? cartItem.quantity,
+      clothingType: cartItem.product.clothingType,
+      province: cartItem.product.province,
+    }));
+  }, [cart, localQuantities]);
 
   const toggleItem = (id: string) => {
     setSelectedIds((prev) =>
@@ -93,16 +127,19 @@ export function CartMain() {
     );
   };
 
-  const updateQuantity = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQty = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQty };
-        }
-        return item;
-      }),
-    );
+  const handleUpdateQuantity = (id: string, delta: number) => {
+    const baseQuantity =
+      localQuantities[id] ?? cart?.items.find((i) => i.id === id)?.quantity;
+    if (baseQuantity == null) return;
+
+    const newQty = Math.max(1, baseQuantity + delta);
+
+    setLocalQuantities((prev) => ({
+      ...prev,
+      [id]: newQty,
+    }));
+    pendingQuantityUpdatesRef.current.set(id, newQty);
+    scheduleDebouncedQuantityUpdate();
   };
 
   const toggleAll = () => {
@@ -114,27 +151,25 @@ export function CartMain() {
   };
 
   const handleDeleteSelected = () => {
-    setItems((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
+    if (selectedIds.length === 0) return;
+    removeMultiple({ cartItemIds: selectedIds });
     setSelectedIds([]);
   };
 
-  // PERBAIKAN: Memisahkan totals dan data item yang dipilih untuk sidebar
+  // Calculate totals based on selected items
   const { totals, selectedItemsForSummary } = useMemo(() => {
-    // 1. Ambil data mentah item yang sedang dicentang
     const selectedItems = items.filter((item) => selectedIds.includes(item.id));
 
-    // 2. Hitung harga dan biaya
     const subtotal = selectedItems.reduce(
       (acc, curr) => acc + curr.price * curr.quantity,
       0,
     );
     const serviceFee = selectedIds.length > 0 ? 5000 : 0;
 
-    // 3. Format data agar sesuai dengan interface CartSummary
     const formattedItems = selectedItems.map((item) => ({
       id: item.id,
       name: item.name,
-      variant: item.size, // Mapping properti size ke variant
+      variant: item.size,
       price: item.price,
       quantity: item.quantity,
     }));
@@ -164,25 +199,44 @@ export function CartMain() {
           </h1>
         </div>
 
-        <div className="lg:grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8">
-            <CartList
-              items={items}
-              selectedIds={selectedIds}
-              onToggleItem={toggleItem}
-              onToggleAll={toggleAll}
-              onUpdateQty={updateQuantity}
-              onDeleteSelected={handleDeleteSelected}
-            />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-brand" />
+            <span className="ml-2 text-[#3d5446]">Memuat keranjang...</span>
           </div>
-          <div className="lg:col-span-4">
-            {/* PERBAIKAN: Mengirimkan data formattedItems ke props selectedItems */}
-            <CartSummary
-              totals={totals}
-              selectedItems={selectedItemsForSummary}
-            />
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+            <p className="font-bold">Gagal memuat keranjang</p>
+            <p className="text-sm mt-1">{error.message}</p>
           </div>
-        </div>
+        ) : items.length === 0 ? (
+          <div className="bg-white rounded-xl border border-[#e8e2d5] p-8 text-center">
+            <ShoppingCart className="w-12 h-12 mx-auto text-[#8e8476] mb-4" />
+            <p className="text-lg font-semibold text-[#3d5446]">
+              Keranjang Anda kosong
+            </p>
+            <p className="text-[#8e8476] mt-2">Tambahkan produk favorit Anda</p>
+          </div>
+        ) : (
+          <div className="lg:grid lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8">
+              <CartList
+                items={items}
+                selectedIds={selectedIds}
+                onToggleItem={toggleItem}
+                onToggleAll={toggleAll}
+                onUpdateQty={handleUpdateQuantity}
+                onDeleteSelected={handleDeleteSelected}
+              />
+            </div>
+            <div className="lg:col-span-4">
+              <CartSummary
+                totals={totals}
+                selectedItems={selectedItemsForSummary}
+              />
+            </div>
+          </div>
+        )}
       </main>
       <Footer />
     </div>
