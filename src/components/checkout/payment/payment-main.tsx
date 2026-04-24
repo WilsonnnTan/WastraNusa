@@ -68,6 +68,7 @@ export function PaymentMain() {
     try {
       const result = await checkout({
         items: items.map((item) => ({
+          cartItemId: item.cartItemId,
           productId: item.productId,
           variantId: item.variantId,
           quantity: item.quantity,

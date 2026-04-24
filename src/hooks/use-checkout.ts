@@ -4,6 +4,7 @@ import type { JSendResponse } from '@/lib/jsend';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface CheckoutItemInput {
+  cartItemId?: string;
   productId: string;
   variantId?: string | null;
   quantity: number;

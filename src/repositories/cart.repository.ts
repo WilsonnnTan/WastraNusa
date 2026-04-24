@@ -148,6 +148,44 @@ export const cartRepository = {
   },
 
   /**
+   * Remove purchased cart items by id
+   */
+  removePurchasedItemsById: async (userId: string, cartItemIds: string[]) => {
+    if (cartItemIds.length === 0) {
+      return { count: 0 };
+    }
+
+    return prisma.cartItem.deleteMany({
+      where: {
+        id: { in: cartItemIds },
+        cart: { userId },
+      },
+    });
+  },
+
+  /**
+   * Remove purchased cart items by product+variant ownership.
+   */
+  removePurchasedItemsByProductVariant: async (
+    userId: string,
+    items: Array<{ productId: string; variantId: string | null }>,
+  ) => {
+    if (items.length === 0) {
+      return { count: 0 };
+    }
+
+    return prisma.cartItem.deleteMany({
+      where: {
+        cart: { userId },
+        OR: items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+        })),
+      },
+    });
+  },
+
+  /**
    * Get total item count in cart
    */
   getCartItemCount: async (userId: string) => {
