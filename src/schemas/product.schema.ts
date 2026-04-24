@@ -1,0 +1,46 @@
+import { Gender, ProductStatus, VariantType } from '@/generated/prisma/enums';
+import { z } from 'zod';
+
+const decimalNumberSchema = z.number().min(0, 'Nilai tidak boleh negatif');
+
+const productVariantInputSchema = z
+  .object({
+    id: z.string().optional(),
+    name: z.string().min(1, 'Nama varian wajib diisi'),
+    type: z.nativeEnum(VariantType),
+    price: decimalNumberSchema.nullish(),
+    stock: z.number().int().min(0, 'Stok varian tidak boleh negatif'),
+    sku: z.string().min(1, 'SKU varian wajib diisi'),
+  })
+  .strict();
+
+const productPayloadSchema = z.object({
+  articleId: z.string().min(1, 'Artikel wajib dipilih'),
+  name: z.string().min(1, 'Nama produk wajib diisi'),
+  slug: z.string().min(1, 'Slug produk wajib diisi'),
+  description: z.string().nullish(),
+  price: decimalNumberSchema,
+  stock: z.number().int().min(0, 'Stok produk tidak boleh negatif'),
+  sku: z.string().min(1, 'SKU produk wajib diisi'),
+  weight: z
+    .number()
+    .int()
+    .min(1, 'Berat produk wajib diisi dalam gram dan minimal 1'),
+  clothingType: z.string().min(1, 'Jenis pakaian wajib diisi'),
+  gender: z.nativeEnum(Gender),
+  status: z.nativeEnum(ProductStatus).optional(),
+  variants: z.array(productVariantInputSchema).optional(),
+});
+
+export const createProductSchema = productPayloadSchema.strict();
+
+export const updateProductSchema = productPayloadSchema
+  .partial()
+  .extend({
+    slug: z.string().min(1, 'Slug produk wajib diisi'),
+  })
+  .strict();
+
+export type CreateProductInput = z.infer<typeof createProductSchema>;
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+export type ProductVariantInput = z.infer<typeof productVariantInputSchema>;

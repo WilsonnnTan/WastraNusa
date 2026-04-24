@@ -42,7 +42,7 @@ const navigationIcons = {
 const ADMIN_NAVIGATION = [
   { title: 'Dashboard', href: '/admin/dashboard' },
   { title: 'Article', href: '/admin/article' },
-  { title: 'Produk & Inventori', href: '/admin/inventori' },
+  { title: 'Produk & Inventori', href: '/admin/product-inventory' },
   { title: 'Pesanan', href: '/admin/pesanan' },
 ];
 

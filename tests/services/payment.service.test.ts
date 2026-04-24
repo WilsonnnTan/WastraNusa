@@ -81,7 +81,7 @@ describe('paymentService', () => {
       ).rejects.toThrow(new ApiError('Product not found: prod-1', 404));
     });
 
-    it('should throw error if insufficient stock', async () => {
+    it('should throw error if insufficient product stock', async () => {
       vi.mocked(addressRepository.findById).mockResolvedValue({
         id: 'addr-1',
         userId: mockUserId,
@@ -104,6 +104,64 @@ describe('paymentService', () => {
         ),
       ).rejects.toThrow(
         new ApiError('Insufficient product stock for Product 1', 400),
+      );
+    });
+
+    it('should throw error if variant belongs to another product', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        name: 'Product 1',
+        price: 100000,
+        stock: 10,
+      } as never);
+
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
+        id: 'var-wrong',
+        productId: 'prod-2', // Different product
+        name: 'Variant Wrong',
+        price: 120000,
+        stock: 5,
+      } as never);
+
+      await expect(
+        paymentService.checkout(mockInput, mockUserId),
+      ).rejects.toThrow(
+        new ApiError('Variant does not belong to this product', 400),
+      );
+    });
+
+    it('should throw error if insufficient variant stock', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        name: 'Product 1',
+        price: 100000,
+        stock: 10,
+      } as never);
+
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
+        id: 'var-1',
+        productId: 'prod-1',
+        name: 'Variant 1',
+        price: 120000,
+        stock: 1, // Only 1 in stock
+      } as never);
+
+      await expect(
+        paymentService.checkout(mockInput, mockUserId),
+      ).rejects.toThrow(
+        new ApiError('Insufficient variant stock for Product 1', 400),
       );
     });
 

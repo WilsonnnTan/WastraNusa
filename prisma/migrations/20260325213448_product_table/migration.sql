@@ -9,10 +9,10 @@ CREATE TABLE "product" (
     "slug" TEXT NOT NULL,
     "description" TEXT,
     "price" DECIMAL(65,30) NOT NULL,
-    "compareAtPrice" DECIMAL(65,30),
     "stock" INTEGER NOT NULL DEFAULT 0,
     "sku" TEXT NOT NULL,
     "weight" INTEGER NOT NULL,
+    "island" TEXT NOT NULL,
     "province" TEXT NOT NULL,
     "clothingType" TEXT NOT NULL,
     "gender" "Gender" NOT NULL,
@@ -29,6 +29,9 @@ CREATE UNIQUE INDEX "product_slug_key" ON "product"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "product_sku_key" ON "product"("sku");
+
+-- CreateIndex
+CREATE INDEX "product_island_idx" ON "product"("island");
 
 -- CreateIndex
 CREATE INDEX "product_province_idx" ON "product"("province");
