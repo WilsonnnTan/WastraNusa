@@ -3,6 +3,7 @@ import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
 import { addressRepository } from '@/repositories/address.repository';
+import { cartRepository } from '@/repositories/cart.repository';
 import { orderRepository } from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
@@ -13,6 +14,7 @@ import type {
 } from '@/schemas/payment.schema';
 
 interface CheckoutResolvedItem {
+  cartItemIds: string[];
   productId: string;
   variantId: string | null;
   quantity: number;
@@ -68,13 +70,19 @@ function mapPaymentStatus(
 }
 
 function aggregateCheckoutItems(input: CheckoutInput): Array<{
+  cartItemIds: string[];
   productId: string;
   variantId: string | null;
   quantity: number;
 }> {
   const map = new Map<
     string,
-    { productId: string; variantId: string | null; quantity: number }
+    {
+      cartItemIds: string[];
+      productId: string;
+      variantId: string | null;
+      quantity: number;
+    }
   >();
 
   for (const item of input.items) {
@@ -84,10 +92,14 @@ function aggregateCheckoutItems(input: CheckoutInput): Array<{
 
     if (existing) {
       existing.quantity += item.quantity;
+      if (item.cartItemId && !existing.cartItemIds.includes(item.cartItemId)) {
+        existing.cartItemIds.push(item.cartItemId);
+      }
       continue;
     }
 
     map.set(key, {
+      cartItemIds: item.cartItemId ? [item.cartItemId] : [],
       productId: item.productId,
       variantId,
       quantity: item.quantity,
@@ -95,6 +107,81 @@ function aggregateCheckoutItems(input: CheckoutInput): Array<{
   }
 
   return Array.from(map.values());
+}
+
+function parseJsonTag(customerNotes: string | null | undefined, tag: string) {
+  if (!customerNotes) return null;
+
+  const marker = `${tag}=`;
+  const start = customerNotes.indexOf(marker);
+  if (start < 0) return null;
+
+  const jsonStart = start + marker.length;
+  const jsonEnd = customerNotes.indexOf(' | ', jsonStart);
+  const jsonRaw =
+    jsonEnd >= 0
+      ? customerNotes.slice(jsonStart, jsonEnd)
+      : customerNotes.slice(jsonStart);
+
+  try {
+    return JSON.parse(jsonRaw);
+  } catch {
+    return null;
+  }
+}
+
+function extractPurchasedItemsFromOrder(order: {
+  productId: string;
+  variantId: string | null;
+  customerNotes: string | null;
+}) {
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{ productId?: string; variantId?: string | null }> | null;
+
+  if (checkoutItems && checkoutItems.length > 0) {
+    return checkoutItems
+      .filter((item) => typeof item.productId === 'string' && item.productId)
+      .map((item) => ({
+        productId: item.productId as string,
+        variantId: item.variantId ?? null,
+      }));
+  }
+
+  return [{ productId: order.productId, variantId: order.variantId }];
+}
+
+function extractPurchasedCartItemIds(order: { customerNotes: string | null }) {
+  const explicitIds = parseJsonTag(
+    order.customerNotes,
+    'checkout_cart_item_ids',
+  ) as string[] | null;
+
+  if (Array.isArray(explicitIds) && explicitIds.length > 0) {
+    return explicitIds.filter((id) => typeof id === 'string' && id.length > 0);
+  }
+
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{ cartItemIds?: string[] }> | null;
+
+  if (!checkoutItems || checkoutItems.length === 0) {
+    return [];
+  }
+
+  const uniqueIds = new Set<string>();
+  for (const item of checkoutItems) {
+    if (!Array.isArray(item.cartItemIds)) continue;
+    for (const id of item.cartItemIds) {
+      if (typeof id === 'string' && id.length > 0) {
+        uniqueIds.add(id);
+      }
+    }
+  }
+
+  return Array.from(uniqueIds);
 }
 
 export const paymentService = {
@@ -174,6 +261,7 @@ export const paymentService = {
       }
 
       resolvedItems.push({
+        cartItemIds: item.cartItemIds,
         productId: product.id,
         variantId: resolvedVariantId,
         quantity: item.quantity,
@@ -204,16 +292,23 @@ export const paymentService = {
     const paymentTransactionId = crypto.randomUUID();
 
     const itemSnapshot = resolvedItems.map((item) => ({
+      cartItemIds: item.cartItemIds,
       productId: item.productId,
       variantId: item.variantId,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
     }));
+    const checkoutCartItemIds = Array.from(
+      new Set(itemSnapshot.flatMap((item) => item.cartItemIds)),
+    );
 
     const customerNotes = [
       input.customerNotes,
       resolvedItems.length > 1
         ? `checkout_items=${JSON.stringify(itemSnapshot)}`
+        : null,
+      checkoutCartItemIds.length > 0
+        ? `checkout_cart_item_ids=${JSON.stringify(checkoutCartItemIds)}`
         : null,
     ]
       .filter(Boolean)
@@ -314,6 +409,21 @@ export const paymentService = {
       throw new ApiError('Invalid signature key', 403);
     }
 
+    const transaction =
+      await paymentTransactionRepository.findTransactionByExternalId(order_id);
+    if (!transaction) {
+      logger.warn('Payment transaction not found for notification', {
+        order_id,
+      });
+      return;
+    }
+
+    const order = await orderRepository.findOrderById(order_id);
+    if (!order) {
+      logger.warn('Order not found for notification', { order_id });
+      return;
+    }
+
     if (
       transaction_status === 'capture' &&
       fraud_status &&
@@ -349,6 +459,35 @@ export const paymentService = {
       paidAt,
       ...(isPaid ? { orderStatus: 'confirmed' as const } : {}),
     });
+
+    if (isPaid) {
+      const order = await orderRepository.findOrderById(order_id);
+
+      if (!order) {
+        logger.warn('Paid order not found for cart cleanup', { order_id });
+      } else {
+        const cartItemIds = extractPurchasedCartItemIds(order);
+        const purchasedItems = extractPurchasedItemsFromOrder(order);
+
+        const byIdResult = await cartRepository.removePurchasedItemsById(
+          order.userId,
+          cartItemIds,
+        );
+        const byProductVariantResult =
+          await cartRepository.removePurchasedItemsByProductVariant(
+            order.userId,
+            purchasedItems,
+          );
+
+        logger.info('Removed purchased items from cart', {
+          order_id,
+          userId: order.userId,
+          removedByIdCount: byIdResult.count,
+          removedByProductVariantCount: byProductVariantResult.count,
+          purchasedItemCount: purchasedItems.length,
+        });
+      }
+    }
 
     logger.info('Midtrans notification processed', {
       order_id,

@@ -1,6 +1,7 @@
 import { ApiError } from '@/lib/error';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
 import { addressRepository } from '@/repositories/address.repository';
+import { cartRepository } from '@/repositories/cart.repository';
 import { orderRepository } from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
@@ -270,6 +271,23 @@ describe('paymentService', () => {
 
     it('should process successful payment', async () => {
       vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        userId: 'user-123',
+        productId: 'prod-1',
+        variantId: 'var-1',
+        customerNotes:
+          'checkout_cart_item_ids=[\"cart-item-1\"] | checkout_items=[{\"productId\":\"prod-1\",\"variantId\":\"var-1\",\"quantity\":2}]',
+      } as never);
+      vi.mocked(cartRepository.removePurchasedItemsById).mockResolvedValue({
+        count: 1,
+      } as never);
+      vi.mocked(
+        cartRepository.removePurchasedItemsByProductVariant,
+      ).mockResolvedValue({ count: 0 } as never);
 
       await paymentService.handleNotification(mockPayload);
 
@@ -283,6 +301,15 @@ describe('paymentService', () => {
         'order-123',
         expect.objectContaining({ paymentStatus: 'paid' }),
       );
+      expect(cartRepository.removePurchasedItemsById).toHaveBeenCalledWith(
+        'user-123',
+        ['cart-item-1'],
+      );
+      expect(
+        cartRepository.removePurchasedItemsByProductVariant,
+      ).toHaveBeenCalledWith('user-123', [
+        { productId: 'prod-1', variantId: 'var-1' },
+      ]);
     });
 
     it('should throw error for invalid signature', async () => {
@@ -301,6 +328,13 @@ describe('paymentService', () => {
         fraud_status: 'challenge',
       };
 
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+      } as never);
+
       await paymentService.handleNotification(fraudPayload);
 
       expect(
@@ -309,6 +343,10 @@ describe('paymentService', () => {
         'order-123',
         expect.objectContaining({ status: 'failed' }),
       );
+      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
+      expect(
+        cartRepository.removePurchasedItemsByProductVariant,
+      ).not.toHaveBeenCalled();
     });
   });
 });

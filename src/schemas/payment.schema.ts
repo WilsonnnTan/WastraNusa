@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const checkoutItemSchema = z.object({
+  cartItemId: z.string().min(1).optional(),
   productId: z.string().min(1, 'Product ID is required'),
   variantId: z.string().nullish(),
   quantity: z.number().int().min(1, 'Quantity must be at least 1'),

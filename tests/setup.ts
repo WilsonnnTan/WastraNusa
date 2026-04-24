@@ -71,6 +71,7 @@ vi.mock('@/repositories/paymentTransaction.repository', () => ({
   paymentTransactionRepository: {
     createPaymentTransaction: vi.fn(),
     updatePaymentStatus: vi.fn(),
+    findTransactionByExternalId: vi.fn(),
   },
 }));
 
@@ -149,6 +150,8 @@ vi.mock('@/repositories/cart.repository', () => ({
     removeItem: vi.fn(),
     clearCart: vi.fn(),
     removeItems: vi.fn(),
+    removePurchasedItemsById: vi.fn(),
+    removePurchasedItemsByProductVariant: vi.fn(),
     getCartItemCount: vi.fn(),
   },
 }));

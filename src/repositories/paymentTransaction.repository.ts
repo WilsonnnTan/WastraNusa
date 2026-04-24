@@ -23,4 +23,10 @@ export const paymentTransactionRepository = {
       data,
     });
   },
+
+  findTransactionByExternalId: async (externalId: string) => {
+    return prisma.paymentTransaction.findUnique({
+      where: { externalId },
+    });
+  },
 };

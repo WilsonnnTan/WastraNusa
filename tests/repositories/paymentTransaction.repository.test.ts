@@ -101,4 +101,30 @@ describe('paymentTransactionRepository', { tags: ['db'] }, () => {
       expect(updated.paidAt).not.toBeNull();
     });
   });
+
+  describe('findTransactionByExternalId', () => {
+    it('should find transaction by externalId', async () => {
+      const id = crypto.randomUUID();
+      txIds.push(id);
+      const externalId = `EXT-FIND-${id.slice(0, 8)}`;
+
+      await paymentTransactionRepository.createPaymentTransaction({
+        id,
+        orderId,
+        externalId,
+        amount: 250000 + 15000,
+        status: 'pending',
+        createdAt: new Date(),
+      });
+
+      const found =
+        await paymentTransactionRepository.findTransactionByExternalId(
+          externalId,
+        );
+
+      expect(found).toBeDefined();
+      expect(found?.id).toBe(id);
+      expect(found?.externalId).toBe(externalId);
+    });
+  });
 });
