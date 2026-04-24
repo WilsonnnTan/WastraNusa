@@ -39,6 +39,7 @@ export function MyOrderMain() {
           {tabs.map((tab) => (
             <button
               key={tab}
+              type="button"
               onClick={() => {
                 setActiveTab(tab);
                 setPage(1);
@@ -57,7 +58,6 @@ export function MyOrderMain() {
       <div className="p-6">
         <MyOrderList activeTab={activeTab} page={page} setPage={setPage} />
       </div>
-      *
     </div>
   );
 }

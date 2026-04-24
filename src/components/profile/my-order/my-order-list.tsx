@@ -5,8 +5,10 @@ import { OrderItem, useOrders } from '@/hooks/use-order';
 import { Eye, Hexagon, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
+import type { OrderStatus } from './my-order-main';
+
 interface MyOrderListProps {
-  activeTab: string;
+  activeTab: OrderStatus;
   page: number;
   setPage: (page: number) => void;
 }
@@ -52,7 +54,11 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
     );
   }
 
-  const filteredOrders = response?.data || [];
+  const orders = response?.data ?? [];
+  const filteredOrders =
+    activeTab === 'Semua'
+      ? orders
+      : orders.filter((order) => order.status === activeTab);
   const meta = response?.meta;
 
   if (filteredOrders.length === 0) {
