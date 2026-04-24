@@ -9,6 +9,7 @@ import {
 } from '@/hooks/use-address';
 import type { CheckoutAddressSelection } from '@/types/checkout';
 import { Edit2, MapPin, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -115,13 +116,23 @@ export function AddressSection({
           <h3 className="text-sm font-bold text-[#3d5446] flex items-center gap-2">
             <MapPin size={18} className="text-brand" /> Alamat Pengiriman
           </h3>
-          <Button
-            onClick={handleAddNew}
-            variant="outline"
-            className="text-[10px] h-8 border-[#d8cfbf] rounded-lg gap-1 hover:bg-[#fbf8f2]"
-          >
-            <Plus size={12} /> Tambah Alamat Baru
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/profile/saved-address">
+              <Button
+                variant="outline"
+                className="text-[10px] h-8 border-[#d8cfbf] rounded-lg gap-1 hover:bg-[#fbf8f2]"
+              >
+                Kelola Alamat
+              </Button>
+            </Link>
+            <Button
+              onClick={handleAddNew}
+              variant="outline"
+              className="text-[10px] h-8 border-[#d8cfbf] rounded-lg gap-1 hover:bg-[#fbf8f2]"
+            >
+              <Plus size={12} /> Tambah Alamat Baru
+            </Button>
+          </div>
         </div>
 
         {shouldShowAddAddressWarning && (
