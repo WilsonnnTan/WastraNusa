@@ -1,4 +1,5 @@
 import type { Prisma } from '@/generated/prisma/client';
+import { OrderStatus, PaymentStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { orderRepository } from '@/repositories/order.repository';
 
@@ -9,6 +10,12 @@ type UiOrderStatus =
   | 'Dikirim'
   | 'Diterima'
   | 'Dibatalkan';
+
+const ADMIN_EDITABLE_ORDER_STATUSES = new Set<OrderStatus>([
+  OrderStatus.processing,
+  OrderStatus.shipped,
+  OrderStatus.delivered,
+]);
 
 function mapToUiOrderStatus(order: {
   orderStatus: string;
@@ -46,6 +53,63 @@ function formatOrderCurrency(amount: number): string {
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(amount);
+}
+
+function mapToPaymentStatusLabel(paymentStatus: string) {
+  if (paymentStatus === 'paid') return 'Lunas';
+  if (paymentStatus === 'failed') return 'Gagal';
+  if (paymentStatus === 'refunded') return 'Refund';
+  return 'Belum Bayar';
+}
+
+function mapAdminOrder(order: {
+  id: string;
+  orderNumber: string;
+  quantity: number;
+  totalAmount: { toNumber(): number } | number;
+  orderStatus: string;
+  paymentStatus: string;
+  trackingNumber: string | null;
+  createdAt: Date;
+  user: { id: string; name: string; email: string };
+  product: { id: string; name: string; province: string; clothingType: string };
+}) {
+  const effectiveOrderStatus =
+    order.paymentStatus === PaymentStatus.failed ||
+    order.orderStatus === OrderStatus.cancelled
+      ? OrderStatus.cancelled
+      : (order.orderStatus as OrderStatus);
+
+  const totalAmount =
+    typeof order.totalAmount === 'number'
+      ? order.totalAmount
+      : order.totalAmount.toNumber();
+
+  return {
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    customer: {
+      id: order.user.id,
+      name: order.user.name,
+      email: order.user.email,
+    },
+    product: {
+      id: order.product.id,
+      name: order.product.name,
+      location: order.product.province,
+      category: order.product.clothingType,
+      quantity: order.quantity,
+    },
+    totalAmount,
+    totalAmountLabel: formatOrderCurrency(totalAmount),
+    orderStatus: effectiveOrderStatus,
+    orderStatusLabel: mapToUiOrderStatus(order),
+    paymentStatus: order.paymentStatus,
+    paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
+    trackingNumber: order.trackingNumber,
+    createdAt: order.createdAt.toISOString(),
+    createdAtLabel: formatOrderDate(order.createdAt),
+  };
 }
 
 export const orderService = {
@@ -186,5 +250,110 @@ export const orderService = {
         : null,
       customerNotes: order.customerNotes,
     };
+  },
+
+  getAdminOrders: async (
+    page: number = 1,
+    limit: number = 10,
+    filters?: {
+      orderStatus?: OrderStatus;
+      paymentStatus?: PaymentStatus;
+    },
+  ) => {
+    const safeLimit = Math.min(Math.max(1, limit), 50);
+    const safePage = Math.max(1, page);
+    const offset = (safePage - 1) * safeLimit;
+
+    const where: Prisma.OrderWhereInput = {};
+    if (filters?.orderStatus) {
+      where.orderStatus = filters.orderStatus;
+    }
+    if (filters?.paymentStatus) {
+      where.paymentStatus = filters.paymentStatus;
+    }
+
+    const [orders, totalItems] = await Promise.all([
+      orderRepository.findOrdersForAdmin(where, offset, safeLimit),
+      orderRepository.countOrdersForAdmin(where),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
+
+    return {
+      items: orders.map(mapAdminOrder),
+      meta: {
+        page: safePage,
+        limit: safeLimit,
+        totalItems,
+        totalPages,
+        hasNextPage: safePage < totalPages,
+      },
+    };
+  },
+
+  updateOrderForAdmin: async (
+    identifier: string,
+    data: {
+      orderStatus?: OrderStatus;
+      trackingNumber?: string | null;
+      customerNotes?: string | null;
+    },
+  ) => {
+    const existing =
+      await orderRepository.findOrderForAdminByIdentifier(identifier);
+
+    if (!existing) {
+      throw new ApiError('Pesanan tidak ditemukan', 404);
+    }
+
+    if (
+      existing.orderStatus === OrderStatus.cancelled ||
+      existing.paymentStatus === PaymentStatus.failed
+    ) {
+      throw new ApiError('Pesanan dibatalkan dan tidak dapat diubah', 400);
+    }
+
+    if (existing.paymentStatus !== PaymentStatus.paid) {
+      throw new ApiError(
+        'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
+        400,
+      );
+    }
+
+    if (
+      data.orderStatus !== undefined &&
+      !ADMIN_EDITABLE_ORDER_STATUSES.has(data.orderStatus)
+    ) {
+      throw new ApiError(
+        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
+        400,
+      );
+    }
+
+    const now = new Date();
+    const nextData: Prisma.OrderUpdateInput = {
+      orderStatus: data.orderStatus,
+      trackingNumber:
+        data.trackingNumber === undefined
+          ? undefined
+          : data.trackingNumber?.trim()
+            ? data.trackingNumber.trim()
+            : null,
+      customerNotes: data.customerNotes,
+    };
+
+    if (data.orderStatus === OrderStatus.shipped) {
+      nextData.shippedAt = now;
+    }
+    if (data.orderStatus === OrderStatus.delivered) {
+      nextData.deliveredAt = now;
+    }
+
+    const updated = await orderRepository.updateOrderForAdmin(
+      identifier,
+      nextData,
+    );
+
+    return mapAdminOrder(updated);
   },
 };

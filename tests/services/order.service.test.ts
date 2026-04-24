@@ -142,4 +142,234 @@ describe('orderService', { tags: ['backend'] }, () => {
       ).rejects.toThrow(ApiError);
     });
   });
+
+  describe('getAdminOrders', () => {
+    it('should return paginated admin order list', async () => {
+      mockRepo.findOrdersForAdmin.mockResolvedValue([
+        {
+          id: 'order-id-1',
+          orderNumber: 'ORD-1',
+          orderStatus: 'processing',
+          paymentStatus: 'paid',
+          trackingNumber: null,
+          quantity: 1,
+          totalAmount: 150000,
+          createdAt: new Date('2025-03-14T00:00:00.000Z'),
+          user: {
+            id: 'user-1',
+            name: 'User',
+            email: 'user@example.com',
+          },
+          product: {
+            id: 'prod-1',
+            name: 'Batik',
+            province: 'Solo',
+            clothingType: 'batik',
+          },
+        },
+      ] as never);
+      mockRepo.countOrdersForAdmin.mockResolvedValue(1);
+
+      const result = await orderService.getAdminOrders(1, 10, {
+        orderStatus: 'processing',
+      });
+
+      expect(mockRepo.findOrdersForAdmin).toHaveBeenCalledWith(
+        { orderStatus: 'processing' },
+        0,
+        10,
+      );
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].orderNumber).toBe('ORD-1');
+      expect(result.meta.totalItems).toBe(1);
+    });
+  });
+
+  describe('updateOrderForAdmin', () => {
+    it('should update order and return mapped result', async () => {
+      const order = {
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'processing',
+        paymentStatus: 'paid',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      };
+
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(order as never);
+      mockRepo.updateOrderForAdmin.mockResolvedValue({
+        ...order,
+        orderStatus: 'shipped',
+        paymentStatus: 'paid',
+        trackingNumber: 'RESI-123',
+      } as never);
+
+      const result = await orderService.updateOrderForAdmin('ORD-1', {
+        orderStatus: 'shipped',
+        trackingNumber: 'RESI-123',
+      });
+
+      expect(mockRepo.updateOrderForAdmin).toHaveBeenCalledWith(
+        'ORD-1',
+        expect.objectContaining({
+          orderStatus: 'shipped',
+          trackingNumber: 'RESI-123',
+        }),
+      );
+      expect(result.orderStatus).toBe('shipped');
+      expect(result.paymentStatus).toBe('paid');
+      expect(result.trackingNumber).toBe('RESI-123');
+    });
+
+    it('should throw when payment is not successful', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'confirmed',
+        paymentStatus: 'unpaid',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-1', { orderStatus: 'shipped' }),
+      ).rejects.toThrow(
+        'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
+      );
+    });
+
+    it('should throw when order is cancelled or payment failed', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'cancelled',
+        paymentStatus: 'failed',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-1', {
+          orderStatus: 'processing',
+        }),
+      ).rejects.toThrow('Pesanan dibatalkan dan tidak dapat diubah');
+    });
+
+    it('should throw when target status is outside editable statuses', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'confirmed',
+        paymentStatus: 'paid',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-1', { orderStatus: 'confirmed' }),
+      ).rejects.toThrow(
+        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
+      );
+    });
+
+    it('should throw ApiError when order not found', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(null);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-404', { orderStatus: 'shipped' }),
+      ).rejects.toThrow(ApiError);
+    });
+  });
 });

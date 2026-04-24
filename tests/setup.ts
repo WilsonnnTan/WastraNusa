@@ -59,6 +59,10 @@ vi.mock('@/repositories/order.repository', () => ({
     updateOrderPaymentStatus: vi.fn(),
     findOrdersByUserId: vi.fn(),
     countOrdersByUserId: vi.fn(),
+    findOrdersForAdmin: vi.fn(),
+    countOrdersForAdmin: vi.fn(),
+    findOrderForAdminByIdentifier: vi.fn(),
+    updateOrderForAdmin: vi.fn(),
   },
 }));
 
@@ -66,6 +70,8 @@ vi.mock('@/services/order.service', () => ({
   orderService: {
     getUserOrders: vi.fn(),
     getUserOrderDetail: vi.fn(),
+    getAdminOrders: vi.fn(),
+    updateOrderForAdmin: vi.fn(),
   },
 }));
 
