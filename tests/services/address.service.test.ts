@@ -100,9 +100,14 @@ describe('addressService', { tags: ['backend'] }, () => {
       });
 
       expect(mockRepo.clearDefaultsByUser).toHaveBeenCalledWith('user-1');
-      expect(mockRepo.update).toHaveBeenCalledWith('addr-1', {
-        isDefault: true,
-      });
+      expect(mockRepo.findById).toHaveBeenCalledWith('addr-1', 'user-1');
+      expect(mockRepo.update).toHaveBeenCalledWith(
+        'addr-1',
+        {
+          isDefault: true,
+        },
+        'user-1',
+      );
     });
 
     it('should throw 404 if address not found or not owned by user', async () => {
@@ -135,17 +140,19 @@ describe('addressService', { tags: ['backend'] }, () => {
 
       await addressService.deleteAddress('addr-1', 'user-1');
 
-      expect(mockRepo.delete).toHaveBeenCalledWith('addr-1');
+      expect(mockRepo.findById).toHaveBeenCalledWith('addr-1', 'user-1');
+      expect(mockRepo.delete).toHaveBeenCalledWith('addr-1', 'user-1');
     });
   });
 
   describe('setDefaultAddress', () => {
     it('should call repository setDefault', async () => {
       mockRepo.findById.mockResolvedValue(MOCK_ADDRESS as never);
-      mockRepo.setDefault.mockResolvedValue([{}, MOCK_ADDRESS] as never);
+      mockRepo.setDefault.mockResolvedValue([{}, {}, MOCK_ADDRESS] as never);
 
       await addressService.setDefaultAddress('addr-1', 'user-1');
 
+      expect(mockRepo.findById).toHaveBeenCalledWith('addr-1', 'user-1');
       expect(mockRepo.setDefault).toHaveBeenCalledWith('addr-1', 'user-1');
     });
   });

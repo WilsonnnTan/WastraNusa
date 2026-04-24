@@ -39,12 +39,25 @@ export const cartRepository = {
     productId: string,
     variantId: string | null,
     quantity: number,
+    userId?: string,
   ) => {
+    if (userId) {
+      const cart = await prisma.cart.findFirst({
+        where: { id: cartId, userId },
+        select: { id: true },
+      });
+
+      if (!cart) {
+        throw new Error('Cart not found');
+      }
+    }
+
     const existingItem = await prisma.cartItem.findFirst({
       where: {
         cartId,
         productId,
         variantId,
+        ...(userId ? { cart: { userId } } : {}),
       },
     });
 
@@ -71,10 +84,26 @@ export const cartRepository = {
   /**
    * Update cart item quantity
    */
-  updateItemQuantity: async (cartItemId: string, quantity: number) => {
-    return prisma.cartItem.update({
-      where: { id: cartItemId },
+  updateItemQuantity: async (
+    cartItemId: string,
+    quantity: number,
+    userId?: string,
+  ) => {
+    if (!userId) {
+      return prisma.cartItem.update({
+        where: { id: cartItemId },
+        data: { quantity },
+        include: { product: true, variant: true },
+      });
+    }
+
+    await prisma.cartItem.updateMany({
+      where: { id: cartItemId, cart: { userId } },
       data: { quantity },
+    });
+
+    return prisma.cartItem.findFirst({
+      where: { id: cartItemId, cart: { userId } },
       include: { product: true, variant: true },
     });
   },
@@ -82,27 +111,39 @@ export const cartRepository = {
   /**
    * Remove item from cart
    */
-  removeItem: async (cartItemId: string) => {
-    return prisma.cartItem.delete({
-      where: { id: cartItemId },
+  removeItem: async (cartItemId: string, userId?: string) => {
+    if (!userId) {
+      return prisma.cartItem.delete({
+        where: { id: cartItemId },
+      });
+    }
+
+    return prisma.cartItem.deleteMany({
+      where: { id: cartItemId, cart: { userId } },
     });
   },
 
   /**
    * Clear all items from cart
    */
-  clearCart: async (cartId: string) => {
+  clearCart: async (cartId: string, userId?: string) => {
     return prisma.cartItem.deleteMany({
-      where: { cartId },
+      where: {
+        cartId,
+        ...(userId ? { cart: { userId } } : {}),
+      },
     });
   },
 
   /**
    * Remove multiple items from cart
    */
-  removeItems: async (cartItemIds: string[]) => {
+  removeItems: async (cartItemIds: string[], userId?: string) => {
     return prisma.cartItem.deleteMany({
-      where: { id: { in: cartItemIds } },
+      where: {
+        id: { in: cartItemIds },
+        ...(userId ? { cart: { userId } } : {}),
+      },
     });
   },
 

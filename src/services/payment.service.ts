@@ -104,8 +104,9 @@ export const paymentService = {
     if (input.shippingAddressId) {
       const shippingAddress = await addressRepository.findById(
         input.shippingAddressId,
+        userId,
       );
-      if (!shippingAddress || shippingAddress.userId !== userId) {
+      if (!shippingAddress) {
         throw new ApiError('Shipping address not found', 404);
       }
       shippingAddressId = shippingAddress.id;

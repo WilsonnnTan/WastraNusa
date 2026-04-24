@@ -55,6 +55,10 @@ describe('paymentService', () => {
       const result = await paymentService.checkout(mockInput, mockUserId);
 
       expect(result.token).toBe('snap-token');
+      expect(addressRepository.findById).toHaveBeenCalledWith(
+        'addr-1',
+        mockUserId,
+      );
       expect(orderRepository.createOrder).toHaveBeenCalled();
       expect(
         productVariantRepository.decrementVariantStock,

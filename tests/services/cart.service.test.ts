@@ -55,6 +55,7 @@ describe('cartService', { tags: ['backend'] }, () => {
         'prod-1',
         null,
         1,
+        'user-1',
       );
       expect(mockRepo.findByUserId).toHaveBeenCalledWith('user-1');
       expect(cart).toEqual(MOCK_CART);
@@ -81,7 +82,11 @@ describe('cartService', { tags: ['backend'] }, () => {
 
       await cartService.updateCartItemQuantity('user-1', 'item-1', 5);
 
-      expect(mockRepo.updateItemQuantity).toHaveBeenCalledWith('item-1', 5);
+      expect(mockRepo.updateItemQuantity).toHaveBeenCalledWith(
+        'item-1',
+        5,
+        'user-1',
+      );
     });
   });
 
@@ -99,7 +104,7 @@ describe('cartService', { tags: ['backend'] }, () => {
 
       await cartService.removeFromCart('user-1', 'item-1');
 
-      expect(mockRepo.removeItem).toHaveBeenCalledWith('item-1');
+      expect(mockRepo.removeItem).toHaveBeenCalledWith('item-1', 'user-1');
     });
   });
 
@@ -123,7 +128,7 @@ describe('cartService', { tags: ['backend'] }, () => {
 
       await cartService.removeMultipleFromCart('user-1', ['item-1']);
 
-      expect(mockRepo.removeItems).toHaveBeenCalledWith(['item-1']);
+      expect(mockRepo.removeItems).toHaveBeenCalledWith(['item-1'], 'user-1');
     });
   });
 
@@ -133,7 +138,7 @@ describe('cartService', { tags: ['backend'] }, () => {
 
       await cartService.clearCart('user-1');
 
-      expect(mockRepo.clearCart).toHaveBeenCalledWith(MOCK_CART.id);
+      expect(mockRepo.clearCart).toHaveBeenCalledWith(MOCK_CART.id, 'user-1');
     });
   });
 });

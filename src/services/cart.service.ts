@@ -25,7 +25,13 @@ export const cartService = {
     }
 
     const cart = await cartRepository.findOrCreateByUser(userId);
-    await cartRepository.addItem(cart.id, productId, variantId, quantity);
+    await cartRepository.addItem(
+      cart.id,
+      productId,
+      variantId,
+      quantity,
+      userId,
+    );
 
     logger.info('Item added to cart', {
       userId,
@@ -61,7 +67,7 @@ export const cartService = {
       throw new ApiError('Item not found in cart', 404);
     }
 
-    await cartRepository.updateItemQuantity(cartItemId, quantity);
+    await cartRepository.updateItemQuantity(cartItemId, quantity, userId);
 
     logger.info('Cart item quantity updated', {
       userId,
@@ -87,7 +93,7 @@ export const cartService = {
       throw new ApiError('Item not found in cart', 404);
     }
 
-    await cartRepository.removeItem(cartItemId);
+    await cartRepository.removeItem(cartItemId, userId);
 
     logger.info('Item removed from cart', {
       userId,
@@ -118,7 +124,7 @@ export const cartService = {
       throw new ApiError('Some items not found in cart', 404);
     }
 
-    await cartRepository.removeItems(cartItemIds);
+    await cartRepository.removeItems(cartItemIds, userId);
 
     logger.info('Multiple items removed from cart', {
       userId,
@@ -137,7 +143,7 @@ export const cartService = {
       throw new ApiError('Cart not found', 404);
     }
 
-    await cartRepository.clearCart(cart.id);
+    await cartRepository.clearCart(cart.id, userId);
 
     logger.info('Cart cleared', { userId });
 
