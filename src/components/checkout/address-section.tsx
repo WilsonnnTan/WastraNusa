@@ -2,16 +2,11 @@
 
 import AddUpdateAddressModal from '@/components/profile/saved-address/add-update-address-modal';
 import { Button } from '@/components/ui/button';
-import {
-  type CustomerAddress,
-  useAddresses,
-  useSetDefaultAddress,
-} from '@/hooks/use-address';
+import { type CustomerAddress, useAddresses } from '@/hooks/use-address';
 import type { CheckoutAddressSelection } from '@/types/checkout';
 import { Edit2, MapPin, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 
 interface AddressSectionProps {
   initialSelectedAddressId?: string;
@@ -38,8 +33,6 @@ export function AddressSection({
   onSelectAddress,
 }: AddressSectionProps) {
   const { data: addresses = [], isLoading, error } = useAddresses();
-  const { mutate: setDefaultAddress, isPending: isSettingDefault } =
-    useSetDefaultAddress();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(
@@ -97,16 +90,6 @@ export function AddressSection({
     onSelectAddress?.(
       selectedAddress ? toCheckoutAddressSelection(selectedAddress) : null,
     );
-
-    setDefaultAddress(addressId, {
-      onError: (err) => {
-        toast.error(
-          err instanceof Error
-            ? err.message
-            : 'Gagal mengatur alamat utama untuk checkout',
-        );
-      },
-    });
   };
 
   return (
@@ -171,7 +154,6 @@ export function AddressSection({
                     checked={activeAddressId === addr.id}
                     onChange={() => handleSelectAddress(addr.id)}
                     className="mt-1 accent-brand h-4 w-4"
-                    disabled={isSettingDefault}
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
