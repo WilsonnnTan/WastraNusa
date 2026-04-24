@@ -4,7 +4,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   SEED_PRODUCT_1,
+  SEED_PRODUCT_2,
   SEED_VARIANT_1_1,
+  SEED_VARIANT_1_2,
 } from '../../prisma/dev-seeds/product.seed';
 import { SEED_REGULAR_USER } from '../../prisma/dev-seeds/user.seed';
 
@@ -161,6 +163,88 @@ describe('cartRepository', { tags: ['db'] }, () => {
     it('should return total number of distinct items in cart', async () => {
       const count = await cartRepository.getCartItemCount(regularUserId);
       expect(typeof count).toBe('number');
+    });
+  });
+
+  describe('removePurchasedItemsById', () => {
+    it('should return count 0 when cartItemIds is empty', async () => {
+      const result = await cartRepository.removePurchasedItemsById(
+        regularUserId,
+        [],
+      );
+
+      expect(result).toEqual({ count: 0 });
+    });
+
+    it('should remove only matched cart items for the user', async () => {
+      const cart = await cartRepository.findOrCreateByUser(regularUserId);
+      const item1 = await cartRepository.addItem(
+        cart.id,
+        SEED_PRODUCT_1.id,
+        null,
+        1,
+      );
+      const item2 = await cartRepository.addItem(
+        cart.id,
+        SEED_PRODUCT_2.id,
+        null,
+        1,
+      );
+      createdCartItemIds.push(item1.id, item2.id);
+
+      const removed = await cartRepository.removePurchasedItemsById(
+        regularUserId,
+        [item1.id],
+      );
+
+      expect(removed.count).toBe(1);
+
+      const updatedCart = await cartRepository.findByUserId(regularUserId);
+      expect(updatedCart?.items.find((i) => i.id === item1.id)).toBeUndefined();
+      expect(updatedCart?.items.find((i) => i.id === item2.id)).toBeDefined();
+    });
+  });
+
+  describe('removePurchasedItemsByProductVariant', () => {
+    it('should return count 0 when items is empty', async () => {
+      const result = await cartRepository.removePurchasedItemsByProductVariant(
+        regularUserId,
+        [],
+      );
+
+      expect(result).toEqual({ count: 0 });
+    });
+
+    it('should remove cart items matching product+variant pairs for the user', async () => {
+      const cart = await cartRepository.findOrCreateByUser(regularUserId);
+      const targetItem = await cartRepository.addItem(
+        cart.id,
+        SEED_PRODUCT_1.id,
+        SEED_VARIANT_1_2.id,
+        1,
+      );
+      const untouchedItem = await cartRepository.addItem(
+        cart.id,
+        SEED_PRODUCT_1.id,
+        SEED_VARIANT_1_1.id,
+        1,
+      );
+      createdCartItemIds.push(targetItem.id, untouchedItem.id);
+
+      const removed = await cartRepository.removePurchasedItemsByProductVariant(
+        regularUserId,
+        [{ productId: SEED_PRODUCT_1.id, variantId: SEED_VARIANT_1_2.id }],
+      );
+
+      expect(removed.count).toBeGreaterThanOrEqual(1);
+
+      const updatedCart = await cartRepository.findByUserId(regularUserId);
+      expect(
+        updatedCart?.items.find((i) => i.id === targetItem.id),
+      ).toBeUndefined();
+      expect(
+        updatedCart?.items.find((i) => i.id === untouchedItem.id),
+      ).toBeDefined();
     });
   });
 });
