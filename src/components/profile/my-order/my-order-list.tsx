@@ -154,7 +154,9 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                   className="h-8 gap-1.5 rounded-lg border-[#ece7dd] text-[#726759] text-xs font-semibold px-4"
                   asChild
                 >
-                  <Link href="#">
+                  <Link
+                    href={`/profile/my-order/${encodeURIComponent(order.id)}`}
+                  >
                     <Eye className="h-3.5 w-3.5" />
                     Detail
                   </Link>
