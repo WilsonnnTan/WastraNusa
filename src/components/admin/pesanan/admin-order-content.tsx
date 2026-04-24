@@ -132,13 +132,23 @@ function isOrderEditable(order: AdminOrderItem) {
   if (order.paymentStatus !== PaymentStatus.paid) {
     return false;
   }
-  if (
-    order.orderStatus === OrderStatus.cancelled ||
-    order.paymentStatus === PaymentStatus.failed
-  ) {
+  if (order.orderStatus === OrderStatus.cancelled) {
     return false;
   }
   return true;
+}
+
+function isEditableTargetStatus(
+  status: OrderStatus,
+): status is
+  | OrderStatus.processing
+  | OrderStatus.shipped
+  | OrderStatus.delivered {
+  return (
+    status === OrderStatus.processing ||
+    status === OrderStatus.shipped ||
+    status === OrderStatus.delivered
+  );
 }
 
 export function AdminOrderContent() {
@@ -210,6 +220,10 @@ export function AdminOrderContent() {
     const payload: AdminOrderUpdateInput = {};
 
     if (draft.orderStatus !== order.orderStatus) {
+      if (!isEditableTargetStatus(draft.orderStatus)) {
+        toast.error('Status hanya boleh Pengemasan, Dikirim, atau Diterima');
+        return;
+      }
       payload.orderStatus = draft.orderStatus;
     }
     const normalizedTrackingNumber =
