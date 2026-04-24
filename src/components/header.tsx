@@ -1,4 +1,3 @@
-import { Input } from '@/components/ui/input';
 import {
   BookOpenText,
   Grid2X2,
@@ -76,22 +75,6 @@ export function Header({ homeHref = '/' }: HeaderProps) {
           >
             <Search className="h-4 w-4" />
           </button>
-        </div>
-
-        <div className="pb-4 md:hidden">
-          <div className="flex items-center overflow-hidden rounded-xl border border-[#d8d0c1] bg-[#ece7dd]">
-            <Input
-              className="h-10 w-full border-0 bg-transparent px-4 text-sm text-[#435d50] placeholder:text-[#9f998b] focus-visible:ring-0 focus-visible:ring-offset-0"
-              placeholder="Cari produk atau artikel..."
-              type="text"
-            />
-            <button
-              className="h-10 bg-[#2f5f49] px-4 text-sm font-semibold text-[#f1f5ee]"
-              type="button"
-            >
-              Cari
-            </button>
-          </div>
         </div>
       </div>
     </header>
