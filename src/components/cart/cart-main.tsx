@@ -109,6 +109,8 @@ export function CartMain() {
 
     return cart.items.map((cartItem) => ({
       id: cartItem.id,
+      productId: cartItem.productId,
+      variantId: cartItem.variantId,
       name: cartItem.product.name,
       price: Number(cartItem.product.price),
       size: cartItem.variant?.name || 'Default',
@@ -167,7 +169,9 @@ export function CartMain() {
     const serviceFee = selectedIds.length > 0 ? 5000 : 0;
 
     const formattedItems = selectedItems.map((item) => ({
-      id: item.id,
+      cartItemId: item.id,
+      productId: item.productId,
+      variantId: item.variantId,
       name: item.name,
       variant: item.size,
       price: item.price,

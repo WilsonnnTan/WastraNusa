@@ -9,6 +9,8 @@ import { CartItem } from './cart-item';
 // 1. Definisi Tipe Data Produk agar TypeScript tidak komplain 'any'
 export interface CartProduct {
   id: string;
+  productId: string;
+  variantId?: string | null;
   name: string;
   price: number;
   size: string;

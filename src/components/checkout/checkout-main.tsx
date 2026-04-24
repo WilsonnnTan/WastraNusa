@@ -3,15 +3,20 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
+import { getCheckoutSession, setCheckoutSession } from '@/lib/checkout-session';
+import {
+  type CheckoutSessionData,
+  type CheckoutShippingSelection,
+} from '@/types/checkout';
 import { ChevronLeft, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { AddressSection } from './address-section';
 import { CheckoutSummary } from './checkout-summary';
 import { ShippingMethodSection } from './shipping-method-section';
 
-// Data kurir didefinisikan di sini agar mudah dihitung
 const shippingOptions = [
   {
     id: 'sic',
@@ -46,38 +51,66 @@ const shippingOptions = [
 ];
 
 export function CheckoutMain() {
-  const [selectedShippingId, setSelectedShippingId] = useState('sic');
+  const router = useRouter();
+  const [sessionData] = useState<CheckoutSessionData | null>(() =>
+    getCheckoutSession(),
+  );
+  const [selectedShippingId, setSelectedShippingId] = useState(() => {
+    return getCheckoutSession()?.shipping?.id ?? 'sic';
+  });
 
-  // Menemukan detail kurir yang dipilih
   const selectedShipping = useMemo(
-    () => shippingOptions.find((opt) => opt.id === selectedShippingId),
+    () =>
+      shippingOptions.find((opt) => opt.id === selectedShippingId) ??
+      shippingOptions[0],
     [selectedShippingId],
   );
 
-  // Kalkulasi total yang akan dikirim ke CheckoutSummary
+  const selectedItems = useMemo(() => sessionData?.items ?? [], [sessionData]);
+
   const totals = useMemo(() => {
-    const subtotal = 930000; // Contoh subtotal produk
-    const serviceFee = 5000;
-    const shippingFee = selectedShipping?.price || 0;
-    const ppn = Math.round((subtotal + shippingFee) * 0.11);
+    const subtotal = selectedItems.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0,
+    );
+    const serviceFee = selectedItems.length > 0 ? 5000 : 0;
+    const shippingFee = selectedShipping?.price ?? 0;
 
     return {
       subtotal,
       shippingFee,
       serviceFee,
-      ppn,
-      total: subtotal + shippingFee + serviceFee + ppn,
+      total: subtotal + shippingFee + serviceFee,
       shippingName: selectedShipping
         ? `${selectedShipping.courier} (${selectedShipping.name})`
         : '-',
     };
-  }, [selectedShipping]);
+  }, [selectedItems, selectedShipping]);
+
+  const handleContinueToPayment = () => {
+    if (!sessionData || !selectedShipping) return;
+
+    const shippingSelection: CheckoutShippingSelection = {
+      id: selectedShipping.id,
+      courier: selectedShipping.courier,
+      service: selectedShipping.name,
+      price: selectedShipping.price,
+      description: selectedShipping.desc,
+    };
+
+    const payload: CheckoutSessionData = {
+      ...sessionData,
+      shipping: shippingSelection,
+    };
+
+    setCheckoutSession(payload);
+    router.push('/cart/checkout/payment');
+  };
 
   return (
     <div className="min-h-screen bg-[#fbf8f2] flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-10 max-w-[1320px]">
-        {/* Progress Bar */}
         <div className="mb-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-[#8e8476]">
           <span className="text-brand">Keranjang</span>
           <span className="text-[#d8cfbf]">/</span>
@@ -88,48 +121,81 @@ export function CheckoutMain() {
           <span className="text-[#d8cfbf]">Pembayaran</span>
         </div>
 
-        <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-8 space-y-6">
-            <AddressSection />
-            <ShippingMethodSection
-              options={shippingOptions}
-              selectedId={selectedShippingId}
-              onSelect={setSelectedShippingId}
-            />
-
-            {/* --- BAGIAN TOMBOL NAVIGASI --- */}
-            <div className="mt-10 pt-6 border-t border-[#e8e2d5] flex flex-col sm:flex-row justify-between items-center gap-4">
-              <Link href="/cart">
-                <Button
-                  variant="ghost"
-                  className="text-brand font-bold gap-2 hover:bg-brand/5 px-0 sm:px-4"
-                >
-                  <ChevronLeft size={18} /> Kembali ke Keranjang
-                </Button>
-              </Link>
-
-              {/* PERBAIKAN: Membungkus tombol dengan Link ke halaman payment */}
-              <Link href="/cart/checkout/payment" className="w-full sm:w-auto">
-                <Button className="w-full bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95">
-                  Tinjau & Konfirmasi →
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trust Badge */}
-            <div className="flex items-center justify-center gap-2 text-[#8e8476] mt-4">
-              <ShieldCheck size={14} />
-              <p className="text-[10px] font-medium uppercase tracking-tighter">
-                Pembayaran Aman & Terenkripsi
-              </p>
-            </div>
-            {/* ---------------------------------- */}
+        {selectedItems.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
+            <p className="text-lg font-bold text-[#3d5446]">
+              Belum ada produk checkout
+            </p>
+            <p className="text-[#8e8476] mt-2">
+              Pilih produk dari keranjang terlebih dahulu.
+            </p>
+            <Link href="/cart" className="inline-block mt-6">
+              <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
+                Kembali ke Keranjang
+              </Button>
+            </Link>
           </div>
+        ) : (
+          <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-8 space-y-6">
+              <AddressSection />
+              <ShippingMethodSection
+                options={shippingOptions}
+                selectedId={selectedShippingId}
+                onSelect={setSelectedShippingId}
+              />
 
-          <aside className="lg:col-span-4 lg:sticky lg:top-24">
-            <CheckoutSummary totals={totals} />
-          </aside>
-        </div>
+              <div className="bg-white rounded-2xl border border-[#e8e2d5] p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-[#3d5446] mb-3">
+                  Data Item yang akan dikirim ke backend
+                </h4>
+                <div className="space-y-2 text-xs text-[#3d5446]">
+                  {selectedItems.map((item) => (
+                    <div
+                      key={item.cartItemId}
+                      className="rounded-lg bg-[#fbf8f2] p-3"
+                    >
+                      <p>ID Produk: {item.productId}</p>
+                      <p>Jumlah: {item.quantity}</p>
+                      <p>
+                        Harga Frontend: Rp {item.price.toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-10 pt-6 border-t border-[#e8e2d5] flex flex-col sm:flex-row justify-between items-center gap-4">
+                <Link href="/cart">
+                  <Button
+                    variant="ghost"
+                    className="text-brand font-bold gap-2 hover:bg-brand/5 px-0 sm:px-4"
+                  >
+                    <ChevronLeft size={18} /> Kembali ke Keranjang
+                  </Button>
+                </Link>
+
+                <Button
+                  onClick={handleContinueToPayment}
+                  className="w-full sm:w-auto bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95"
+                >
+                  Tinjau & Konfirmasi -&gt;
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-[#8e8476] mt-4">
+                <ShieldCheck size={14} />
+                <p className="text-[10px] font-medium uppercase tracking-tighter">
+                  Pembayaran Aman & Terenkripsi
+                </p>
+              </div>
+            </div>
+
+            <aside className="lg:col-span-4 lg:sticky lg:top-24">
+              <CheckoutSummary totals={totals} items={selectedItems} />
+            </aside>
+          </div>
+        )}
       </main>
       <Footer />
     </div>

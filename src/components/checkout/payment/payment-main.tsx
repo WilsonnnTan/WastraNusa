@@ -3,52 +3,149 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, CreditCard } from 'lucide-react';
+import { useCheckout } from '@/hooks/use-checkout';
+import { getCheckoutSession } from '@/lib/checkout-session';
+import type {
+  CheckoutSessionData,
+  CheckoutShippingSelection,
+} from '@/types/checkout';
+import { ChevronLeft, CreditCard, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useMemo, useState } from 'react';
 
 import { CheckoutSummary } from '../checkout-summary';
 import { ReviewItems } from './review-items';
 
-// PERBAIKAN: Mundur satu folder
+const defaultShipping: CheckoutShippingSelection = {
+  id: 'sic',
+  courier: 'SiCepat',
+  service: 'Reguler',
+  price: 16000,
+  description: '2-4 hari kerja',
+};
 
 export function PaymentMain() {
-  const totals = {
-    subtotal: 930000,
-    shippingFee: 16000,
-    serviceFee: 5000,
-    ppn: 102300,
-    total: 1053300,
-    shippingName: 'SiCepat',
+  const [sessionData] = useState<CheckoutSessionData | null>(() =>
+    getCheckoutSession(),
+  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { mutateAsync: checkout, isPending: isSubmitting } = useCheckout();
+
+  const items = useMemo(() => sessionData?.items ?? [], [sessionData]);
+  const shipping = useMemo(
+    () => sessionData?.shipping ?? defaultShipping,
+    [sessionData],
+  );
+
+  const totals = useMemo(() => {
+    const subtotal = items.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0,
+    );
+    const serviceFee = items.length > 0 ? 5000 : 0;
+    const shippingFee = shipping.price;
+
+    return {
+      subtotal,
+      shippingFee,
+      serviceFee,
+      total: subtotal + shippingFee + serviceFee,
+      shippingName: `${shipping.courier} (${shipping.service})`,
+    };
+  }, [items, shipping]);
+
+  const handleConfirmAndPay = async () => {
+    if (items.length === 0 || isSubmitting) return;
+
+    setErrorMessage(null);
+
+    try {
+      const result = await checkout({
+        items: items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          frontendPrice: item.price,
+        })),
+        shippingCost: shipping.price,
+        courier: shipping.courier,
+        courierService: shipping.service,
+        estimatedDelivery: shipping.description,
+      });
+
+      window.location.href = result.redirect_url;
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Terjadi kesalahan saat checkout',
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#fbf8f2] flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-10 max-w-[1320px]">
-        <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-8 space-y-6">
-            <ReviewItems />
-
-            <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <Link href="/cart/checkout">
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto text-[#3d5446] border-[#d8cfbf] font-bold gap-2 hover:bg-[#f4efe6] px-6 py-6 rounded-xl"
-                >
-                  <ChevronLeft size={18} /> Kembali
-                </Button>
-              </Link>
-
-              <Button className="w-full sm:w-auto bg-[#cc6644] hover:bg-[#b3593b] text-white px-8 py-6 rounded-xl font-bold shadow-lg shadow-[#cc6644]/20 transition-all active:scale-95 gap-2">
-                <CreditCard size={18} /> Konfirmasi & Bayar Sekarang
+        {items.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
+            <p className="text-lg font-bold text-[#3d5446]">
+              Belum ada data checkout
+            </p>
+            <p className="text-[#8e8476] mt-2">
+              Kembali ke keranjang dan pilih produk terlebih dahulu.
+            </p>
+            <Link href="/cart" className="inline-block mt-6">
+              <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
+                Kembali ke Keranjang
               </Button>
-            </div>
+            </Link>
           </div>
+        ) : (
+          <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-8 space-y-6">
+              <ReviewItems items={items} shipping={shipping} />
 
-          <aside className="lg:col-span-4 lg:sticky lg:top-24">
-            <CheckoutSummary totals={totals} />
-          </aside>
-        </div>
+              {errorMessage && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <Link href="/cart/checkout">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto text-[#3d5446] border-[#d8cfbf] font-bold gap-2 hover:bg-[#f4efe6] px-6 py-6 rounded-xl"
+                  >
+                    <ChevronLeft size={18} /> Kembali
+                  </Button>
+                </Link>
+
+                <Button
+                  onClick={handleConfirmAndPay}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto bg-[#cc6644] hover:bg-[#b3593b] text-white px-8 py-6 rounded-xl font-bold shadow-lg shadow-[#cc6644]/20 transition-all active:scale-95 gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />{' '}
+                      Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={18} /> Konfirmasi & Bayar Sekarang
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <aside className="lg:col-span-4 lg:sticky lg:top-24">
+              <CheckoutSummary totals={totals} items={items} />
+            </aside>
+          </div>
+        )}
       </main>
       <Footer />
     </div>
