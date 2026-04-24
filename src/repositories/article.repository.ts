@@ -124,6 +124,15 @@ export const articleRepository = {
           select: { id: true, name: true, image: true },
         },
         engagement: true,
+        products: {
+          select: {
+            name: true,
+            province: true,
+            island: true,
+            price: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
         sections: {
           orderBy: { order: 'asc' },
         },
