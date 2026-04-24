@@ -12,9 +12,7 @@ describe('Checkout API', { tags: ['backend'] }, () => {
   });
 
   const mockCheckoutInput = {
-    productId: 'p-123',
-    variantId: 'v-456',
-    quantity: 1,
+    items: [{ productId: 'p-123', variantId: 'v-456', quantity: 1 }],
     shippingAddressId: 'a-789',
     courier: 'JNE',
     courierService: 'REG',
@@ -53,7 +51,7 @@ describe('Checkout API', { tags: ['backend'] }, () => {
 
     const req = new Request('http://localhost/api/checkout', {
       method: 'POST',
-      body: JSON.stringify({ productId: '' }), // Invalid input
+      body: JSON.stringify({ items: [] }), // Invalid input
     });
 
     const response = await POST(req, { params: Promise.resolve({}) });

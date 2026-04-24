@@ -6,9 +6,12 @@ export const orderRepository = {
     return prisma.order.create({ data });
   },
 
-  findOrderById: async (orderId: string) => {
-    return prisma.order.findUnique({
-      where: { id: orderId },
+  findOrderById: async (orderId: string, userId?: string) => {
+    return prisma.order.findFirst({
+      where: {
+        id: orderId,
+        ...(userId ? { userId } : {}),
+      },
     });
   },
 

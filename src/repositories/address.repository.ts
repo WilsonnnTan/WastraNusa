@@ -9,19 +9,55 @@ export const addressRepository = {
     });
   },
 
-  findById: async (id: string) => {
-    return prisma.customerAddress.findUnique({ where: { id } });
+  findById: async (id: string, userId?: string) => {
+    return prisma.customerAddress.findFirst({
+      where: {
+        id,
+        ...(userId ? { userId } : {}),
+      },
+    });
+  },
+
+  findDefaultByUser: async (userId: string) => {
+    return prisma.customerAddress.findFirst({
+      where: { userId, isDefault: true },
+      orderBy: { createdAt: 'desc' },
+    });
   },
 
   create: async (data: Prisma.CustomerAddressUncheckedCreateInput) => {
     return prisma.customerAddress.create({ data });
   },
 
-  update: async (id: string, data: Prisma.CustomerAddressUpdateInput) => {
-    return prisma.customerAddress.update({ where: { id }, data });
+  update: async (
+    id: string,
+    data: Prisma.CustomerAddressUpdateInput,
+    userId?: string,
+  ) => {
+    if (!userId) {
+      return prisma.customerAddress.update({ where: { id }, data });
+    }
+
+    await prisma.customerAddress.updateMany({
+      where: { id, userId },
+      data,
+    });
+
+    return prisma.customerAddress.findFirst({
+      where: { id, userId },
+    });
   },
 
-  delete: async (id: string) => {
+  delete: async (id: string, userId?: string) => {
+    if (userId) {
+      const address = await prisma.customerAddress.findFirst({
+        where: { id, userId },
+      });
+      if (!address) return null;
+
+      return prisma.customerAddress.delete({ where: { id: address.id } });
+    }
+
     return prisma.customerAddress.delete({ where: { id } });
   },
 
@@ -41,9 +77,12 @@ export const addressRepository = {
         where: { userId },
         data: { isDefault: false },
       }),
-      prisma.customerAddress.update({
-        where: { id },
+      prisma.customerAddress.updateMany({
+        where: { id, userId },
         data: { isDefault: true },
+      }),
+      prisma.customerAddress.findFirst({
+        where: { id, userId },
       }),
     ]);
   },

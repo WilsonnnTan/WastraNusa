@@ -38,8 +38,8 @@ export const addressService = {
     userId: string,
     data: UpdateAddressInput,
   ) => {
-    const existing = await addressRepository.findById(id);
-    if (!existing || existing.userId !== userId) {
+    const existing = await addressRepository.findById(id, userId);
+    if (!existing) {
       throw new ApiError('Address not found', 404);
     }
 
@@ -47,32 +47,41 @@ export const addressService = {
       await addressRepository.clearDefaultsByUser(userId);
     }
 
-    const address = await addressRepository.update(id, data);
+    const address = await addressRepository.update(id, data, userId);
+    if (!address) {
+      throw new ApiError('Address not found', 404);
+    }
     logger.info('Address updated', { addressId: id, userId });
     return address;
   },
 
   deleteAddress: async (id: string, userId: string) => {
-    const existing = await addressRepository.findById(id);
-    if (!existing || existing.userId !== userId) {
+    const existing = await addressRepository.findById(id, userId);
+    if (!existing) {
       throw new ApiError('Address not found', 404);
     }
     if (existing.isDefault) {
       throw new ApiError('Alamat utama tidak dapat dihapus', 400);
     }
 
-    const address = await addressRepository.delete(id);
+    const address = await addressRepository.delete(id, userId);
+    if (!address) {
+      throw new ApiError('Address not found', 404);
+    }
     logger.info('Address deleted', { addressId: id, userId });
     return address;
   },
 
   setDefaultAddress: async (id: string, userId: string) => {
-    const existing = await addressRepository.findById(id);
-    if (!existing || existing.userId !== userId) {
+    const existing = await addressRepository.findById(id, userId);
+    if (!existing) {
       throw new ApiError('Address not found', 404);
     }
 
-    const [, updated] = await addressRepository.setDefault(id, userId);
+    const [, , updated] = await addressRepository.setDefault(id, userId);
+    if (!updated) {
+      throw new ApiError('Address not found', 404);
+    }
     logger.info('Default address set', { addressId: id, userId });
     return updated;
   },
