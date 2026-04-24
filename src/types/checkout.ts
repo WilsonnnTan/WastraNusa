@@ -18,8 +18,20 @@ export interface CheckoutShippingSelection {
   description: string;
 }
 
+export interface CheckoutAddressSelection {
+  id: string;
+  label: string;
+  recipientName: string;
+  phone: string;
+  fullAddress: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
+
 export interface CheckoutSessionData {
   items: CheckoutSelectedItem[];
   shipping?: CheckoutShippingSelection;
+  address?: CheckoutAddressSelection;
   createdAt: string;
 }

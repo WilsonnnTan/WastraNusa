@@ -36,6 +36,7 @@ export function PaymentMain() {
     () => sessionData?.shipping ?? defaultShipping,
     [sessionData],
   );
+  const address = useMemo(() => sessionData?.address, [sessionData]);
 
   const totals = useMemo(() => {
     const subtotal = items.reduce(
@@ -67,6 +68,7 @@ export function PaymentMain() {
           quantity: item.quantity,
           frontendPrice: item.price,
         })),
+        shippingAddressId: address?.id,
         shippingCost: shipping.price,
         courier: shipping.courier,
         courierService: shipping.service,
@@ -104,7 +106,11 @@ export function PaymentMain() {
         ) : (
           <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-8 space-y-6">
-              <ReviewItems items={items} shipping={shipping} />
+              <ReviewItems
+                items={items}
+                shipping={shipping}
+                address={address}
+              />
 
               {errorMessage && (
                 <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">

@@ -5,6 +5,7 @@ import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { getCheckoutSession, setCheckoutSession } from '@/lib/checkout-session';
 import {
+  type CheckoutAddressSelection,
   type CheckoutSessionData,
   type CheckoutShippingSelection,
 } from '@/types/checkout';
@@ -58,6 +59,10 @@ export function CheckoutMain() {
   const [selectedShippingId, setSelectedShippingId] = useState(() => {
     return getCheckoutSession()?.shipping?.id ?? 'sic';
   });
+  const [selectedAddress, setSelectedAddress] =
+    useState<CheckoutAddressSelection | null>(() => {
+      return getCheckoutSession()?.address ?? null;
+    });
 
   const selectedShipping = useMemo(
     () =>
@@ -88,7 +93,7 @@ export function CheckoutMain() {
   }, [selectedItems, selectedShipping]);
 
   const handleContinueToPayment = () => {
-    if (!sessionData || !selectedShipping) return;
+    if (!sessionData || !selectedShipping || !selectedAddress) return;
 
     const shippingSelection: CheckoutShippingSelection = {
       id: selectedShipping.id,
@@ -101,6 +106,7 @@ export function CheckoutMain() {
     const payload: CheckoutSessionData = {
       ...sessionData,
       shipping: shippingSelection,
+      address: selectedAddress,
     };
 
     setCheckoutSession(payload);
@@ -138,7 +144,10 @@ export function CheckoutMain() {
         ) : (
           <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-8 space-y-6">
-              <AddressSection />
+              <AddressSection
+                initialSelectedAddressId={selectedAddress?.id}
+                onSelectAddress={setSelectedAddress}
+              />
               <ShippingMethodSection
                 options={shippingOptions}
                 selectedId={selectedShippingId}
@@ -157,6 +166,7 @@ export function CheckoutMain() {
 
                 <Button
                   onClick={handleContinueToPayment}
+                  disabled={!selectedAddress}
                   className="w-full sm:w-auto bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95"
                 >
                   Tinjau & Konfirmasi -&gt;

@@ -1,6 +1,7 @@
 'use client';
 
 import type {
+  CheckoutAddressSelection,
   CheckoutSelectedItem,
   CheckoutShippingSelection,
 } from '@/types/checkout';
@@ -9,9 +10,10 @@ import { Hexagon } from 'lucide-react';
 interface ReviewItemsProps {
   items: CheckoutSelectedItem[];
   shipping?: CheckoutShippingSelection;
+  address?: CheckoutAddressSelection;
 }
 
-export function ReviewItems({ items, shipping }: ReviewItemsProps) {
+export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
   return (
     <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 sm:p-8 shadow-sm">
       <h2 className="text-xl font-bold text-[#3d5446] mb-6">
@@ -53,10 +55,26 @@ export function ReviewItems({ items, shipping }: ReviewItemsProps) {
           <h4 className="text-[11px] font-bold text-[#d8cfbf] mb-2 uppercase tracking-wider">
             Alamat Pengiriman
           </h4>
-          <p className="text-[11px] text-[#7a887f] leading-relaxed">
-            Akan menggunakan alamat default dari akun saat checkout backend
-            diproses.
-          </p>
+          {address ? (
+            <>
+              <p className="text-xs font-bold text-[#3d5446] mb-0.5">
+                {address.recipientName}
+              </p>
+              <p className="text-[11px] text-[#7a887f] mb-0.5">
+                {address.phone}
+              </p>
+              <p className="text-[11px] text-[#7a887f] leading-relaxed">
+                {address.fullAddress}
+                <br />
+                {address.city}, {address.province} {address.postalCode}
+              </p>
+            </>
+          ) : (
+            <p className="text-[11px] text-red-600 leading-relaxed">
+              Alamat belum dipilih. Kembali ke halaman checkout untuk memilih
+              alamat pengiriman.
+            </p>
+          )}
         </div>
 
         <div className="bg-[#fbf8f2] border border-[#e8e2d5] rounded-xl p-5">

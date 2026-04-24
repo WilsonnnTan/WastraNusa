@@ -46,9 +46,33 @@ function normalizeCheckoutSession(raw: unknown): CheckoutSessionData | null {
         }
       : undefined;
 
+  const addressRaw = record.address;
+  const address =
+    addressRaw && typeof addressRaw === 'object'
+      ? {
+          id: String((addressRaw as Record<string, unknown>).id ?? ''),
+          label: String((addressRaw as Record<string, unknown>).label ?? ''),
+          recipientName: String(
+            (addressRaw as Record<string, unknown>).recipientName ?? '',
+          ),
+          phone: String((addressRaw as Record<string, unknown>).phone ?? ''),
+          fullAddress: String(
+            (addressRaw as Record<string, unknown>).fullAddress ?? '',
+          ),
+          city: String((addressRaw as Record<string, unknown>).city ?? ''),
+          province: String(
+            (addressRaw as Record<string, unknown>).province ?? '',
+          ),
+          postalCode: String(
+            (addressRaw as Record<string, unknown>).postalCode ?? '',
+          ),
+        }
+      : undefined;
+
   return {
     items,
     shipping,
+    address,
     createdAt: String(record.createdAt ?? new Date().toISOString()),
   };
 }

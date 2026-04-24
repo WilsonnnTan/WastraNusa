@@ -109,12 +109,16 @@ export const paymentService = {
         throw new ApiError('Shipping address not found', 404);
       }
       shippingAddressId = shippingAddress.id;
+      logger.info('use address id from req', {
+        shippingAddressId,
+      });
     } else {
       const defaultAddress = await addressRepository.findDefaultByUser(userId);
       if (!defaultAddress) {
         throw new ApiError('Default shipping address not found', 400);
       }
       shippingAddressId = defaultAddress.id;
+      logger.info('use default id since no address id passed');
     }
 
     const mergedItems = aggregateCheckoutItems(input);
