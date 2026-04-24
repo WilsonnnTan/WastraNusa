@@ -12,8 +12,7 @@ import Link from 'next/link';
 const menuItems = [
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/ensiklopedia' },
   { label: 'Katalog', icon: Grid2X2 },
-  // 1. Tambahkan href: '/cart' di sini
-  { label: 'Keranjang', icon: ShoppingCart, badge: '3', href: '/cart' },
+  { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
   { label: 'Profil', icon: UserRound, href: '/profile' },
 ];
 
@@ -41,16 +40,11 @@ export function Header({ homeHref = '/' }: HeaderProps) {
           </Link>
 
           <nav className="ml-auto hidden items-center gap-5 md:flex lg:gap-6">
-            {menuItems.map(({ label, icon: Icon, badge, href }) => {
+            {menuItems.map(({ label, icon: Icon, href }) => {
               const content = (
                 <>
                   <div className="relative">
                     <Icon className="h-4 w-4" />
-                    {badge ? (
-                      <span className="absolute -right-2.5 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-[#d9b57a] px-1 text-[9px] font-bold text-[#284b3b]">
-                        {badge}
-                      </span>
-                    ) : null}
                   </div>
                   <span className="text-xs font-medium">{label}</span>
                 </>
