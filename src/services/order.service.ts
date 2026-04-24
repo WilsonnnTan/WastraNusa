@@ -11,6 +11,12 @@ type UiOrderStatus =
   | 'Diterima'
   | 'Dibatalkan';
 
+const ADMIN_EDITABLE_ORDER_STATUSES = new Set<OrderStatus>([
+  OrderStatus.processing,
+  OrderStatus.shipped,
+  OrderStatus.delivered,
+]);
+
 function mapToUiOrderStatus(order: {
   orderStatus: string;
   paymentStatus: string;
@@ -68,6 +74,12 @@ function mapAdminOrder(order: {
   user: { id: string; name: string; email: string };
   product: { id: string; name: string; province: string; clothingType: string };
 }) {
+  const effectiveOrderStatus =
+    order.paymentStatus === PaymentStatus.failed ||
+    order.orderStatus === OrderStatus.cancelled
+      ? OrderStatus.cancelled
+      : (order.orderStatus as OrderStatus);
+
   const totalAmount =
     typeof order.totalAmount === 'number'
       ? order.totalAmount
@@ -90,7 +102,7 @@ function mapAdminOrder(order: {
     },
     totalAmount,
     totalAmountLabel: formatOrderCurrency(totalAmount),
-    orderStatus: order.orderStatus,
+    orderStatus: effectiveOrderStatus,
     orderStatusLabel: mapToUiOrderStatus(order),
     paymentStatus: order.paymentStatus,
     paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
@@ -292,6 +304,30 @@ export const orderService = {
 
     if (!existing) {
       throw new ApiError('Pesanan tidak ditemukan', 404);
+    }
+
+    if (
+      existing.orderStatus === OrderStatus.cancelled ||
+      existing.paymentStatus === PaymentStatus.failed
+    ) {
+      throw new ApiError('Pesanan dibatalkan dan tidak dapat diubah', 400);
+    }
+
+    if (existing.paymentStatus !== PaymentStatus.paid) {
+      throw new ApiError(
+        'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
+        400,
+      );
+    }
+
+    if (
+      data.orderStatus !== undefined &&
+      !ADMIN_EDITABLE_ORDER_STATUSES.has(data.orderStatus)
+    ) {
+      throw new ApiError(
+        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
+        400,
+      );
     }
 
     const now = new Date();

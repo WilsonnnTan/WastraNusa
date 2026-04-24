@@ -1,9 +1,15 @@
 import { OrderStatus } from '@/generated/prisma/enums';
 import { z } from 'zod';
 
+const editableOrderStatusSchema = z.union([
+  z.literal(OrderStatus.processing),
+  z.literal(OrderStatus.shipped),
+  z.literal(OrderStatus.delivered),
+]);
+
 export const adminOrderUpdateSchema = z
   .object({
-    orderStatus: z.nativeEnum(OrderStatus).optional(),
+    orderStatus: editableOrderStatusSchema.optional(),
     trackingNumber: z.string().nullish(),
     customerNotes: z.string().nullish(),
   })

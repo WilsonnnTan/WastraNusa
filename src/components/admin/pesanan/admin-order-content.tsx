@@ -35,13 +35,19 @@ type OrderDraft = {
   trackingNumber: string;
 };
 
-const ORDER_STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
+const ORDER_STATUS_FILTER_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: OrderStatus.pending, label: 'Menunggu Bayar' },
   { value: OrderStatus.confirmed, label: 'Dikonfirmasi' },
   { value: OrderStatus.processing, label: 'Pengemasan' },
   { value: OrderStatus.shipped, label: 'Dikirim' },
   { value: OrderStatus.delivered, label: 'Diterima' },
   { value: OrderStatus.cancelled, label: 'Dibatalkan' },
+];
+
+const ORDER_STATUS_EDIT_OPTIONS: { value: OrderStatus; label: string }[] = [
+  { value: OrderStatus.processing, label: 'Pengemasan' },
+  { value: OrderStatus.shipped, label: 'Dikirim' },
+  { value: OrderStatus.delivered, label: 'Diterima' },
 ];
 
 const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
@@ -120,6 +126,19 @@ function getOrderDraft(order: AdminOrderItem, draft?: OrderDraft): OrderDraft {
     orderStatus: order.orderStatus,
     trackingNumber: order.trackingNumber ?? '',
   };
+}
+
+function isOrderEditable(order: AdminOrderItem) {
+  if (order.paymentStatus !== PaymentStatus.paid) {
+    return false;
+  }
+  if (
+    order.orderStatus === OrderStatus.cancelled ||
+    order.paymentStatus === PaymentStatus.failed
+  ) {
+    return false;
+  }
+  return true;
 }
 
 export function AdminOrderContent() {
@@ -257,7 +276,7 @@ export function AdminOrderContent() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Status Pesanan</SelectItem>
-                  {ORDER_STATUS_OPTIONS.map((option) => (
+                  {ORDER_STATUS_FILTER_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -318,6 +337,13 @@ export function AdminOrderContent() {
                   ) : (
                     orderData?.items.map((order) => {
                       const draft = getOrderDraft(order, drafts[order.orderId]);
+                      const editable = isOrderEditable(order);
+                      const selectedEditableStatus =
+                        ORDER_STATUS_EDIT_OPTIONS.some(
+                          (option) => option.value === draft.orderStatus,
+                        )
+                          ? draft.orderStatus
+                          : undefined;
                       return (
                         <tr
                           key={order.orderId}
@@ -366,7 +392,7 @@ export function AdminOrderContent() {
                                 {order.orderStatusLabel}
                               </Badge>
                               <Select
-                                value={draft.orderStatus}
+                                value={selectedEditableStatus}
                                 onValueChange={(value: OrderStatus) =>
                                   handleDraftChange(
                                     order.orderId,
@@ -377,12 +403,13 @@ export function AdminOrderContent() {
                                     order,
                                   )
                                 }
+                                disabled={!editable}
                               >
                                 <SelectTrigger className="h-9 rounded-lg border-[#ddd6c9] bg-white text-xs">
-                                  <SelectValue />
+                                  <SelectValue placeholder="Pilih status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {ORDER_STATUS_OPTIONS.map((option) => (
+                                  {ORDER_STATUS_EDIT_OPTIONS.map((option) => (
                                     <SelectItem
                                       key={option.value}
                                       value={option.value}
@@ -419,6 +446,7 @@ export function AdminOrderContent() {
                               }
                               placeholder="Isi no. resi"
                               className="h-9 rounded-lg border-[#ddd6c9] bg-white text-sm"
+                              disabled={!editable}
                             />
                           </td>
                           <td className="px-4 py-3 text-right">
@@ -426,7 +454,7 @@ export function AdminOrderContent() {
                               size="sm"
                               className="h-9 rounded-lg"
                               onClick={() => handleSave(order)}
-                              disabled={savingId === order.orderId}
+                              disabled={!editable || savingId === order.orderId}
                             >
                               <Save data-icon="inline-start" />
                               Simpan

@@ -56,4 +56,22 @@ describe('Admin Order Detail API', { tags: ['backend'] }, () => {
     expect(response.status).toBe(400);
     expect(body.status).toBe('fail');
   });
+
+  it('should return 400 when orderStatus is outside editable statuses', async () => {
+    mockAuth.requireAdmin.mockResolvedValue({ id: 'admin-1' } as never);
+
+    const req = new Request('http://localhost/api/admin/orders/ORD-1', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderStatus: 'confirmed' }),
+    });
+    const response = await PUT(req, {
+      params: Promise.resolve({ id: 'ORD-1' }),
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.status).toBe('fail');
+    expect(mockService.updateOrderForAdmin).not.toHaveBeenCalled();
+  });
 });

@@ -191,7 +191,7 @@ describe('orderService', { tags: ['backend'] }, () => {
         id: 'order-id-1',
         orderNumber: 'ORD-1',
         orderStatus: 'processing',
-        paymentStatus: 'unpaid',
+        paymentStatus: 'paid',
         trackingNumber: null,
         quantity: 1,
         totalAmount: 150000,
@@ -242,6 +242,126 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.orderStatus).toBe('shipped');
       expect(result.paymentStatus).toBe('paid');
       expect(result.trackingNumber).toBe('RESI-123');
+    });
+
+    it('should throw when payment is not successful', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'confirmed',
+        paymentStatus: 'unpaid',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-1', { orderStatus: 'shipped' }),
+      ).rejects.toThrow(
+        'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
+      );
+    });
+
+    it('should throw when order is cancelled or payment failed', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'cancelled',
+        paymentStatus: 'failed',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-1', {
+          orderStatus: 'processing',
+        }),
+      ).rejects.toThrow('Pesanan dibatalkan dan tidak dapat diubah');
+    });
+
+    it('should throw when target status is outside editable statuses', async () => {
+      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'confirmed',
+        paymentStatus: 'paid',
+        trackingNumber: null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
+        },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      await expect(
+        orderService.updateOrderForAdmin('ORD-1', { orderStatus: 'confirmed' }),
+      ).rejects.toThrow(
+        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
+      );
     });
 
     it('should throw ApiError when order not found', async () => {
