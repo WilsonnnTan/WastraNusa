@@ -4,6 +4,20 @@ import {
   type CheckoutSessionData,
 } from '@/types/checkout';
 
+let cachedRaw: string | null = null;
+let cachedData: CheckoutSessionData | null = null;
+
+const listeners = new Set<() => void>();
+
+export function subscribeToCheckoutSession(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function notifyListeners() {
+  listeners.forEach((l) => l());
+}
+
 function normalizeCheckoutSession(raw: unknown): CheckoutSessionData | null {
   if (!raw || typeof raw !== 'object') return null;
 
@@ -81,16 +95,33 @@ export function getCheckoutSession(): CheckoutSessionData | null {
   if (typeof window === 'undefined') return null;
 
   const raw = sessionStorage.getItem(CHECKOUT_SESSION_KEY);
-  if (!raw) return null;
+  if (!raw) {
+    cachedRaw = null;
+    cachedData = null;
+    return null;
+  }
+
+  if (raw === cachedRaw) {
+    return cachedData;
+  }
 
   try {
-    return normalizeCheckoutSession(JSON.parse(raw));
+    const data = normalizeCheckoutSession(JSON.parse(raw));
+    cachedRaw = raw;
+    cachedData = data;
+    return data;
   } catch {
+    cachedRaw = null;
+    cachedData = null;
     return null;
   }
 }
 
 export function setCheckoutSession(sessionData: CheckoutSessionData) {
   if (typeof window === 'undefined') return;
-  sessionStorage.setItem(CHECKOUT_SESSION_KEY, JSON.stringify(sessionData));
+  const raw = JSON.stringify(sessionData);
+  sessionStorage.setItem(CHECKOUT_SESSION_KEY, raw);
+  cachedRaw = raw;
+  cachedData = sessionData;
+  notifyListeners();
 }

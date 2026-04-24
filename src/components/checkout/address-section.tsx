@@ -51,14 +51,16 @@ export function AddressSection({
     return addresses[0]?.id ?? null;
   }, [addresses, selectedAddressId]);
 
-  useEffect(() => {
+  const selectedAddress = useMemo(() => {
     const activeAddress = addresses.find(
       (address) => address.id === activeAddressId,
     );
-    onSelectAddress?.(
-      activeAddress ? toCheckoutAddressSelection(activeAddress) : null,
-    );
-  }, [activeAddressId, addresses, onSelectAddress]);
+    return activeAddress ? toCheckoutAddressSelection(activeAddress) : null;
+  }, [activeAddressId, addresses]);
+
+  useEffect(() => {
+    onSelectAddress?.(selectedAddress);
+  }, [selectedAddress, onSelectAddress]);
 
   const errorMessage =
     error instanceof Error ? error.message : 'Gagal memuat alamat';

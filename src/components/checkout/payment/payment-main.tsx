@@ -4,14 +4,17 @@ import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/hooks/use-checkout';
-import { getCheckoutSession } from '@/lib/checkout-session';
+import {
+  getCheckoutSession,
+  subscribeToCheckoutSession,
+} from '@/lib/checkout-session';
 import type {
   CheckoutSessionData,
   CheckoutShippingSelection,
 } from '@/types/checkout';
 import { ChevronLeft, CreditCard, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 
 import { CheckoutSummary } from '../checkout-summary';
 import { ReviewItems } from './review-items';
@@ -25,9 +28,11 @@ const defaultShipping: CheckoutShippingSelection = {
 };
 
 export function PaymentMain() {
-  const [sessionData] = useState<CheckoutSessionData | null>(() =>
-    getCheckoutSession(),
-  );
+  const sessionData = useSyncExternalStore(
+    subscribeToCheckoutSession,
+    getCheckoutSession,
+    () => null,
+  ) as CheckoutSessionData | null;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { mutateAsync: checkout, isPending: isSubmitting } = useCheckout();
 

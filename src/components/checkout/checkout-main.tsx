@@ -3,7 +3,11 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
-import { getCheckoutSession, setCheckoutSession } from '@/lib/checkout-session';
+import {
+  getCheckoutSession,
+  setCheckoutSession,
+  subscribeToCheckoutSession,
+} from '@/lib/checkout-session';
 import {
   type CheckoutAddressSelection,
   type CheckoutSessionData,
@@ -12,7 +16,7 @@ import {
 import { ChevronLeft, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 
 import { AddressSection } from './address-section';
 import { CheckoutSummary } from './checkout-summary';
@@ -53,16 +57,19 @@ const shippingOptions = [
 
 export function CheckoutMain() {
   const router = useRouter();
-  const [sessionData] = useState<CheckoutSessionData | null>(() =>
-    getCheckoutSession(),
-  );
-  const [selectedShippingId, setSelectedShippingId] = useState(() => {
-    return getCheckoutSession()?.shipping?.id ?? 'sic';
-  });
-  const [selectedAddress, setSelectedAddress] =
-    useState<CheckoutAddressSelection | null>(() => {
-      return getCheckoutSession()?.address ?? null;
-    });
+  const sessionData = useSyncExternalStore(
+    subscribeToCheckoutSession,
+    getCheckoutSession,
+    () => null,
+  ) as CheckoutSessionData | null;
+  const [selectedShippingIdState, setSelectedShippingId] = useState<
+    string | null
+  >(null);
+  const [selectedAddressState, setSelectedAddress] =
+    useState<CheckoutAddressSelection | null>(null);
+  const selectedShippingId =
+    selectedShippingIdState ?? sessionData?.shipping?.id ?? 'sic';
+  const selectedAddress = selectedAddressState ?? sessionData?.address ?? null;
 
   const selectedShipping = useMemo(
     () =>
