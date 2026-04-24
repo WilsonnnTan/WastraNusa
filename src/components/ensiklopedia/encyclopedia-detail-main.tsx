@@ -372,29 +372,38 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
 
           {hasRelatedProducts ? (
             <Card className="rounded-xl border border-[#ddd2bf] bg-[#f7f3ea] p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-[#355645]">
-                  Produk Terkait
-                </h3>
-                <Button
-                  variant="link"
-                  className="h-auto p-0 text-xs text-[#c17f61]"
-                >
-                  Lihat semua
-                </Button>
-              </div>
-
-              <div className="space-y-3">
+              <h3 className="text-sm font-bold text-[#355645]">
+                Produk Terkait
+              </h3>
+              <div className="mt-1 space-y-2.5">
                 {article.relatedProducts.map((product) => (
-                  <div key={product.name}>
-                    <p className="text-sm font-semibold text-[#365746]">
-                      {product.name}
-                    </p>
-                    <p className="text-xs text-[#7d7a70]">{product.location}</p>
-                    <p className="text-sm font-bold text-[#2f5f49]">
-                      {product.price}
-                    </p>
-                  </div>
+                  <Link
+                    key={`${product.name}-${product.location}`}
+                    href="#"
+                    className="flex items-center gap-3 rounded-lg border border-[#dfd4c2] bg-[#efe7da] p-3 transition-colors hover:bg-[#e9dfcf]"
+                  >
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-dashed border-[#d4c6b1] bg-[#e8ddcc]">
+                      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(111,96,78,0.12)_100%)]" />
+                      <div className="absolute inset-0 grid place-items-center">
+                        <div className="flex flex-col items-center gap-1.5 text-[#6f604e]">
+                          <span className="h-4 w-4 rotate-45 border border-[#b7a387]" />
+                          <span className="text-[9px] font-medium">Foto</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-snug text-[#365746]">
+                        {product.name}
+                      </p>
+                      <p className="mt-1 text-xs text-[#7d7a70]">
+                        {product.location}
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-[#2f5f49]">
+                        {product.price}
+                      </p>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </Card>
