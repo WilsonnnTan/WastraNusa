@@ -13,6 +13,13 @@ export const addressRepository = {
     return prisma.customerAddress.findUnique({ where: { id } });
   },
 
+  findDefaultByUser: async (userId: string) => {
+    return prisma.customerAddress.findFirst({
+      where: { userId, isDefault: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
   create: async (data: Prisma.CustomerAddressUncheckedCreateInput) => {
     return prisma.customerAddress.create({ data });
   },
