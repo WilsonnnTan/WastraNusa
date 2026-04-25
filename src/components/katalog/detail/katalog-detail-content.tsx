@@ -2,20 +2,17 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import type { ProductInventoryItem } from '@/types/product';
 
-import type { CatalogProduct } from '../data';
 import { formatRupiah } from '../utils';
 
 export type DetailTab = 'deskripsi' | 'spesifikasi';
 
 type KatalogDetailContentProps = {
   activeTab: DetailTab;
-  product: CatalogProduct;
+  product: ProductInventoryItem;
   onTabChange: (tab: DetailTab) => void;
 };
-
-const PRODUCT_DESCRIPTION =
-  'Batik Tulis Kawung merupakan salah satu motif batik tertua dari Keraton Yogyakarta dan Solo. Motif kawung terinspirasi dari buah aren (kolang-kaling) yang disusun geometris, melambangkan kesucian, kekuatan, dan harapan agar manusia selalu ingat pada asal-usulnya. Dibuat secara tulis tangan menggunakan canting dan malam, setiap lembar membutuhkan 2-4 minggu pengerjaan oleh pengrajin berpengalaman di Kampung Batik Laweyan, Solo.';
 
 const CARE_GUIDES = [
   'Cuci dengan tangan menggunakan sabun lerak atau sampo',
@@ -54,25 +51,22 @@ export function KatalogDetailContent({
 
       {activeTab === 'deskripsi' ? (
         <div className="flex flex-col gap-4 p-5">
-          <h3 className="text-3xl font-bold text-[#2f5b49]">
-            Tentang Batik Tulis Kawung
-          </h3>
+          <h3 className="text-3xl font-bold text-[#2f5b49]">Tentang Produk</h3>
           <p className="text-[15px] leading-7 text-[#445c50]">
-            {PRODUCT_DESCRIPTION}
+            {product.description ||
+              'Deskripsi produk belum tersedia. Data ini akan dilengkapi oleh admin katalog.'}
           </p>
 
           <div className="grid gap-3 md:grid-cols-2">
             <Card className="rounded-xl border border-[#ddd4c5] bg-[#efe8dc] px-4 py-3">
-              <p className="text-xs text-[#9f9687]">Bahan</p>
+              <p className="text-xs text-[#9f9687]">Artikel Referensi</p>
               <p className="font-semibold text-[#355847]">
-                Kain Mori Primissima 100% Katun
+                {product.articleTitle}
               </p>
             </Card>
             <Card className="rounded-xl border border-[#ddd4c5] bg-[#efe8dc] px-4 py-3">
-              <p className="text-xs text-[#9f9687]">Teknik</p>
-              <p className="font-semibold text-[#355847]">
-                Batik Tulis Canting
-              </p>
+              <p className="text-xs text-[#9f9687]">SKU Produk</p>
+              <p className="font-semibold text-[#355847]">{product.sku}</p>
             </Card>
           </div>
 
@@ -96,18 +90,22 @@ export function KatalogDetailContent({
         <div className="grid gap-0 p-5 text-sm text-[#41594d]">
           {[
             ['Nama Produk', product.name],
-            ['Kategori', product.category],
-            ['Asal', `${product.city}, ${product.region}`],
+            ['Kategori', product.clothingType],
+            ['Asal', `${product.province}, ${product.island}`],
             ['Harga', formatRupiah(product.price)],
             ['Stok', `${product.stock} unit`],
-            ['Ukuran Tersedia', product.sizes.join(', ')],
+            ['Berat', `${product.weight} gram`],
+            ['Gender', product.gender],
+            ['Status', product.status],
+            ['Terjual', `${product.sold} unit`],
+            ['Varian', `${product.variantCount} varian`],
           ].map(([label, value], index) => (
             <div key={label}>
               <div className="grid grid-cols-[160px_minmax(0,1fr)] gap-3 py-2">
                 <p className="text-[#6e7a70]">{label}</p>
                 <p className="font-semibold text-[#2f5a48]">{value}</p>
               </div>
-              {index < 5 ? <Separator className="bg-[#ddd4c5]" /> : null}
+              {index < 8 ? <Separator className="bg-[#ddd4c5]" /> : null}
             </div>
           ))}
         </div>
