@@ -1,14 +1,12 @@
 ﻿'use client';
 
+import { CatalogFiltersSidebar } from '@/components/catalog/main/catalog-filters-sidebar';
+import type { PricePresetKey } from '@/components/catalog/main/catalog-filters-sidebar';
 import { Gender, ProductStatus } from '@/generated/prisma/enums';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import type { ProductCatalogSortBy } from '@/types/product';
 import { useMemo, useState } from 'react';
 
-import {
-  CatalogFiltersSidebar,
-  type PricePresetKey,
-} from './catalog-filters-sidebar';
 import { CatalogMainHeader } from './catalog-main-header';
 import { CatalogPagination } from './catalog-pagination';
 import {
@@ -25,8 +23,8 @@ const Catalog_SORT_OPTIONS: Array<{
 }> = [
   { label: 'Terbaru', value: 'newest' },
   { label: 'Terlama', value: 'oldest' },
-  { label: 'Harga Terendah', value: 'price_asc' },
-  { label: 'Harga Tertinggi', value: 'price_desc' },
+  { label: 'Harga ↑', value: 'price_asc' },
+  { label: 'Harga ↓', value: 'price_desc' },
   { label: 'Paling Laris', value: 'sold_desc' },
   { label: 'Nama A-Z', value: 'name_asc' },
   { label: 'Nama Z-A', value: 'name_desc' },
@@ -60,7 +58,7 @@ export function CatalogMain() {
   );
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [selectedIsland, setSelectedIsland] = useState<string>();
-  const [selectedProvince, setSelectedProvince] = useState<string>();
+  const [selectedSize, setSelectedSize] = useState<string>();
   const [selectedGender, setSelectedGender] = useState<Gender>();
   const [selectedStatus, setSelectedStatus] = useState<ProductStatus>();
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -75,8 +73,8 @@ export function CatalogMain() {
       minPrice: parsePriceInput(minPriceInput),
       maxPrice: parsePriceInput(maxPriceInput),
       island: selectedIsland,
-      province: selectedProvince,
       clothingType: selectedCategory,
+      size: selectedSize,
       gender: selectedGender,
       status: selectedStatus,
       inStock: inStockOnly ? true : undefined,
@@ -90,7 +88,7 @@ export function CatalogMain() {
       selectedCategory,
       selectedGender,
       selectedIsland,
-      selectedProvince,
+      selectedSize,
       selectedStatus,
     ],
   );
@@ -117,7 +115,7 @@ export function CatalogMain() {
     setActiveSort('newest');
     setSelectedCategory(undefined);
     setSelectedIsland(undefined);
-    setSelectedProvince(undefined);
+    setSelectedSize(undefined);
     setSelectedGender(undefined);
     setSelectedStatus(undefined);
     setInStockOnly(false);
@@ -141,48 +139,48 @@ export function CatalogMain() {
             totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
             categories={meta?.categories ?? []}
             islands={meta?.islands ?? []}
-            provinces={meta?.provinces ?? []}
+            sizes={meta?.sizes ?? []}
             genders={meta?.genders ?? []}
             statuses={meta?.statuses ?? []}
             selectedCategory={selectedCategory}
             selectedIsland={selectedIsland}
-            selectedProvince={selectedProvince}
+            selectedSize={selectedSize}
             selectedGender={selectedGender}
             selectedStatus={selectedStatus}
             inStockOnly={inStockOnly}
             minPriceInput={minPriceInput}
             maxPriceInput={maxPriceInput}
             selectedPricePreset={selectedPricePreset}
-            onCategoryChange={(value) => {
+            onCategoryChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedCategory(value);
             }}
-            onIslandChange={(value) => {
+            onIslandChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedIsland(value);
             }}
-            onProvinceChange={(value) => {
+            onSizeChange={(value: string | undefined) => {
               setCurrentPage(1);
-              setSelectedProvince(value);
+              setSelectedSize(value);
             }}
-            onGenderChange={(value) => {
+            onGenderChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedGender(value as Gender | undefined);
             }}
-            onStatusChange={(value) => {
+            onStatusChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedStatus(value as ProductStatus | undefined);
             }}
-            onInStockOnlyChange={(value) => {
+            onInStockOnlyChange={(value: boolean) => {
               setCurrentPage(1);
               setInStockOnly(value);
             }}
-            onMinPriceChange={(value) => {
+            onMinPriceChange={(value: string) => {
               setCurrentPage(1);
               setSelectedPricePreset('all');
               setMinPriceInput(value.replace(/[^\d]/g, ''));
             }}
-            onMaxPriceChange={(value) => {
+            onMaxPriceChange={(value: string) => {
               setCurrentPage(1);
               setSelectedPricePreset('all');
               setMaxPriceInput(value.replace(/[^\d]/g, ''));

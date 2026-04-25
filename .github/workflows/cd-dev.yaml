@@ -1,0 +1,46 @@
+name: WastraNusa Development Deployment
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_DEV_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DEV_PROJECT_ID }}
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  Deployment-Development:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      # --- BAGIAN BARU: Menginstal pnpm di dalam mesin GitHub ---
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10 # Atau sesuaikan dengan versi pnpm di komputermu
+
+      # --- BAGIAN BARU: Menginstal Node.js yang di-cache oleh pnpm ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # Sekarang kita bisa menggunakan pnpm untuk menginstal Vercel CLI
+      - name: Install Vercel CLI
+        run: pnpm install -g vercel
+
+      - name: Pull Vercel Environment Variables
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

@@ -92,6 +92,7 @@ vi.mock('@/repositories/product.repository', () => ({
     countByClothingType: vi.fn(),
     countByIsland: vi.fn(),
     countByProvince: vi.fn(),
+    countBySize: vi.fn(),
     countByGender: vi.fn(),
     countByStatus: vi.fn(),
     getPriceRange: vi.fn(),

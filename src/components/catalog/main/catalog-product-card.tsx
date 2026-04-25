@@ -17,8 +17,8 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
   const isOutOfStock = product.stock <= 0 || product.status === 'out_of_stock';
 
   return (
-    <Link href={`/catalog/${product.slug}`} className="block">
-      <Card className="overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed] p-0 transition hover:border-[#cdbfa8] hover:shadow-sm">
+    <Link href={`/catalog/${product.slug}`} className="block h-full">
+      <Card className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed] p-0 transition hover:border-[#cdbfa8] hover:shadow-sm">
         <div className="relative h-56 border-b border-dashed border-[#dfd5c2] bg-[#ece2d4]">
           <Badge
             variant="outline"
@@ -50,7 +50,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 p-3">
+        <div className="flex flex-1 flex-col gap-2 p-3">
           <div className="flex items-center justify-between text-xs text-[#7c7a72]">
             <span>{product.clothingType}</span>
             <span>{product.province}</span>
@@ -80,7 +80,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
             ) : null}
           </div>
 
-          <div className="mt-1 flex items-end justify-between">
+          <div className="mt-auto flex items-end justify-between pt-1">
             <div className="flex flex-col">
               <p className="text-2xl font-extrabold tracking-tight text-[#2f5f49]">
                 {formatRupiah(product.price)}

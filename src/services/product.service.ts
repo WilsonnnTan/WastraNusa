@@ -128,6 +128,7 @@ const normalizeFilters = (
     maxPrice: normalizedMaxPrice,
     island: filters.island?.trim() || undefined,
     province: filters.province?.trim() || undefined,
+    size: filters.size?.trim() || undefined,
     clothingType: filters.clothingType?.trim() || undefined,
     gender: filters.gender,
     status: filters.status,
@@ -199,6 +200,7 @@ export const productService = {
       normalizedFilters,
       'province',
     );
+    const filtersWithoutSize = withFilterOmitted(normalizedFilters, 'size');
     const filtersWithoutGender = withFilterOmitted(normalizedFilters, 'gender');
     const filtersWithoutStatus = withFilterOmitted(normalizedFilters, 'status');
     const filtersWithoutPrice = withFilterOmitted(
@@ -213,6 +215,7 @@ export const productService = {
       categoryCounts,
       islandCounts,
       provinceCounts,
+      sizeCounts,
       genderCounts,
       statusCounts,
       priceRange,
@@ -230,6 +233,7 @@ export const productService = {
       productRepository.countByClothingType(filtersWithoutCategory),
       productRepository.countByIsland(filtersWithoutIsland),
       productRepository.countByProvince(filtersWithoutProvince),
+      productRepository.countBySize(filtersWithoutSize),
       productRepository.countByGender(filtersWithoutGender),
       productRepository.countByStatus(filtersWithoutStatus),
       productRepository.getPriceRange(filtersWithoutPrice),
@@ -272,6 +276,14 @@ export const productService = {
       normalizedFilters.gender,
     );
 
+    const sizes = mapFilterOptions(
+      sizeCounts.map((item) => ({
+        name: item.name,
+        count: item._count.name,
+      })),
+      normalizedFilters.size,
+    );
+
     const statusMap = new Map(
       statusCounts.map((item) => [item.status, item._count.status]),
     );
@@ -292,6 +304,7 @@ export const productService = {
         categories,
         islands,
         provinces,
+        sizes,
         genders,
         statuses,
         priceRange,

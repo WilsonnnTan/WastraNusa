@@ -75,6 +75,10 @@ export function fetchProductCatalog(
     searchParams.set('province', filters.province);
   }
 
+  if (filters.size) {
+    searchParams.set('size', filters.size);
+  }
+
   if (filters.clothingType) {
     searchParams.set('clothingType', filters.clothingType);
   }
