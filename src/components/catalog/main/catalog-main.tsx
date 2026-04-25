@@ -153,36 +153,36 @@ export function CatalogMain() {
             minPriceInput={minPriceInput}
             maxPriceInput={maxPriceInput}
             selectedPricePreset={selectedPricePreset}
-            onCategoryChange={(value) => {
+            onCategoryChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedCategory(value);
             }}
-            onIslandChange={(value) => {
+            onIslandChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedIsland(value);
             }}
-            onSizeChange={(value) => {
+            onSizeChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedSize(value);
             }}
-            onGenderChange={(value) => {
+            onGenderChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedGender(value as Gender | undefined);
             }}
-            onStatusChange={(value) => {
+            onStatusChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedStatus(value as ProductStatus | undefined);
             }}
-            onInStockOnlyChange={(value) => {
+            onInStockOnlyChange={(value: boolean) => {
               setCurrentPage(1);
               setInStockOnly(value);
             }}
-            onMinPriceChange={(value) => {
+            onMinPriceChange={(value: string) => {
               setCurrentPage(1);
               setSelectedPricePreset('all');
               setMinPriceInput(value.replace(/[^\d]/g, ''));
             }}
-            onMaxPriceChange={(value) => {
+            onMaxPriceChange={(value: string) => {
               setCurrentPage(1);
               setSelectedPricePreset('all');
               setMaxPriceInput(value.replace(/[^\d]/g, ''));

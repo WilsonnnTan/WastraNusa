@@ -32,6 +32,7 @@ export const GET = withApiPublic(async ({ req }) => {
 
   const island = url.searchParams.get('island') || undefined;
   const province = url.searchParams.get('province') || undefined;
+  const size = url.searchParams.get('size') || undefined;
   const clothingType = url.searchParams.get('clothingType') || undefined;
 
   const rawGender = url.searchParams.get('gender');
@@ -60,6 +61,7 @@ export const GET = withApiPublic(async ({ req }) => {
     maxPrice,
     island,
     province,
+    size,
     clothingType,
     gender,
     status,
