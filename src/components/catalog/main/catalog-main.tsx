@@ -1,14 +1,12 @@
 ﻿'use client';
 
+import { CatalogFiltersSidebar } from '@/components/catalog/main/catalog-filters-sidebar';
+import type { PricePresetKey } from '@/components/catalog/main/catalog-filters-sidebar';
 import { Gender, ProductStatus } from '@/generated/prisma/enums';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import type { ProductCatalogSortBy } from '@/types/product';
 import { useMemo, useState } from 'react';
 
-import {
-  CatalogFiltersSidebar,
-  type PricePresetKey,
-} from './catalog-filters-sidebar';
 import { CatalogMainHeader } from './catalog-main-header';
 import { CatalogPagination } from './catalog-pagination';
 import {
