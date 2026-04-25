@@ -25,8 +25,8 @@ const Catalog_SORT_OPTIONS: Array<{
 }> = [
   { label: 'Terbaru', value: 'newest' },
   { label: 'Terlama', value: 'oldest' },
-  { label: 'Harga Terendah', value: 'price_asc' },
-  { label: 'Harga Tertinggi', value: 'price_desc' },
+  { label: 'Harga ↑', value: 'price_asc' },
+  { label: 'Harga ↓', value: 'price_desc' },
   { label: 'Paling Laris', value: 'sold_desc' },
   { label: 'Nama A-Z', value: 'name_asc' },
   { label: 'Nama Z-A', value: 'name_desc' },
@@ -60,7 +60,7 @@ export function CatalogMain() {
   );
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [selectedIsland, setSelectedIsland] = useState<string>();
-  const [selectedProvince, setSelectedProvince] = useState<string>();
+  const [selectedSize, setSelectedSize] = useState<string>();
   const [selectedGender, setSelectedGender] = useState<Gender>();
   const [selectedStatus, setSelectedStatus] = useState<ProductStatus>();
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -75,8 +75,8 @@ export function CatalogMain() {
       minPrice: parsePriceInput(minPriceInput),
       maxPrice: parsePriceInput(maxPriceInput),
       island: selectedIsland,
-      province: selectedProvince,
       clothingType: selectedCategory,
+      size: selectedSize,
       gender: selectedGender,
       status: selectedStatus,
       inStock: inStockOnly ? true : undefined,
@@ -90,7 +90,7 @@ export function CatalogMain() {
       selectedCategory,
       selectedGender,
       selectedIsland,
-      selectedProvince,
+      selectedSize,
       selectedStatus,
     ],
   );
@@ -117,7 +117,7 @@ export function CatalogMain() {
     setActiveSort('newest');
     setSelectedCategory(undefined);
     setSelectedIsland(undefined);
-    setSelectedProvince(undefined);
+    setSelectedSize(undefined);
     setSelectedGender(undefined);
     setSelectedStatus(undefined);
     setInStockOnly(false);
@@ -141,12 +141,12 @@ export function CatalogMain() {
             totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
             categories={meta?.categories ?? []}
             islands={meta?.islands ?? []}
-            provinces={meta?.provinces ?? []}
+            sizes={meta?.sizes ?? []}
             genders={meta?.genders ?? []}
             statuses={meta?.statuses ?? []}
             selectedCategory={selectedCategory}
             selectedIsland={selectedIsland}
-            selectedProvince={selectedProvince}
+            selectedSize={selectedSize}
             selectedGender={selectedGender}
             selectedStatus={selectedStatus}
             inStockOnly={inStockOnly}
@@ -161,9 +161,9 @@ export function CatalogMain() {
               setCurrentPage(1);
               setSelectedIsland(value);
             }}
-            onProvinceChange={(value) => {
+            onSizeChange={(value) => {
               setCurrentPage(1);
-              setSelectedProvince(value);
+              setSelectedSize(value);
             }}
             onGenderChange={(value) => {
               setCurrentPage(1);

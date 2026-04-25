@@ -9,7 +9,7 @@ type CatalogProductGridProps = {
 
 export function CatalogProductGrid({ products }: CatalogProductGridProps) {
   return (
-    <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="mt-4 grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {products.map((product) => (
         <CatalogProductCard key={product.slug} product={product} />
       ))}
@@ -25,11 +25,11 @@ export function CatalogProductGridSkeleton({
   count = 9,
 }: CatalogProductGridSkeletonProps) {
   return (
-    <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="mt-4 grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={`Catalog-skeleton-${index}`}
-          className="overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed]"
+          className="h-full overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed]"
         >
           <Skeleton className="h-56 w-full rounded-none border-b border-dashed border-[#dfd5c2] bg-[#ece2d4]" />
           <div className="space-y-3 p-3">
