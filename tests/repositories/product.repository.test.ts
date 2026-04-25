@@ -13,6 +13,51 @@ vi.unmock('@/repositories/product.repository');
 
 const createdProductIds: string[] = [];
 
+const createTestProduct = async (
+  overrides: Partial<{
+    name: string;
+    slug: string;
+    price: number;
+    stock: number;
+    sku: string;
+    island: string;
+    province: string;
+    clothingType: string;
+    gender: 'male' | 'female';
+    status: 'active' | 'inactive' | 'out_of_stock';
+  }> = {},
+) => {
+  const id = crypto.randomUUID();
+  createdProductIds.push(id);
+
+  return productRepository.create({
+    id,
+    articleId: SEED_ARTICLE_1.id,
+    name: overrides.name ?? `Repo Test Product ${id.slice(0, 8)}`,
+    slug: overrides.slug ?? `repo-test-product-${id.slice(0, 8)}`,
+    description: 'Repository test product',
+    price: overrides.price ?? 100000,
+    stock: overrides.stock ?? 10,
+    sku: overrides.sku ?? `REPO-SKU-${id.slice(0, 8)}`,
+    weight: 250,
+    island: overrides.island ?? SEED_ARTICLE_1.island,
+    province: overrides.province ?? SEED_ARTICLE_1.province,
+    clothingType: overrides.clothingType ?? SEED_ARTICLE_1.clothingType,
+    gender: overrides.gender ?? SEED_ARTICLE_1.gender,
+    status: overrides.status ?? 'active',
+  });
+};
+
+const toNumber = (value: unknown): number => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (value && typeof value === 'object' && 'toNumber' in value) {
+    return (value as { toNumber: () => number }).toNumber();
+  }
+  return Number(value);
+};
+
 beforeAll(async () => {
   const product = await prisma.product.findFirst({
     where: { id: SEED_PRODUCT_1.id },
@@ -104,12 +149,165 @@ describe('productRepository', { tags: ['db'] }, () => {
       const products = await productRepository.findAll();
       expect(products.length).toBeGreaterThanOrEqual(2);
     });
+
+    it('should filter products by island and clothing type', async () => {
+      const products = await productRepository.findAll({
+        filters: {
+          island: SEED_PRODUCT_1.island,
+          clothingType: SEED_PRODUCT_1.clothingType,
+        },
+      });
+
+      expect(products.length).toBeGreaterThanOrEqual(1);
+      expect(products.some((p) => p.id === SEED_PRODUCT_1.id)).toBe(true);
+      expect(products.every((p) => p.island === SEED_PRODUCT_1.island)).toBe(
+        true,
+      );
+      expect(
+        products.every((p) => p.clothingType === SEED_PRODUCT_1.clothingType),
+      ).toBe(true);
+    });
+
+    it('should filter out-of-stock products when inStock is false', async () => {
+      const created = await createTestProduct({
+        name: 'Repo Out Of Stock Product',
+        slug: `repo-out-of-stock-${crypto.randomUUID().slice(0, 8)}`,
+        stock: 0,
+        status: 'out_of_stock',
+      });
+
+      const products = await productRepository.findAll({
+        filters: { inStock: false },
+      });
+
+      expect(products.some((p) => p.id === created.id)).toBe(true);
+      expect(products.every((p) => p.stock === 0)).toBe(true);
+    });
+
+    it('should sort products by price ascending and descending', async () => {
+      const ascProducts = await productRepository.findAll({
+        filters: { sortBy: 'price_asc' },
+      });
+      const descProducts = await productRepository.findAll({
+        filters: { sortBy: 'price_desc' },
+      });
+
+      expect(ascProducts.length).toBeGreaterThanOrEqual(2);
+      expect(descProducts.length).toBeGreaterThanOrEqual(2);
+
+      const ascFirst = toNumber(ascProducts[0].price);
+      const ascLast = toNumber(ascProducts[ascProducts.length - 1].price);
+      const descFirst = toNumber(descProducts[0].price);
+      const descLast = toNumber(descProducts[descProducts.length - 1].price);
+
+      expect(ascFirst).toBeLessThanOrEqual(ascLast);
+      expect(descFirst).toBeGreaterThanOrEqual(descLast);
+    });
   });
 
   describe('countAll', () => {
     it('should return total product count', async () => {
       const count = await productRepository.countAll();
       expect(count).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should count products with filters', async () => {
+      const count = await productRepository.countAll({
+        island: SEED_PRODUCT_1.island,
+        clothingType: SEED_PRODUCT_1.clothingType,
+      });
+
+      expect(count).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('aggregation helpers', () => {
+    it('should group product counts by clothing type', async () => {
+      const grouped = await productRepository.countByClothingType();
+
+      expect(grouped.length).toBeGreaterThan(0);
+      expect(
+        grouped.some(
+          (item) =>
+            item.clothingType === SEED_PRODUCT_1.clothingType &&
+            item._count.clothingType >= 1,
+        ),
+      ).toBe(true);
+    });
+
+    it('should group product counts by island', async () => {
+      const grouped = await productRepository.countByIsland();
+
+      expect(grouped.length).toBeGreaterThan(0);
+      expect(
+        grouped.some(
+          (item) =>
+            item.island === SEED_PRODUCT_1.island && item._count.island >= 1,
+        ),
+      ).toBe(true);
+    });
+
+    it('should group product counts by province', async () => {
+      const grouped = await productRepository.countByProvince();
+
+      expect(grouped.length).toBeGreaterThan(0);
+      expect(
+        grouped.some(
+          (item) =>
+            item.province === SEED_PRODUCT_1.province &&
+            item._count.province >= 1,
+        ),
+      ).toBe(true);
+    });
+
+    it('should group product counts by gender', async () => {
+      const grouped = await productRepository.countByGender();
+
+      expect(grouped.length).toBeGreaterThan(0);
+      expect(
+        grouped.some(
+          (item) =>
+            item.gender === SEED_PRODUCT_1.gender && item._count.gender >= 1,
+        ),
+      ).toBe(true);
+    });
+
+    it('should group product counts by status including inactive items', async () => {
+      await createTestProduct({
+        name: 'Repo Inactive Product',
+        slug: `repo-inactive-${crypto.randomUUID().slice(0, 8)}`,
+        status: 'inactive',
+      });
+
+      const grouped = await productRepository.countByStatus();
+
+      expect(grouped.length).toBeGreaterThan(0);
+      expect(
+        grouped.some(
+          (item) => item.status === 'inactive' && item._count.status >= 1,
+        ),
+      ).toBe(true);
+    });
+
+    it('should return min and max price from filtered products', async () => {
+      const clothingType = `RangeTest-${crypto.randomUUID().slice(0, 8)}`;
+      await createTestProduct({
+        name: 'Repo Range Min',
+        slug: `repo-range-min-${crypto.randomUUID().slice(0, 8)}`,
+        price: 111111,
+        clothingType,
+      });
+      await createTestProduct({
+        name: 'Repo Range Max',
+        slug: `repo-range-max-${crypto.randomUUID().slice(0, 8)}`,
+        price: 333333,
+        clothingType,
+      });
+
+      const range = await productRepository.getPriceRange({ clothingType });
+
+      expect(range.min).toBe(111111);
+      expect(range.max).toBe(333333);
     });
   });
 

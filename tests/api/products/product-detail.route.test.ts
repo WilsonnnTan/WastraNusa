@@ -26,6 +26,7 @@ const MOCK_PRODUCT = {
   sold: 0,
   variants: [],
   variantCount: 0,
+  createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
 
@@ -38,11 +39,7 @@ beforeEach(() => {
 });
 
 describe('GET /api/products/[id]', { tags: ['backend'] }, () => {
-  it('should return product detail for admin', async () => {
-    mockAuth.requireAdmin.mockResolvedValue({
-      id: 'admin-1',
-      role: 'admin',
-    } as never);
+  it('should return product detail', async () => {
     mockService.getProductDetail.mockResolvedValue(MOCK_PRODUCT as never);
 
     const req = createRequest('http://localhost/api/products/prod-1');
@@ -56,10 +53,6 @@ describe('GET /api/products/[id]', { tags: ['backend'] }, () => {
   });
 
   it('should return 404 when product not found (via service)', async () => {
-    mockAuth.requireAdmin.mockResolvedValue({
-      id: 'admin-1',
-      role: 'admin',
-    } as never);
     mockService.getProductDetail.mockRejectedValue(
       new ApiError('Product not found', 404),
     );

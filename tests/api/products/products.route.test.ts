@@ -28,6 +28,7 @@ const MOCK_PRODUCT_LIST = {
       sold: 0,
       variants: [],
       variantCount: 0,
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
   ],
@@ -37,6 +38,21 @@ const MOCK_PRODUCT_LIST = {
     totalItems: 1,
     totalPages: 1,
     hasNextPage: false,
+    categories: [],
+    islands: [],
+    provinces: [],
+    genders: [],
+    statuses: [],
+    priceRange: {
+      min: 250000,
+      max: 250000,
+    },
+    stats: {
+      totalProducts: 1,
+      totalCategories: 1,
+      totalIslands: 1,
+      totalProvinces: 1,
+    },
   },
 };
 
@@ -61,11 +77,7 @@ beforeEach(() => {
 });
 
 describe('GET /api/products', { tags: ['backend'] }, () => {
-  it('should return product list for admin', async () => {
-    mockAuth.requireAdmin.mockResolvedValue({
-      id: 'admin-1',
-      role: 'admin',
-    } as never);
+  it('should return product list', async () => {
     mockService.getProducts.mockResolvedValue(MOCK_PRODUCT_LIST as never);
 
     const req = createRequest('http://localhost/api/products');
@@ -75,20 +87,38 @@ describe('GET /api/products', { tags: ['backend'] }, () => {
     expect(res.status).toBe(200);
     expect(body.status).toBe('success');
     expect(body.data).toEqual(MOCK_PRODUCT_LIST);
-    expect(mockService.getProducts).toHaveBeenCalledWith(1, 10);
+    expect(mockService.getProducts).toHaveBeenCalledWith(1, 10, {
+      minPrice: undefined,
+      maxPrice: undefined,
+      island: undefined,
+      province: undefined,
+      clothingType: undefined,
+      gender: undefined,
+      status: undefined,
+      inStock: undefined,
+      sortBy: undefined,
+    });
   });
 
-  it('should parse page and limit from query params', async () => {
-    mockAuth.requireAdmin.mockResolvedValue({
-      id: 'admin-1',
-      role: 'admin',
-    } as never);
+  it('should parse page, limit, and filter params from query', async () => {
     mockService.getProducts.mockResolvedValue(MOCK_PRODUCT_LIST as never);
 
-    const req = createRequest('http://localhost/api/products?page=2&limit=5');
+    const req = createRequest(
+      'http://localhost/api/products?page=2&limit=5&minPrice=100000&maxPrice=500000&island=Jawa&province=Jawa%20Tengah&clothingType=batik&gender=male&status=active&inStock=true&sortBy=price_desc',
+    );
     await GET(req, { params: Promise.resolve({}) });
 
-    expect(mockService.getProducts).toHaveBeenCalledWith(2, 5);
+    expect(mockService.getProducts).toHaveBeenCalledWith(2, 5, {
+      minPrice: 100000,
+      maxPrice: 500000,
+      island: 'Jawa',
+      province: 'Jawa Tengah',
+      clothingType: 'batik',
+      gender: 'male',
+      status: 'active',
+      inStock: true,
+      sortBy: 'price_desc',
+    });
   });
 });
 
