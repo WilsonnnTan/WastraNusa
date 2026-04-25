@@ -7,7 +7,15 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-export function KatalogMainHeader() {
+type KatalogMainHeaderProps = {
+  totalProducts: number;
+  totalProvinces: number;
+};
+
+export function KatalogMainHeader({
+  totalProducts,
+  totalProvinces,
+}: KatalogMainHeaderProps) {
   return (
     <section className="mx-auto w-full max-w-[1320px] px-4 pb-5 pt-6 md:px-6 lg:px-8">
       <Breadcrumb>
@@ -26,13 +34,13 @@ export function KatalogMainHeader() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+      <div className="mt-3">
         <div>
           <h1 className="text-4xl font-bold tracking-tight text-[#2f5b49]">
             Katalog Produk Wastra
           </h1>
           <p className="mt-1 text-[#4f6458]">
-            12 produk autentik dari 34 provinsi
+            {totalProducts} produk autentik dari {totalProvinces} provinsi
           </p>
         </div>
       </div>
