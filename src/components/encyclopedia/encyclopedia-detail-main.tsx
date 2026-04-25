@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -140,8 +140,8 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
 
   const hasRelatedProducts = article.relatedProducts.length > 0;
   const nextArticleHref = article.nextArticle.slug
-    ? `/ensiklopedia/${article.nextArticle.slug}`
-    : '/ensiklopedia';
+    ? `/encyclopedia/${article.nextArticle.slug}`
+    : '/encyclopedia';
   const nextArticleDescription = article.nextArticle.slug
     ? 'Lanjutkan baca artikel terkait'
     : 'Kembali ke daftar ensiklopedia';
@@ -177,7 +177,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink
-              href="/ensiklopedia"
+              href="/encyclopedia"
               className="hover:text-[#2f5b49]"
             >
               Ensiklopedia Budaya

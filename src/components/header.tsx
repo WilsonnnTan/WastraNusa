@@ -9,7 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const menuItems = [
-  { label: 'Ensiklopedia', icon: BookOpenText, href: '/ensiklopedia' },
+  { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
   { label: 'Katalog', icon: Grid2X2, href: '/katalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
   { label: 'Profil', icon: UserRound, href: '/profile' },

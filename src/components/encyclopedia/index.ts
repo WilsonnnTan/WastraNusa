@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Barrel export for encyclopedia components
  */
 

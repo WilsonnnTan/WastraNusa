@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import {
   EncyclopediaArticleCard,
@@ -6,7 +6,7 @@ import {
   EncyclopediaPagination,
   EncyclopediaSidebar,
   EncyclopediaStats,
-} from '@/components/ensiklopedia';
+} from '@/components/encyclopedia';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -173,7 +173,7 @@ export function EncyclopediaMain({
     }
 
     const query = searchParams.toString();
-    router.push(query ? `/ensiklopedia?${query}` : '/ensiklopedia');
+    router.push(query ? `/encyclopedia?${query}` : '/encyclopedia');
   };
 
   const handleIslandClick = (island: string) => {
@@ -198,7 +198,7 @@ export function EncyclopediaMain({
   };
 
   const handleArticleClick = (article: (typeof articles)[number]) => {
-    router.push(`/ensiklopedia/${article.slug}`);
+    router.push(`/encyclopedia/${article.slug}`);
   };
 
   const handlePageChange = (page: number) => {

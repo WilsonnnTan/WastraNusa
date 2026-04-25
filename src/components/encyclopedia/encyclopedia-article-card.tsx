@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { Eye, Heart } from 'lucide-react';

@@ -112,7 +112,7 @@ export function Footer({ year = 2026 }: FooterProps) {
               <h4 className="text-lg font-bold text-[#edf4e8]">
                 {column.title === 'Ensiklopedia' ? (
                   <Link
-                    href="/ensiklopedia"
+                    href="/encyclopedia"
                     className="transition hover:text-white"
                   >
                     {column.title}
@@ -126,7 +126,7 @@ export function Footer({ year = 2026 }: FooterProps) {
                   <li key={link}>
                     {column.title === 'Ensiklopedia' ? (
                       <Link
-                        href="/ensiklopedia"
+                        href="/encyclopedia"
                         className="text-left text-sm transition hover:text-white"
                       >
                         {link}

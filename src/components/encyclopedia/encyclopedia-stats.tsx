@@ -1,4 +1,4 @@
-import type { Stat } from '@/types/encyclopedia';
+﻿import type { Stat } from '@/types/encyclopedia';
 
 interface EncyclopediaStatsProps {
   stats: Stat[];

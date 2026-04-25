@@ -18,8 +18,8 @@ export function KatalogDetailEncyclopedia({
   isLinkedArticlePending = false,
 }: KatalogDetailEncyclopediaProps) {
   const articleHref = linkedArticle?.slug
-    ? `/ensiklopedia/${linkedArticle.slug}`
-    : '/ensiklopedia';
+    ? `/encyclopedia/${linkedArticle.slug}`
+    : '/encyclopedia';
   const articleTitle =
     linkedArticle?.title ?? 'Artikel ensiklopedia belum tersedia';
   const articleExcerpt =

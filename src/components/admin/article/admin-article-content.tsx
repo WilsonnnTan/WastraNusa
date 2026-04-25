@@ -213,7 +213,7 @@ export function AdminArticleContent() {
                               variant="secondary"
                               aria-label="Kunjungi artikel"
                               onClick={() =>
-                                router.push(`/ensiklopedia/${article.slug}`)
+                                router.push(`/encyclopedia/${article.slug}`)
                               }
                             >
                               <Eye />

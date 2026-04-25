@@ -53,7 +53,7 @@ export function LoginForm() {
           if (session.data?.user.role === 'admin') {
             router.push('/admin/dashboard');
           } else {
-            router.push('/ensiklopedia');
+            router.push('/encyclopedia');
           }
         },
       },

@@ -1,4 +1,4 @@
-import { EncyclopediaMain } from '@/components/ensiklopedia/encyclopedia-main';
+﻿import { EncyclopediaMain } from '@/components/encyclopedia/encyclopedia-main';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 

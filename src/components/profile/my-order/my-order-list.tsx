@@ -1,4 +1,4 @@
-import { EncyclopediaPagination as Pagination } from '@/components/ensiklopedia/encyclopedia-pagination';
+import { EncyclopediaPagination as Pagination } from '@/components/encyclopedia/encyclopedia-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { OrderItem, useOrders } from '@/hooks/use-order';
