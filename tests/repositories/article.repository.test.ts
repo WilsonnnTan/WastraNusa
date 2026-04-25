@@ -148,6 +148,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
       if (article && article.products.length > 0) {
         expect(article.products[0]).toEqual(
           expect.objectContaining({
+            slug: expect.any(String),
             name: expect.any(String),
             province: expect.any(String),
             island: expect.any(String),
@@ -169,6 +170,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
       if (article && article.products.length > 0) {
         expect(article.products[0]).toEqual(
           expect.objectContaining({
+            slug: expect.any(String),
             name: expect.any(String),
             province: expect.any(String),
             island: expect.any(String),
