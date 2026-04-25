@@ -177,7 +177,7 @@ function PopularArticlesCard({
             {articles.map((article) => (
               <Link
                 key={article.rank}
-                href={`/ensiklopedia/${article.slug}`}
+                href={`/encyclopedia/${article.slug}`}
                 className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 transition-colors hover:bg-[#fdf9f4] last:border-b-0"
               >
                 <div className="pt-0.5 text-sm font-semibold text-[#8c7f71]">

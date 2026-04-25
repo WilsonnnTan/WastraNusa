@@ -12,9 +12,9 @@ export function GoogleButton({
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/ensiklopedia',
+      callbackURL: '/encyclopedia',
       errorCallbackURL: '/error',
-      newUserCallbackURL: '/ensiklopedia',
+      newUserCallbackURL: '/encyclopedia',
       disableRedirect: false,
     });
   };

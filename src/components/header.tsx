@@ -1,4 +1,4 @@
-import {
+﻿import {
   BookOpenText,
   Grid2X2,
   Search,
@@ -9,8 +9,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const menuItems = [
-  { label: 'Ensiklopedia', icon: BookOpenText, href: '/ensiklopedia' },
-  { label: 'Katalog', icon: Grid2X2, href: '/katalog' },
+  { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
+  { label: 'Catalog', icon: Grid2X2, href: '/catalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
   { label: 'Profil', icon: UserRound, href: '/profile' },
 ];

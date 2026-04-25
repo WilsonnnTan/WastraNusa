@@ -54,7 +54,7 @@ export function IslandCards() {
           ? islands.map((island, index) => (
               <Link
                 key={island.name}
-                href={`/ensiklopedia?island=${encodeURIComponent(island.name)}`}
+                href={`/encyclopedia?island=${encodeURIComponent(island.name)}`}
               >
                 <Card className="group relative overflow-hidden rounded-2xl border border-[#ddd4c6]">
                   <div

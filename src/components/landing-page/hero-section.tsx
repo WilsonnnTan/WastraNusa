@@ -162,7 +162,7 @@ export function HeroSection() {
                           asChild
                           className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
                         >
-                          <Link href={`/ensiklopedia/${slide.slug}`}>
+                          <Link href={`/encyclopedia/${slide.slug}`}>
                             Baca Artikel
                           </Link>
                         </Button>
@@ -170,7 +170,7 @@ export function HeroSection() {
                           asChild
                           className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
                         >
-                          <Link href="/ensiklopedia">
+                          <Link href="/encyclopedia">
                             Jelajahi Ensiklopedia
                           </Link>
                         </Button>

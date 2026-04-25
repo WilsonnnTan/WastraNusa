@@ -27,7 +27,7 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
       {articles.map((article) => (
         <Link
           key={article.id}
-          href={`/ensiklopedia/${article.slug}`}
+          href={`/encyclopedia/${article.slug}`}
           className="group flex items-center gap-4 rounded-xl border border-[#ece7dd] bg-white p-3.5 transition-all hover:border-[#dcd5c7] hover:bg-[#fcfbf9]"
         >
           <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591]">

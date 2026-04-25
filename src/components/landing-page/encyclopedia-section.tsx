@@ -63,7 +63,7 @@ export function EncyclopediaSection() {
                 asChild
                 className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc]"
               >
-                <Link href="/ensiklopedia">Cari</Link>
+                <Link href="/encyclopedia">Cari</Link>
               </Button>
             </div>
 
@@ -76,7 +76,7 @@ export function EncyclopediaSection() {
                   className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:bg-white/14"
                 >
                   <Link
-                    href={`/ensiklopedia?island=${encodeURIComponent(tag.name)}`}
+                    href={`/encyclopedia?island=${encodeURIComponent(tag.name)}`}
                   >
                     {tag.name}
                   </Link>
@@ -93,7 +93,7 @@ export function EncyclopediaSection() {
                   className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:bg-white/14"
                 >
                   <Link
-                    href={`/ensiklopedia?topic=${encodeURIComponent(topic)}`}
+                    href={`/encyclopedia?topic=${encodeURIComponent(topic)}`}
                   >
                     {topic}
                   </Link>
@@ -134,7 +134,7 @@ export function EncyclopediaSection() {
                 ? latestArticles.map((article) => (
                     <Link
                       key={article.slug}
-                      href={`/ensiklopedia/${article.slug}`}
+                      href={`/encyclopedia/${article.slug}`}
                       className="block"
                     >
                       <Card className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5 transition hover:bg-white/11">
@@ -171,7 +171,7 @@ export function EncyclopediaSection() {
               asChild
               className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
             >
-              <Link href="/ensiklopedia">
+              <Link href="/encyclopedia">
                 Lihat semua artikel
                 <ChevronRight className="h-4 w-4" />
               </Link>
