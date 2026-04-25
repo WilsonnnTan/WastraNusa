@@ -9,6 +9,9 @@ on:
     branches:
       - dev
 
+permissions:
+  contents: read
+
 jobs:
   Deployment-Development:
     runs-on: ubuntu-latest
