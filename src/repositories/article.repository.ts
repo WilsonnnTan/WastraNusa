@@ -126,6 +126,7 @@ export const articleRepository = {
         engagement: true,
         products: {
           select: {
+            slug: true,
             name: true,
             province: true,
             island: true,

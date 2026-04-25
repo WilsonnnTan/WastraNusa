@@ -28,18 +28,63 @@ export interface ProductInventoryItem {
   sold: number;
   variants: ProductVariantItem[];
   variantCount: number;
+  createdAt: string;
   updatedAt: string;
+}
+
+export type ProductCatalogSortBy =
+  | 'newest'
+  | 'oldest'
+  | 'price_asc'
+  | 'price_desc'
+  | 'sold_desc'
+  | 'name_asc'
+  | 'name_desc';
+
+export interface ProductCatalogFilters {
+  minPrice?: number;
+  maxPrice?: number;
+  island?: string;
+  province?: string;
+  clothingType?: string;
+  gender?: Gender;
+  status?: ProductStatus;
+  inStock?: boolean;
+  sortBy?: ProductCatalogSortBy;
+}
+
+export interface ProductFilterOption {
+  name: string;
+  count: number;
+  active?: boolean;
+}
+
+export interface ProductInventoryListMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  categories?: ProductFilterOption[];
+  islands?: ProductFilterOption[];
+  provinces?: ProductFilterOption[];
+  genders?: ProductFilterOption[];
+  statuses?: ProductFilterOption[];
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  stats?: {
+    totalProducts: number;
+    totalCategories: number;
+    totalIslands: number;
+    totalProvinces: number;
+  };
 }
 
 export interface ProductInventoryListResponse {
   items: ProductInventoryItem[];
-  meta: {
-    page: number;
-    limit: number;
-    totalItems: number;
-    totalPages: number;
-    hasNextPage: boolean;
-  };
+  meta: ProductInventoryListMeta;
 }
 
 export interface ArticleOptionItem {

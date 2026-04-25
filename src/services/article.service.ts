@@ -167,6 +167,7 @@ export const articleService = {
         { label: 'Durasi Baca', value: `${article.readMinutes} menit` },
       ],
       relatedProducts: (article.products ?? []).map((product) => ({
+        slug: product.slug,
         name: product.name,
         location: [product.province, product.island].filter(Boolean).join(', '),
         price: formatRupiah(Number(product.price)),

@@ -1,14 +1,71 @@
-import { withApiAdmin } from '@/lib/api-handler';
+import { Gender, ProductStatus } from '@/generated/prisma/enums';
+import { withApiAdmin, withApiPublic } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
 import { createProductSchema } from '@/schemas/product.schema';
 import { productService } from '@/services/product.service';
+import type { ProductCatalogSortBy } from '@/types/product';
 
-export const GET = withApiAdmin(async ({ req }) => {
+const PRODUCT_SORT_OPTIONS: readonly ProductCatalogSortBy[] = [
+  'newest',
+  'oldest',
+  'price_asc',
+  'price_desc',
+  'sold_desc',
+  'name_asc',
+  'name_desc',
+];
+
+export const GET = withApiPublic(async ({ req }) => {
   const url = new URL(req.url);
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
   const limit = Math.max(1, Number(url.searchParams.get('limit')) || 10);
 
-  const products = await productService.getProducts(page, limit);
+  const minPriceParam = url.searchParams.get('minPrice');
+  const rawMinPrice =
+    minPriceParam === null ? Number.NaN : Number(minPriceParam);
+  const minPrice = Number.isFinite(rawMinPrice) ? rawMinPrice : undefined;
+
+  const maxPriceParam = url.searchParams.get('maxPrice');
+  const rawMaxPrice =
+    maxPriceParam === null ? Number.NaN : Number(maxPriceParam);
+  const maxPrice = Number.isFinite(rawMaxPrice) ? rawMaxPrice : undefined;
+
+  const island = url.searchParams.get('island') || undefined;
+  const province = url.searchParams.get('province') || undefined;
+  const clothingType = url.searchParams.get('clothingType') || undefined;
+
+  const rawGender = url.searchParams.get('gender');
+  const gender =
+    rawGender && rawGender in Gender ? (rawGender as Gender) : undefined;
+
+  const rawStatus = url.searchParams.get('status');
+  const status =
+    rawStatus && rawStatus in ProductStatus
+      ? (rawStatus as ProductStatus)
+      : undefined;
+
+  const rawInStock = url.searchParams.get('inStock');
+  const inStock =
+    rawInStock === 'true' ? true : rawInStock === 'false' ? false : undefined;
+
+  const rawSortBy = url.searchParams.get('sortBy');
+  const sortBy =
+    rawSortBy &&
+    PRODUCT_SORT_OPTIONS.includes(rawSortBy as ProductCatalogSortBy)
+      ? (rawSortBy as ProductCatalogSortBy)
+      : undefined;
+
+  const products = await productService.getProducts(page, limit, {
+    minPrice,
+    maxPrice,
+    island,
+    province,
+    clothingType,
+    gender,
+    status,
+    inStock,
+    sortBy,
+  });
   return jsend.success(products);
 });
 

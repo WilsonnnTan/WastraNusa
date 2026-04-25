@@ -9,6 +9,9 @@ import {
   type UpdateProductInput,
 } from '@/schemas/product.schema';
 import {
+  type ProductCatalogFilters,
+  type ProductCatalogSortBy,
+  type ProductFilterOption,
   type ProductInventoryItem,
   type ProductInventoryListResponse,
 } from '@/types/product';
@@ -54,6 +57,7 @@ const mapProduct = (product: {
     stock: number;
     sku: string;
   }[];
+  createdAt: Date;
   updatedAt: Date;
 }): ProductInventoryItem => ({
   id: product.id,
@@ -74,8 +78,84 @@ const mapProduct = (product: {
   sold: product.sold,
   variants: product.variants.map(mapVariant),
   variantCount: product.variants.length,
+  createdAt: product.createdAt.toISOString(),
   updatedAt: product.updatedAt.toISOString(),
 });
+
+const PRODUCT_SORT_OPTIONS: readonly ProductCatalogSortBy[] = [
+  'newest',
+  'oldest',
+  'price_asc',
+  'price_desc',
+  'sold_desc',
+  'name_asc',
+  'name_desc',
+];
+
+const PRODUCT_STATUS_OPTIONS: readonly ProductStatus[] = [
+  ProductStatus.active,
+  ProductStatus.inactive,
+  ProductStatus.out_of_stock,
+];
+
+const normalizeFilters = (
+  filters: ProductCatalogFilters = {},
+): ProductCatalogFilters => {
+  const minPrice =
+    typeof filters.minPrice === 'number' && Number.isFinite(filters.minPrice)
+      ? Math.max(0, filters.minPrice)
+      : undefined;
+  const maxPrice =
+    typeof filters.maxPrice === 'number' && Number.isFinite(filters.maxPrice)
+      ? Math.max(0, filters.maxPrice)
+      : undefined;
+
+  const normalizedMinPrice =
+    typeof minPrice === 'number' &&
+    typeof maxPrice === 'number' &&
+    minPrice > maxPrice
+      ? maxPrice
+      : minPrice;
+  const normalizedMaxPrice =
+    typeof minPrice === 'number' &&
+    typeof maxPrice === 'number' &&
+    minPrice > maxPrice
+      ? minPrice
+      : maxPrice;
+
+  return {
+    minPrice: normalizedMinPrice,
+    maxPrice: normalizedMaxPrice,
+    island: filters.island?.trim() || undefined,
+    province: filters.province?.trim() || undefined,
+    clothingType: filters.clothingType?.trim() || undefined,
+    gender: filters.gender,
+    status: filters.status,
+    inStock: typeof filters.inStock === 'boolean' ? filters.inStock : undefined,
+    sortBy: PRODUCT_SORT_OPTIONS.includes(filters.sortBy ?? 'newest')
+      ? (filters.sortBy ?? 'newest')
+      : 'newest',
+  };
+};
+
+const withFilterOmitted = <K extends keyof ProductCatalogFilters>(
+  filters: ProductCatalogFilters,
+  key: K,
+): Omit<ProductCatalogFilters, K> => {
+  const clonedFilters = { ...filters };
+  delete clonedFilters[key];
+  return clonedFilters;
+};
+
+const mapFilterOptions = (
+  data: Array<{ name: string; count: number }>,
+  activeName?: string,
+): ProductFilterOption[] =>
+  data.map((item) => ({
+    name: item.name,
+    count: item.count,
+    active: item.name === activeName,
+  }));
 
 const normalizeVariantsForCreate = (variants?: ProductVariantInput[]) =>
   variants?.map((variant) => ({
@@ -103,17 +183,103 @@ export const productService = {
   getProducts: async (
     page: number = 1,
     limit: number = 10,
+    filters: ProductCatalogFilters = {},
   ): Promise<ProductInventoryListResponse> => {
+    const normalizedFilters = normalizeFilters(filters);
     const safeLimit = Math.min(Math.max(1, limit), 50);
     const safePage = Math.max(1, page);
     const offset = (safePage - 1) * safeLimit;
 
-    const [products, totalItems] = await Promise.all([
-      productRepository.findAll({ offset, limit: safeLimit }),
+    const filtersWithoutCategory = withFilterOmitted(
+      normalizedFilters,
+      'clothingType',
+    );
+    const filtersWithoutIsland = withFilterOmitted(normalizedFilters, 'island');
+    const filtersWithoutProvince = withFilterOmitted(
+      normalizedFilters,
+      'province',
+    );
+    const filtersWithoutGender = withFilterOmitted(normalizedFilters, 'gender');
+    const filtersWithoutStatus = withFilterOmitted(normalizedFilters, 'status');
+    const filtersWithoutPrice = withFilterOmitted(
+      withFilterOmitted(normalizedFilters, 'minPrice'),
+      'maxPrice',
+    );
+
+    const [
+      products,
+      totalItems,
+      globalTotalItems,
+      categoryCounts,
+      islandCounts,
+      provinceCounts,
+      genderCounts,
+      statusCounts,
+      priceRange,
+      globalCategoryCounts,
+      globalIslandCounts,
+      globalProvinceCounts,
+    ] = await Promise.all([
+      productRepository.findAll({
+        offset,
+        limit: safeLimit,
+        filters: normalizedFilters,
+      }),
+      productRepository.countAll(normalizedFilters),
       productRepository.countAll(),
+      productRepository.countByClothingType(filtersWithoutCategory),
+      productRepository.countByIsland(filtersWithoutIsland),
+      productRepository.countByProvince(filtersWithoutProvince),
+      productRepository.countByGender(filtersWithoutGender),
+      productRepository.countByStatus(filtersWithoutStatus),
+      productRepository.getPriceRange(filtersWithoutPrice),
+      productRepository.countByClothingType(),
+      productRepository.countByIsland(),
+      productRepository.countByProvince(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
+
+    const categories = mapFilterOptions(
+      categoryCounts.map((item) => ({
+        name: item.clothingType,
+        count: item._count.clothingType,
+      })),
+      normalizedFilters.clothingType,
+    );
+
+    const islands = mapFilterOptions(
+      islandCounts.map((item) => ({
+        name: item.island,
+        count: item._count.island,
+      })),
+      normalizedFilters.island,
+    );
+
+    const provinces = mapFilterOptions(
+      provinceCounts.map((item) => ({
+        name: item.province,
+        count: item._count.province,
+      })),
+      normalizedFilters.province,
+    );
+
+    const genders = mapFilterOptions(
+      genderCounts.map((item) => ({
+        name: item.gender,
+        count: item._count.gender,
+      })),
+      normalizedFilters.gender,
+    );
+
+    const statusMap = new Map(
+      statusCounts.map((item) => [item.status, item._count.status]),
+    );
+    const statuses = PRODUCT_STATUS_OPTIONS.map((status) => ({
+      name: status,
+      count: statusMap.get(status) ?? 0,
+      active: normalizedFilters.status === status,
+    }));
 
     return {
       items: products.map(mapProduct),
@@ -123,6 +289,18 @@ export const productService = {
         totalItems,
         totalPages,
         hasNextPage: safePage < totalPages,
+        categories,
+        islands,
+        provinces,
+        genders,
+        statuses,
+        priceRange,
+        stats: {
+          totalProducts: globalTotalItems,
+          totalCategories: globalCategoryCounts.length,
+          totalIslands: globalIslandCounts.length,
+          totalProvinces: globalProvinceCounts.length,
+        },
       },
     };
   },
@@ -185,11 +363,23 @@ export const productService = {
       throw new ApiError('Product not found', 404);
     }
 
-    if (data.articleId) {
-      const article = await articleRepository.findByIdOrSlug(data.articleId);
-      if (!article) {
-        throw new ApiError('Artikel tidak ditemukan', 404);
-      }
+    const nextArticle =
+      data.articleId && data.articleId !== existing.articleId
+        ? await articleRepository.findByIdOrSlug(data.articleId)
+        : undefined;
+
+    if (data.articleId && !nextArticle) {
+      throw new ApiError('Artikel tidak ditemukan', 404);
+    }
+
+    const nextIsland = nextArticle?.island?.trim();
+    const nextProvince = nextArticle?.province?.trim();
+
+    if (nextArticle && (!nextIsland || !nextProvince)) {
+      throw new ApiError(
+        'Artikel belum memiliki data pulau/provinsi yang valid',
+        400,
+      );
     }
 
     const product = await productRepository.update(idOrSlug, {
@@ -201,6 +391,8 @@ export const productService = {
       stock: data.stock,
       sku: data.sku,
       weight: data.weight,
+      island: nextIsland,
+      province: nextProvince,
       clothingType: data.clothingType,
       gender: data.gender,
       status: data.status,

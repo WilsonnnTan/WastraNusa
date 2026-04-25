@@ -38,6 +38,7 @@ const MOCK_PRODUCT_RAW = {
   status: 'active' as const,
   sold: 0,
   variants: [MOCK_VARIANT],
+  createdAt: new Date('2025-12-01'),
   updatedAt: new Date('2026-01-01'),
 };
 
@@ -49,6 +50,14 @@ const MOCK_ARTICLE = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+
+  mockProductRepo.countAll.mockResolvedValue(0);
+  mockProductRepo.countByClothingType.mockResolvedValue([] as never);
+  mockProductRepo.countByIsland.mockResolvedValue([] as never);
+  mockProductRepo.countByProvince.mockResolvedValue([] as never);
+  mockProductRepo.countByGender.mockResolvedValue([] as never);
+  mockProductRepo.countByStatus.mockResolvedValue([] as never);
+  mockProductRepo.getPriceRange.mockResolvedValue({ min: 0, max: 0 });
 });
 
 describe('productService', { tags: ['backend'] }, () => {
@@ -61,15 +70,20 @@ describe('productService', { tags: ['backend'] }, () => {
 
       const result = await productService.getProducts(1, 10);
 
-      expect(mockProductRepo.findAll).toHaveBeenCalledWith({
-        offset: 0,
-        limit: 10,
-      });
-      expect(mockProductRepo.countAll).toHaveBeenCalled();
+      expect(mockProductRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 0,
+          limit: 10,
+        }),
+      );
+      expect(mockProductRepo.countAll).toHaveBeenCalledTimes(2);
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('prod-1');
       expect(result.items[0].price).toBe(250000);
       expect(result.items[0].variantCount).toBe(1);
+      expect(result.items[0].createdAt).toBe(
+        MOCK_PRODUCT_RAW.createdAt.toISOString(),
+      );
       expect(result.meta.page).toBe(1);
       expect(result.meta.limit).toBe(10);
       expect(result.meta.totalItems).toBe(1);
@@ -82,10 +96,12 @@ describe('productService', { tags: ['backend'] }, () => {
 
       await productService.getProducts(1, 200);
 
-      expect(mockProductRepo.findAll).toHaveBeenCalledWith({
-        offset: 0,
-        limit: 50,
-      });
+      expect(mockProductRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 0,
+          limit: 50,
+        }),
+      );
     });
 
     it('should default to page 1 and limit 10 when called with no arguments', async () => {
@@ -94,10 +110,12 @@ describe('productService', { tags: ['backend'] }, () => {
 
       await productService.getProducts();
 
-      expect(mockProductRepo.findAll).toHaveBeenCalledWith({
-        offset: 0,
-        limit: 10,
-      });
+      expect(mockProductRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 0,
+          limit: 10,
+        }),
+      );
     });
 
     it('should compute correct offset for page 2', async () => {
@@ -106,10 +124,12 @@ describe('productService', { tags: ['backend'] }, () => {
 
       await productService.getProducts(2, 5);
 
-      expect(mockProductRepo.findAll).toHaveBeenCalledWith({
-        offset: 5,
-        limit: 5,
-      });
+      expect(mockProductRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 5,
+          limit: 5,
+        }),
+      );
     });
 
     it('should map article title and variant count correctly', async () => {

@@ -55,6 +55,7 @@ export interface EncyclopediaKeyFact {
 }
 
 export interface EncyclopediaRelatedProduct {
+  slug: string;
   name: string;
   location: string;
   price: string;

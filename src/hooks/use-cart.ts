@@ -137,10 +137,11 @@ async function clearCartApi(): Promise<Cart> {
  * Fetch user's cart with all items.
  * Implements caching with 3-minute stale time for cart data.
  */
-export function useCart() {
+export function useCart(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: cartKeys.list(),
     queryFn: fetchCartApi,
+    enabled: options?.enabled ?? true,
     staleTime: 1000 * 60 * 3, // 3 minutes — cart data changes less frequently
   });
 }

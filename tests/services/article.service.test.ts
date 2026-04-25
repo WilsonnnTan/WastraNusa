@@ -327,6 +327,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         ...MOCK_ARTICLE,
         products: [
           {
+            slug: 'batik-tulis-kawung-premium',
             name: 'Batik Tulis Kawung Premium',
             province: 'DI Yogyakarta',
             island: 'Jawa',
@@ -341,6 +342,7 @@ describe('articleService', { tags: ['backend'] }, () => {
 
       expect(result.relatedProducts).toEqual([
         {
+          slug: 'batik-tulis-kawung-premium',
           name: 'Batik Tulis Kawung Premium',
           location: 'DI Yogyakarta, Jawa',
           price: 'Rp 450.000',

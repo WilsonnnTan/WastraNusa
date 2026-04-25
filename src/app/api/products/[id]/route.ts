@@ -1,9 +1,9 @@
-import { withApiAdmin } from '@/lib/api-handler';
+import { withApiAdmin, withApiPublic } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
 import { updateProductSchema } from '@/schemas/product.schema';
 import { productService } from '@/services/product.service';
 
-export const GET = withApiAdmin<{ id: string }>(async ({ params }) => {
+export const GET = withApiPublic<{ id: string }>(async ({ params }) => {
   const product = await productService.getProductDetail(params.id);
   return jsend.success(product);
 });

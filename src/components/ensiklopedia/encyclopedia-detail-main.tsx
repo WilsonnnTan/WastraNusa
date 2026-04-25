@@ -378,8 +378,8 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               <div className="mt-1 space-y-2.5">
                 {article.relatedProducts.map((product) => (
                   <Link
-                    key={`${product.name}-${product.location}`}
-                    href="#"
+                    key={product.slug}
+                    href={`/katalog/${product.slug}`}
                     className="flex items-center gap-3 rounded-lg border border-[#dfd4c2] bg-[#efe7da] p-3 transition-colors hover:bg-[#e9dfcf]"
                   >
                     <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-dashed border-[#d4c6b1] bg-[#e8ddcc]">
