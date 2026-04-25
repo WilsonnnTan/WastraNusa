@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail } from '@/hooks/use-article';
@@ -10,13 +10,13 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { KatalogDetailBreadcrumb } from './katalog-detail-breadcrumb';
-import { type DetailTab, KatalogDetailContent } from './katalog-detail-content';
-import { KatalogDetailEncyclopedia } from './katalog-detail-encyclopedia';
-import { KatalogDetailGallery } from './katalog-detail-gallery';
-import { KatalogDetailProductSummary } from './katalog-detail-product-summary';
+import { CatalogDetailBreadcrumb } from './catalog-detail-breadcrumb';
+import { CatalogDetailContent, type DetailTab } from './catalog-detail-content';
+import { CatalogDetailEncyclopedia } from './catalog-detail-encyclopedia';
+import { CatalogDetailGallery } from './catalog-detail-gallery';
+import { CatalogDetailProductSummary } from './catalog-detail-product-summary';
 
-function KatalogDetailSkeleton() {
+function CatalogDetailSkeleton() {
   return (
     <main className="border-t border-[#ddd4c5]">
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-6 md:px-6 lg:px-8">
@@ -95,7 +95,7 @@ function KatalogDetailSkeleton() {
   );
 }
 
-export function KatalogDetailMain({ slug }: { slug: string }) {
+export function CatalogDetailMain({ slug }: { slug: string }) {
   const { data: product, error, isPending } = useProductCatalogDetail(slug);
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
@@ -156,7 +156,7 @@ export function KatalogDetailMain({ slug }: { slug: string }) {
   ]);
 
   if (isPending && !product) {
-    return <KatalogDetailSkeleton />;
+    return <CatalogDetailSkeleton />;
   }
 
   if (!isPending && error) {
@@ -300,14 +300,14 @@ export function KatalogDetailMain({ slug }: { slug: string }) {
   return (
     <main className="border-t border-[#ddd4c5]">
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-6 md:px-6 lg:px-8">
-        <KatalogDetailBreadcrumb
+        <CatalogDetailBreadcrumb
           category={product.clothingType}
           name={product.name}
         />
 
         <div className="mt-4 grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
-          <KatalogDetailGallery category={product.clothingType} />
-          <KatalogDetailProductSummary
+          <CatalogDetailGallery category={product.clothingType} />
+          <CatalogDetailProductSummary
             product={product}
             sizeOptions={sizeVariants.map((variant) => variant.name)}
             colorOptions={colorVariants.map((variant) => variant.name)}
@@ -332,12 +332,12 @@ export function KatalogDetailMain({ slug }: { slug: string }) {
       </section>
 
       <section className="mx-auto grid w-full max-w-[1320px] gap-4 px-4 pb-10 md:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <KatalogDetailContent
+        <CatalogDetailContent
           activeTab={activeTab}
           product={product}
           onTabChange={setActiveTab}
         />
-        <KatalogDetailEncyclopedia
+        <CatalogDetailEncyclopedia
           encyclopediaFacts={encyclopediaFacts}
           category={product.clothingType}
           linkedArticle={linkedArticle}

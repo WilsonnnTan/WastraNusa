@@ -1,4 +1,4 @@
-import {
+﻿import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -7,15 +7,15 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-type KatalogDetailBreadcrumbProps = {
+type CatalogDetailBreadcrumbProps = {
   category: string;
   name: string;
 };
 
-export function KatalogDetailBreadcrumb({
+export function CatalogDetailBreadcrumb({
   category,
   name,
-}: KatalogDetailBreadcrumbProps) {
+}: CatalogDetailBreadcrumbProps) {
   return (
     <Breadcrumb>
       <BreadcrumbList className="text-[#66786d] text-sm font-medium">
@@ -26,8 +26,8 @@ export function KatalogDetailBreadcrumb({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="/katalog" className="hover:text-[#2f5b49]">
-            Katalog
+          <BreadcrumbLink href="/catalog" className="hover:text-[#2f5b49]">
+            Catalog
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

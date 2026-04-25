@@ -1,22 +1,22 @@
-import { Button } from '@/components/ui/button';
+﻿import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { BookOpenText } from 'lucide-react';
 import Link from 'next/link';
 
-type KatalogDetailEncyclopediaProps = {
+type CatalogDetailEncyclopediaProps = {
   encyclopediaFacts: readonly [string, string][];
   category: string;
   linkedArticle?: EncyclopediaArticleDetail;
   isLinkedArticlePending?: boolean;
 };
 
-export function KatalogDetailEncyclopedia({
+export function CatalogDetailEncyclopedia({
   encyclopediaFacts,
   category,
   linkedArticle,
   isLinkedArticlePending = false,
-}: KatalogDetailEncyclopediaProps) {
+}: CatalogDetailEncyclopediaProps) {
   const articleHref = linkedArticle?.slug
     ? `/encyclopedia/${linkedArticle.slug}`
     : '/encyclopedia';

@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
@@ -6,18 +6,18 @@ import Link from 'next/link';
 
 import { formatRupiah } from '../utils';
 
-type KatalogProductCardProps = {
+type CatalogProductCardProps = {
   product: ProductInventoryItem;
 };
 
-export function KatalogProductCard({ product }: KatalogProductCardProps) {
+export function CatalogProductCard({ product }: CatalogProductCardProps) {
   const sizeVariants = product.variants
     .filter((variant) => variant.type === 'size')
     .map((variant) => variant.name);
   const isOutOfStock = product.stock <= 0 || product.status === 'out_of_stock';
 
   return (
-    <Link href={`/katalog/${product.slug}`} className="block">
+    <Link href={`/catalog/${product.slug}`} className="block">
       <Card className="overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed] p-0 transition hover:border-[#cdbfa8] hover:shadow-sm">
         <div className="relative h-56 border-b border-dashed border-[#dfd5c2] bg-[#ece2d4]">
           <Badge

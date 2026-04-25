@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,7 +25,7 @@ const PRICE_RANGES: Array<{
   { key: 'gt-3m', label: '> Rp 3.000.000' },
 ];
 
-type KatalogFiltersSidebarProps = {
+type CatalogFiltersSidebarProps = {
   totalProducts: number;
   categories: ProductFilterOption[];
   islands: ProductFilterOption[];
@@ -53,7 +53,7 @@ type KatalogFiltersSidebarProps = {
   onResetFilters: () => void;
 };
 
-export function KatalogFiltersSidebar({
+export function CatalogFiltersSidebar({
   totalProducts,
   categories,
   islands,
@@ -79,7 +79,7 @@ export function KatalogFiltersSidebar({
   onMaxPriceChange,
   onPricePresetChange,
   onResetFilters,
-}: KatalogFiltersSidebarProps) {
+}: CatalogFiltersSidebarProps) {
   return (
     <aside className="flex flex-col gap-3">
       <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">

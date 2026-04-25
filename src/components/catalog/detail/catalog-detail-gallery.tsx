@@ -1,13 +1,13 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
-type KatalogDetailGalleryProps = {
+type CatalogDetailGalleryProps = {
   category: string;
 };
 
 const THUMBNAILS = ['Batik', 'Ikat', 'Ikat', 'Ulos', 'Ulos'];
 
-export function KatalogDetailGallery({ category }: KatalogDetailGalleryProps) {
+export function CatalogDetailGallery({ category }: CatalogDetailGalleryProps) {
   return (
     <div className="flex flex-col gap-3">
       <Card className="relative h-[430px] rounded-2xl border border-[#ddd4c5] bg-[#ebe2d4] p-0">

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Gender, ProductStatus } from '@/generated/prisma/enums';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
@@ -6,20 +6,20 @@ import type { ProductCatalogSortBy } from '@/types/product';
 import { useMemo, useState } from 'react';
 
 import {
-  KatalogFiltersSidebar,
+  CatalogFiltersSidebar,
   type PricePresetKey,
-} from './katalog-filters-sidebar';
-import { KatalogMainHeader } from './katalog-main-header';
-import { KatalogPagination } from './katalog-pagination';
+} from './catalog-filters-sidebar';
+import { CatalogMainHeader } from './catalog-main-header';
+import { CatalogPagination } from './catalog-pagination';
 import {
-  KatalogProductGrid,
-  KatalogProductGridSkeleton,
-} from './katalog-product-grid';
-import { KatalogProductToolbar } from './katalog-product-toolbar';
+  CatalogProductGrid,
+  CatalogProductGridSkeleton,
+} from './catalog-product-grid';
+import { CatalogProductToolbar } from './catalog-product-toolbar';
 
-const KATALOG_PAGE_SIZE = 9;
+const Catalog_PAGE_SIZE = 9;
 
-const KATALOG_SORT_OPTIONS: Array<{
+const Catalog_SORT_OPTIONS: Array<{
   label: string;
   value: ProductCatalogSortBy;
 }> = [
@@ -54,9 +54,9 @@ function parsePriceInput(value: string): number | undefined {
   return Number.isFinite(numericValue) ? numericValue : undefined;
 }
 
-export function KatalogMain() {
+export function CatalogMain() {
   const [activeSort, setActiveSort] = useState<ProductCatalogSortBy>(
-    KATALOG_SORT_OPTIONS[0].value,
+    Catalog_SORT_OPTIONS[0].value,
   );
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [selectedIsland, setSelectedIsland] = useState<string>();
@@ -97,7 +97,7 @@ export function KatalogMain() {
 
   const { data, error, isPending } = useProductCatalog(
     currentPage,
-    KATALOG_PAGE_SIZE,
+    Catalog_PAGE_SIZE,
     filters,
   );
   const showLoadingSkeleton = isPending && !data;
@@ -128,7 +128,7 @@ export function KatalogMain() {
 
   return (
     <main className="border-t border-[#dbd4c7]">
-      <KatalogMainHeader
+      <CatalogMainHeader
         totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
         totalProvinces={
           meta?.stats?.totalProvinces ?? meta?.provinces?.length ?? 0
@@ -137,7 +137,7 @@ export function KatalogMain() {
 
       <section className="border-y border-[#d4ccbe] bg-[#e8e3d9] py-6">
         <div className="mx-auto grid w-full max-w-[1320px] gap-4 px-4 md:px-6 lg:px-8 xl:grid-cols-[280px_minmax(0,1fr)]">
-          <KatalogFiltersSidebar
+          <CatalogFiltersSidebar
             totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
             categories={meta?.categories ?? []}
             islands={meta?.islands ?? []}
@@ -192,9 +192,9 @@ export function KatalogMain() {
           />
 
           <div>
-            <KatalogProductToolbar
+            <CatalogProductToolbar
               activeSort={activeSort}
-              sortOptions={KATALOG_SORT_OPTIONS}
+              sortOptions={Catalog_SORT_OPTIONS}
               productCount={meta?.totalItems ?? products.length}
               onSortChange={(sortValue) => {
                 setCurrentPage(1);
@@ -202,7 +202,7 @@ export function KatalogMain() {
               }}
             />
 
-            {showLoadingSkeleton ? <KatalogProductGridSkeleton /> : null}
+            {showLoadingSkeleton ? <CatalogProductGridSkeleton /> : null}
 
             {!showLoadingSkeleton && !isPending && error ? (
               <div className="mt-4 rounded-2xl border border-[#e2c9bb] bg-[#fbf1eb] p-6 text-sm text-[#8b5e4a]">
@@ -211,7 +211,7 @@ export function KatalogMain() {
             ) : null}
 
             {!error && products.length > 0 ? (
-              <KatalogProductGrid products={products} />
+              <CatalogProductGrid products={products} />
             ) : null}
 
             {!isPending && !error && products.length === 0 ? (
@@ -221,7 +221,7 @@ export function KatalogMain() {
             ) : null}
 
             {(meta?.totalPages ?? 0) > 1 ? (
-              <KatalogPagination
+              <CatalogPagination
                 currentPage={currentPage}
                 totalPages={meta?.totalPages ?? 1}
                 onPageChange={setCurrentPage}

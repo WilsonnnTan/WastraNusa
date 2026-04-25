@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
+﻿import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ProductCatalogSortBy } from '@/types/product';
 
-type KatalogProductToolbarProps = {
+type CatalogProductToolbarProps = {
   activeSort: ProductCatalogSortBy;
   sortOptions: Array<{
     label: string;
@@ -13,12 +13,12 @@ type KatalogProductToolbarProps = {
   onSortChange: (option: ProductCatalogSortBy) => void;
 };
 
-export function KatalogProductToolbar({
+export function CatalogProductToolbar({
   activeSort,
   sortOptions,
   productCount,
   onSortChange,
-}: KatalogProductToolbarProps) {
+}: CatalogProductToolbarProps) {
   return (
     <Card className="rounded-2xl border border-[#d9d0c1] bg-[#f9f6ef] px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">

@@ -1,18 +1,18 @@
-import { Button } from '@/components/ui/button';
+﻿import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-type KatalogPaginationProps = {
+type CatalogPaginationProps = {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
 };
 
-export function KatalogPagination({
+export function CatalogPagination({
   currentPage,
   totalPages,
   onPageChange,
-}: KatalogPaginationProps) {
+}: CatalogPaginationProps) {
   const maxVisiblePages = 3;
   const startPage = Math.max(
     1,

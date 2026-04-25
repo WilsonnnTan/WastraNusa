@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+﻿import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { formatRupiah } from '../utils';
 
 export type DetailTab = 'deskripsi' | 'spesifikasi';
 
-type KatalogDetailContentProps = {
+type CatalogDetailContentProps = {
   activeTab: DetailTab;
   product: ProductInventoryItem;
   onTabChange: (tab: DetailTab) => void;
@@ -22,11 +22,11 @@ const CARE_GUIDES = [
   'Simpan terlipat rapi, hindari paparan cahaya berlebihan',
 ];
 
-export function KatalogDetailContent({
+export function CatalogDetailContent({
   activeTab,
   product,
   onTabChange,
-}: KatalogDetailContentProps) {
+}: CatalogDetailContentProps) {
   return (
     <Card className="rounded-2xl border border-[#d9d0c2] bg-[#f7f3ea] p-0">
       <div className="inline-flex items-center gap-2 border-b border-[#ddd4c5] p-3">
@@ -54,7 +54,7 @@ export function KatalogDetailContent({
           <h3 className="text-3xl font-bold text-[#2f5b49]">Tentang Produk</h3>
           <p className="text-[15px] leading-7 text-[#445c50]">
             {product.description ||
-              'Deskripsi produk belum tersedia. Data ini akan dilengkapi oleh admin katalog.'}
+              'Deskripsi produk belum tersedia. Data ini akan dilengkapi oleh admin Catalog.'}
           </p>
 
           <div className="grid gap-3 md:grid-cols-2">

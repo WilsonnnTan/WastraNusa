@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+﻿import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -7,7 +7,7 @@ import { CircleCheck, Minus, Plus, ShoppingCart } from 'lucide-react';
 
 import { formatRupiah } from '../utils';
 
-type KatalogDetailProductSummaryProps = {
+type CatalogDetailProductSummaryProps = {
   product: ProductInventoryItem;
   sizeOptions: string[];
   colorOptions: string[];
@@ -23,7 +23,7 @@ type KatalogDetailProductSummaryProps = {
   isCartActionPending?: boolean;
 };
 
-export function KatalogDetailProductSummary({
+export function CatalogDetailProductSummary({
   product,
   sizeOptions,
   colorOptions,
@@ -37,7 +37,7 @@ export function KatalogDetailProductSummary({
   onAddToCart,
   onBuyNow,
   isCartActionPending = false,
-}: KatalogDetailProductSummaryProps) {
+}: CatalogDetailProductSummaryProps) {
   const isOutOfStock = product.stock <= 0 || product.status === 'out_of_stock';
 
   return (

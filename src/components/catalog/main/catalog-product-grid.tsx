@@ -1,34 +1,34 @@
-import { Skeleton } from '@/components/ui/skeleton';
+﻿import { Skeleton } from '@/components/ui/skeleton';
 import type { ProductInventoryItem } from '@/types/product';
 
-import { KatalogProductCard } from './katalog-product-card';
+import { CatalogProductCard } from './catalog-product-card';
 
-type KatalogProductGridProps = {
+type CatalogProductGridProps = {
   products: ProductInventoryItem[];
 };
 
-export function KatalogProductGrid({ products }: KatalogProductGridProps) {
+export function CatalogProductGrid({ products }: CatalogProductGridProps) {
   return (
     <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {products.map((product) => (
-        <KatalogProductCard key={product.slug} product={product} />
+        <CatalogProductCard key={product.slug} product={product} />
       ))}
     </div>
   );
 }
 
-type KatalogProductGridSkeletonProps = {
+type CatalogProductGridSkeletonProps = {
   count?: number;
 };
 
-export function KatalogProductGridSkeleton({
+export function CatalogProductGridSkeleton({
   count = 9,
-}: KatalogProductGridSkeletonProps) {
+}: CatalogProductGridSkeletonProps) {
   return (
     <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: count }).map((_, index) => (
         <div
-          key={`katalog-skeleton-${index}`}
+          key={`Catalog-skeleton-${index}`}
           className="overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed]"
         >
           <Skeleton className="h-56 w-full rounded-none border-b border-dashed border-[#dfd5c2] bg-[#ece2d4]" />
