@@ -25,7 +25,6 @@ const Catalog_SORT_OPTIONS: Array<{
   { label: 'Terlama', value: 'oldest' },
   { label: 'Harga ↑', value: 'price_asc' },
   { label: 'Harga ↓', value: 'price_desc' },
-  { label: 'Paling Laris', value: 'sold_desc' },
   { label: 'Nama A-Z', value: 'name_asc' },
   { label: 'Nama Z-A', value: 'name_desc' },
 ];
