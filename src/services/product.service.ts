@@ -162,7 +162,7 @@ const normalizeVariantsForCreate = (variants?: ProductVariantInput[]) =>
     id: variant.id ?? crypto.randomUUID(),
     name: variant.name,
     type: variant.type,
-    price: variant.price ?? null,
+    price: variant.price,
     stock: variant.stock,
     sku: variant.sku,
   }));
@@ -173,7 +173,7 @@ const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
     id: variant.id ?? crypto.randomUUID(),
     name: variant.name,
     type: variant.type,
-    price: variant.price ?? null,
+    price: variant.price,
     stock: variant.stock,
     sku: variant.sku,
   })),

@@ -2,13 +2,21 @@ import { Gender, ProductStatus, VariantType } from '@/generated/prisma/enums';
 import { z } from 'zod';
 
 const decimalNumberSchema = z.number().min(0, 'Nilai tidak boleh negatif');
+const requiredVariantPriceSchema = z
+  .number({
+    error: (issue) =>
+      issue.input === undefined || Number.isNaN(issue.input)
+        ? 'Harga varian wajib diisi'
+        : 'Harga varian harus berupa angka',
+  })
+  .min(0, 'Harga varian tidak boleh negatif');
 
 const productVariantInputSchema = z
   .object({
     id: z.string().optional(),
     name: z.string().min(1, 'Nama varian wajib diisi'),
     type: z.nativeEnum(VariantType),
-    price: decimalNumberSchema.nullish(),
+    price: requiredVariantPriceSchema,
     stock: z.number().int().min(0, 'Stok varian tidak boleh negatif'),
     sku: z.string().min(1, 'SKU varian wajib diisi'),
   })

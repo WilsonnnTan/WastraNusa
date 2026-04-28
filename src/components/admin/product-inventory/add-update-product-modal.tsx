@@ -75,7 +75,7 @@ function buildProductFormValues(
         id: variant.id,
         name: variant.name,
         type: variant.type,
-        price: variant.price,
+        price: variant.price ?? Number.NaN,
         stock: variant.stock,
         sku: variant.sku,
       })) ?? [],
@@ -506,7 +506,7 @@ export default function AddUpdateProductModal({
                   append({
                     name: '',
                     type: VariantType.size,
-                    price: null,
+                    price: 0,
                     stock: 0,
                     sku: '',
                   })
@@ -626,7 +626,7 @@ export default function AddUpdateProductModal({
 
                   <div className="md:col-span-2">
                     <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
-                      Harga Tambahan (Opsional)
+                      Harga Varian *
                     </label>
                     <Controller
                       control={control}
@@ -635,17 +635,26 @@ export default function AddUpdateProductModal({
                         <Input
                           type="number"
                           min={0}
-                          value={variantPriceField.value ?? ''}
+                          value={
+                            typeof variantPriceField.value === 'number' &&
+                            Number.isNaN(variantPriceField.value)
+                              ? ''
+                              : (variantPriceField.value ?? '')
+                          }
                           onChange={(event) => {
                             const value = event.target.value;
                             variantPriceField.onChange(
-                              value === '' ? null : Number(value),
+                              value === '' ? Number.NaN : Number(value),
                             );
                           }}
-                          placeholder="5000"
+                          placeholder="150000"
                         />
                       )}
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Harga ini adalah harga jual langsung untuk varian, bukan
+                      tambahan dari harga produk utama.
+                    </p>
                     {errors.variants?.[index]?.price && (
                       <p className="mt-1 text-xs text-red-500">
                         {errors.variants[index]?.price?.message}
