@@ -11,6 +11,7 @@ export type DetailTab = 'deskripsi' | 'spesifikasi';
 type CatalogDetailContentProps = {
   activeTab: DetailTab;
   product: ProductInventoryItem;
+  displayPrice: number;
   onTabChange: (tab: DetailTab) => void;
 };
 
@@ -25,6 +26,7 @@ const CARE_GUIDES = [
 export function CatalogDetailContent({
   activeTab,
   product,
+  displayPrice,
   onTabChange,
 }: CatalogDetailContentProps) {
   return (
@@ -92,12 +94,11 @@ export function CatalogDetailContent({
             ['Nama Produk', product.name],
             ['Kategori', product.clothingType],
             ['Asal', `${product.province}, ${product.island}`],
-            ['Harga', formatRupiah(product.price)],
+            ['Harga', formatRupiah(displayPrice)],
             ['Total Stok', `${product.stock} unit`],
             ['Berat', `${product.weight} gram`],
             ['Gender', product.gender],
             ['Status', product.status],
-            ['Terjual', `${product.sold} unit`],
             ['Varian', `${product.variantCount} varian`],
           ].map(([label, value], index) => (
             <div key={label}>

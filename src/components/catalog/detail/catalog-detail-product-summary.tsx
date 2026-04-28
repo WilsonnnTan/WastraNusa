@@ -13,6 +13,7 @@ type CatalogDetailProductSummaryProps = {
   colorOptions: ProductInventoryItem['variants'];
   selectedColor?: string;
   selectedSize?: string;
+  selectedVariantPrice: number;
   selectedVariantStock: number;
   safeQuantity: number;
   onColorChange: (color?: string) => void;
@@ -30,6 +31,7 @@ export function CatalogDetailProductSummary({
   colorOptions,
   selectedColor,
   selectedSize,
+  selectedVariantPrice,
   selectedVariantStock,
   safeQuantity,
   onColorChange,
@@ -85,7 +87,7 @@ export function CatalogDetailProductSummary({
 
       <Card className="mt-4 rounded-2xl border border-[#ddd4c5] bg-[#efe9de] px-5 py-4">
         <h2 className="text-4xl font-extrabold tracking-tight text-[#2f5f49]">
-          {formatRupiah(product.price)}
+          {formatRupiah(selectedVariantPrice)}
         </h2>
         <p className="text-sm text-[#6d6a62]">
           Harga sudah termasuk PPN · Belum termasuk ongkos kirim

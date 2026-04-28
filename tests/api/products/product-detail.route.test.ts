@@ -24,8 +24,25 @@ const MOCK_PRODUCT = {
   gender: 'male',
   status: 'active',
   sold: 0,
-  variants: [],
-  variantCount: 0,
+  variants: [
+    {
+      id: 'variant-1',
+      name: 'Size L',
+      type: 'size',
+      price: 250000,
+      stock: 12,
+      sku: 'BPK-L',
+    },
+    {
+      id: 'variant-2',
+      name: 'Size XL',
+      type: 'size',
+      price: 275000,
+      stock: 8,
+      sku: 'BPK-XL',
+    },
+  ],
+  variantCount: 2,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -86,6 +103,15 @@ describe('PUT /api/products/[id]', { tags: ['backend'] }, () => {
       body: JSON.stringify({
         name: 'Updated Batik Shirt',
         slug: 'updated-batik-shirt',
+        variants: [
+          {
+            name: 'Size L',
+            type: 'size',
+            price: 250000,
+            stock: 12,
+            sku: 'BPK-L',
+          },
+        ],
       }),
     });
     const res = await PUT(req, { params: Promise.resolve({ id: 'prod-1' }) });
@@ -109,7 +135,10 @@ describe('PUT /api/products/[id]', { tags: ['backend'] }, () => {
     const req = createRequest('http://localhost/api/products/prod-1', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ weight: 0 }), // weight must be >= 1
+      body: JSON.stringify({
+        slug: 'premium-batik-shirt',
+        variants: [],
+      }),
     });
     const res = await PUT(req, { params: Promise.resolve({ id: 'prod-1' }) });
     const body = await res.json();
@@ -130,7 +159,19 @@ describe('PUT /api/products/[id]', { tags: ['backend'] }, () => {
     const req = createRequest('http://localhost/api/products/nonexistent', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'X', slug: 'x-slug' }),
+      body: JSON.stringify({
+        name: 'X',
+        slug: 'x-slug',
+        variants: [
+          {
+            name: 'Size L',
+            type: 'size',
+            price: 250000,
+            stock: 12,
+            sku: 'BPK-L',
+          },
+        ],
+      }),
     });
     const res = await PUT(req, {
       params: Promise.resolve({ id: 'nonexistent' }),

@@ -20,6 +20,15 @@ const MOCK_VARIANT = {
   sku: 'BPK-L',
 };
 
+const MOCK_VARIANT_2 = {
+  id: 'variant-2',
+  name: 'Size XL',
+  type: 'size' as const,
+  price: { toNumber: () => 275000 },
+  stock: 10,
+  sku: 'BPK-XL',
+};
+
 const MOCK_PRODUCT_RAW = {
   id: 'prod-1',
   articleId: 'article-1',
@@ -36,7 +45,7 @@ const MOCK_PRODUCT_RAW = {
   gender: 'male' as const,
   status: 'active' as const,
   sold: 0,
-  variants: [MOCK_VARIANT],
+  variants: [MOCK_VARIANT, MOCK_VARIANT_2],
   createdAt: new Date('2025-12-01'),
   updatedAt: new Date('2026-01-01'),
 };
@@ -79,8 +88,8 @@ describe('productService', { tags: ['backend'] }, () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('prod-1');
       expect(result.items[0].price).toBe(250000);
-      expect(result.items[0].stock).toBe(20);
-      expect(result.items[0].variantCount).toBe(1);
+      expect(result.items[0].stock).toBe(30);
+      expect(result.items[0].variantCount).toBe(2);
       expect(result.items[0].createdAt).toBe(
         MOCK_PRODUCT_RAW.createdAt.toISOString(),
       );
@@ -161,7 +170,9 @@ describe('productService', { tags: ['backend'] }, () => {
       expect(mockProductRepo.findByIdOrSlug).toHaveBeenCalledWith('prod-1');
       expect(result.id).toBe('prod-1');
       expect(result.name).toBe('Premium Batik Shirt');
-      expect(result.variants).toHaveLength(1);
+      expect(result.variants).toHaveLength(2);
+      expect(result.variants[0]?.price).toBe(250000);
+      expect(result.variants[1]?.price).toBe(275000);
     });
 
     it('should accept slug as identifier', async () => {
@@ -246,6 +257,15 @@ describe('productService', { tags: ['backend'] }, () => {
       weight: 300,
       clothingType: 'batik',
       gender: 'male' as const,
+      variants: [
+        {
+          name: 'Size M',
+          type: 'size' as const,
+          price: 175000,
+          stock: 5,
+          sku: 'VAR-M',
+        },
+      ],
     };
 
     it('should create a product and return mapped output', async () => {
