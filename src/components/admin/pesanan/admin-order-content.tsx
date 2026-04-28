@@ -185,22 +185,6 @@ export function AdminOrderContent() {
     }
   }, [page, orderData, queryClient, filters]);
 
-  const headerData = useMemo(
-    () => ({
-      title: 'Manajemen Pesanan',
-      subtitle: 'Kelola status pesanan pelanggan',
-      brandName: '',
-      brandLabel: '',
-      adminName: '',
-      adminRole: '',
-      lastUpdatedLabel: '',
-      summary: [],
-      stockAlerts: [],
-      popularArticles: [],
-    }),
-    [],
-  );
-
   const handleDraftChange = (
     orderId: string,
     updater: (current: OrderDraft) => OrderDraft,
@@ -265,7 +249,10 @@ export function AdminOrderContent() {
 
   return (
     <main className="flex flex-col">
-      <AdminHeader data={headerData} />
+      <AdminHeader
+        title="Manajemen Pesanan"
+        subtitle="Kelola status pesanan pelanggan"
+      />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">

@@ -14,7 +14,7 @@ import {
 import { type ProductInventoryItem } from '@/types/product';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import AddUpdateProductModal from './add-update-product-modal';
@@ -105,22 +105,6 @@ export function AdminProductInventoryContent() {
     }
   }, [page, productData, queryClient]);
 
-  const headerData = useMemo(
-    () => ({
-      title: 'Produk & Inventory',
-      subtitle: 'Kelola produk, varian, dan stok',
-      brandName: '',
-      brandLabel: '',
-      adminName: '',
-      adminRole: '',
-      lastUpdatedLabel: '',
-      summary: [],
-      stockAlerts: [],
-      popularArticles: [],
-    }),
-    [],
-  );
-
   const handleDelete = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
       deleteProduct(id, {
@@ -148,7 +132,10 @@ export function AdminProductInventoryContent() {
 
   return (
     <main className="flex flex-col">
-      <AdminHeader data={headerData} />
+      <AdminHeader
+        title="Produk & Inventory"
+        subtitle="Kelola produk, varian, dan stok"
+      />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
