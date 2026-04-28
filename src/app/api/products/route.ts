@@ -10,7 +10,6 @@ const PRODUCT_SORT_OPTIONS: readonly ProductCatalogSortBy[] = [
   'oldest',
   'price_asc',
   'price_desc',
-  'sold_desc',
   'name_asc',
   'name_desc',
 ];

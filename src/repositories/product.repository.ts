@@ -93,8 +93,6 @@ function buildOrderBy(sortBy: ProductCatalogSortBy = DEFAULT_SORT) {
       return { price: 'asc' } as const;
     case 'price_desc':
       return { price: 'desc' } as const;
-    case 'sold_desc':
-      return { sold: 'desc' } as const;
     case 'name_asc':
       return { name: 'asc' } as const;
     case 'name_desc':
