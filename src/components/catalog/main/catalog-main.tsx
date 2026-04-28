@@ -128,9 +128,7 @@ export function CatalogMain() {
     <main className="border-t border-[#dbd4c7]">
       <CatalogMainHeader
         totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
-        totalProvinces={
-          meta?.stats?.totalProvinces ?? meta?.provinces?.length ?? 0
-        }
+        totalIslands={meta?.stats?.totalIslands ?? meta?.islands?.length ?? 0}
       />
 
       <section className="border-y border-[#d4ccbe] bg-[#e8e3d9] py-6">

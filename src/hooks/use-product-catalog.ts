@@ -71,10 +71,6 @@ export function fetchProductCatalog(
     searchParams.set('island', filters.island);
   }
 
-  if (filters.province) {
-    searchParams.set('province', filters.province);
-  }
-
   if (filters.size) {
     searchParams.set('size', filters.size);
   }

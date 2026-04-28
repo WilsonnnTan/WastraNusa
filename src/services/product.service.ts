@@ -127,7 +127,6 @@ const normalizeFilters = (
     minPrice: normalizedMinPrice,
     maxPrice: normalizedMaxPrice,
     island: filters.island?.trim() || undefined,
-    province: filters.province?.trim() || undefined,
     size: filters.size?.trim() || undefined,
     clothingType: filters.clothingType?.trim() || undefined,
     gender: filters.gender,
@@ -196,10 +195,6 @@ export const productService = {
       'clothingType',
     );
     const filtersWithoutIsland = withFilterOmitted(normalizedFilters, 'island');
-    const filtersWithoutProvince = withFilterOmitted(
-      normalizedFilters,
-      'province',
-    );
     const filtersWithoutSize = withFilterOmitted(normalizedFilters, 'size');
     const filtersWithoutGender = withFilterOmitted(normalizedFilters, 'gender');
     const filtersWithoutStatus = withFilterOmitted(normalizedFilters, 'status');
@@ -214,14 +209,12 @@ export const productService = {
       globalTotalItems,
       categoryCounts,
       islandCounts,
-      provinceCounts,
       sizeCounts,
       genderCounts,
       statusCounts,
       priceRange,
       globalCategoryCounts,
       globalIslandCounts,
-      globalProvinceCounts,
     ] = await Promise.all([
       productRepository.findAll({
         offset,
@@ -232,14 +225,12 @@ export const productService = {
       productRepository.countAll(),
       productRepository.countByClothingType(filtersWithoutCategory),
       productRepository.countByIsland(filtersWithoutIsland),
-      productRepository.countByProvince(filtersWithoutProvince),
       productRepository.countBySize(filtersWithoutSize),
       productRepository.countByGender(filtersWithoutGender),
       productRepository.countByStatus(filtersWithoutStatus),
       productRepository.getPriceRange(filtersWithoutPrice),
       productRepository.countByClothingType(),
       productRepository.countByIsland(),
-      productRepository.countByProvince(),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
@@ -258,14 +249,6 @@ export const productService = {
         count: item._count.island,
       })),
       normalizedFilters.island,
-    );
-
-    const provinces = mapFilterOptions(
-      provinceCounts.map((item) => ({
-        name: item.province,
-        count: item._count.province,
-      })),
-      normalizedFilters.province,
     );
 
     const genders = mapFilterOptions(
@@ -303,7 +286,6 @@ export const productService = {
         hasNextPage: safePage < totalPages,
         categories,
         islands,
-        provinces,
         sizes,
         genders,
         statuses,
@@ -312,7 +294,6 @@ export const productService = {
           totalProducts: globalTotalItems,
           totalCategories: globalCategoryCounts.length,
           totalIslands: globalIslandCounts.length,
-          totalProvinces: globalProvinceCounts.length,
         },
       },
     };

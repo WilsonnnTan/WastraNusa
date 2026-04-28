@@ -9,12 +9,12 @@
 
 type CatalogMainHeaderProps = {
   totalProducts: number;
-  totalProvinces: number;
+  totalIslands: number;
 };
 
 export function CatalogMainHeader({
   totalProducts,
-  totalProvinces,
+  totalIslands,
 }: CatalogMainHeaderProps) {
   return (
     <section className="mx-auto w-full max-w-[1320px] px-4 pb-5 pt-6 md:px-6 lg:px-8">
@@ -40,7 +40,7 @@ export function CatalogMainHeader({
             Catalog Produk Wastra
           </h1>
           <p className="mt-1 text-[#4f6458]">
-            {totalProducts} produk autentik dari {totalProvinces} provinsi
+            {totalProducts} produk autentik dari {totalIslands} pulau
           </p>
         </div>
       </div>

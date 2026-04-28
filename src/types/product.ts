@@ -45,7 +45,6 @@ export interface ProductCatalogFilters {
   minPrice?: number;
   maxPrice?: number;
   island?: string;
-  province?: string;
   size?: string;
   clothingType?: string;
   gender?: Gender;
@@ -68,7 +67,6 @@ export interface ProductInventoryListMeta {
   hasNextPage: boolean;
   categories?: ProductFilterOption[];
   islands?: ProductFilterOption[];
-  provinces?: ProductFilterOption[];
   sizes?: ProductFilterOption[];
   genders?: ProductFilterOption[];
   statuses?: ProductFilterOption[];
@@ -80,7 +78,6 @@ export interface ProductInventoryListMeta {
     totalProducts: number;
     totalCategories: number;
     totalIslands: number;
-    totalProvinces: number;
   };
 }
 

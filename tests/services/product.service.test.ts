@@ -54,7 +54,6 @@ beforeEach(() => {
   mockProductRepo.countAll.mockResolvedValue(0);
   mockProductRepo.countByClothingType.mockResolvedValue([] as never);
   mockProductRepo.countByIsland.mockResolvedValue([] as never);
-  mockProductRepo.countByProvince.mockResolvedValue([] as never);
   mockProductRepo.countBySize.mockResolvedValue([] as never);
   mockProductRepo.countByGender.mockResolvedValue([] as never);
   mockProductRepo.countByStatus.mockResolvedValue([] as never);
