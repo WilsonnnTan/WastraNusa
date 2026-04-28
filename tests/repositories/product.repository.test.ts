@@ -247,19 +247,6 @@ describe('productRepository', { tags: ['db'] }, () => {
       ).toBe(true);
     });
 
-    it('should group product counts by province', async () => {
-      const grouped = await productRepository.countByProvince();
-
-      expect(grouped.length).toBeGreaterThan(0);
-      expect(
-        grouped.some(
-          (item) =>
-            item.province === SEED_PRODUCT_1.province &&
-            item._count.province >= 1,
-        ),
-      ).toBe(true);
-    });
-
     it('should group product counts by gender', async () => {
       const grouped = await productRepository.countByGender();
 

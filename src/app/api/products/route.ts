@@ -31,7 +31,6 @@ export const GET = withApiPublic(async ({ req }) => {
   const maxPrice = Number.isFinite(rawMaxPrice) ? rawMaxPrice : undefined;
 
   const island = url.searchParams.get('island') || undefined;
-  const province = url.searchParams.get('province') || undefined;
   const size = url.searchParams.get('size') || undefined;
   const clothingType = url.searchParams.get('clothingType') || undefined;
 
@@ -60,7 +59,6 @@ export const GET = withApiPublic(async ({ req }) => {
     minPrice,
     maxPrice,
     island,
-    province,
     size,
     clothingType,
     gender,

@@ -27,7 +27,6 @@ function buildProductWhereInput(
     minPrice,
     maxPrice,
     island,
-    province,
     size,
     clothingType,
     gender,
@@ -37,7 +36,6 @@ function buildProductWhereInput(
 
   const where: Prisma.ProductWhereInput = {
     ...(island ? { island } : {}),
-    ...(province ? { province } : {}),
     ...(size
       ? {
           variants: {
@@ -162,19 +160,6 @@ export const productRepository = {
       },
       orderBy: {
         island: 'asc',
-      },
-    });
-  },
-
-  countByProvince: async (filters?: ProductCatalogFilters) => {
-    return prisma.product.groupBy({
-      by: ['province'],
-      where: buildProductWhereInput(filters),
-      _count: {
-        province: true,
-      },
-      orderBy: {
-        province: 'asc',
       },
     });
   },

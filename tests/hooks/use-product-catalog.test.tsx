@@ -135,7 +135,6 @@ describe('use-product-catalog hooks', { tags: ['frontend'] }, () => {
       minPrice: 100000,
       maxPrice: 500000,
       island: 'Jawa',
-      province: 'Jawa Tengah',
       clothingType: 'Batik',
       gender: 'male',
       status: 'active',
@@ -144,7 +143,7 @@ describe('use-product-catalog hooks', { tags: ['frontend'] }, () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/products?page=2&limit=12&minPrice=100000&maxPrice=500000&island=Jawa&province=Jawa+Tengah&clothingType=Batik&gender=male&status=active&inStock=true&sortBy=price_desc',
+      '/api/products?page=2&limit=12&minPrice=100000&maxPrice=500000&island=Jawa&clothingType=Batik&gender=male&status=active&inStock=true&sortBy=price_desc',
       expect.any(Object),
     );
   });

@@ -40,7 +40,6 @@ const MOCK_PRODUCT_LIST = {
     hasNextPage: false,
     categories: [],
     islands: [],
-    provinces: [],
     genders: [],
     statuses: [],
     priceRange: {
@@ -51,7 +50,6 @@ const MOCK_PRODUCT_LIST = {
       totalProducts: 1,
       totalCategories: 1,
       totalIslands: 1,
-      totalProvinces: 1,
     },
   },
 };
@@ -91,7 +89,7 @@ describe('GET /api/products', { tags: ['backend'] }, () => {
       minPrice: undefined,
       maxPrice: undefined,
       island: undefined,
-      province: undefined,
+      size: undefined,
       clothingType: undefined,
       gender: undefined,
       status: undefined,
@@ -104,7 +102,7 @@ describe('GET /api/products', { tags: ['backend'] }, () => {
     mockService.getProducts.mockResolvedValue(MOCK_PRODUCT_LIST as never);
 
     const req = createRequest(
-      'http://localhost/api/products?page=2&limit=5&minPrice=100000&maxPrice=500000&island=Jawa&province=Jawa%20Tengah&clothingType=batik&gender=male&status=active&inStock=true&sortBy=price_desc',
+      'http://localhost/api/products?page=2&limit=5&minPrice=100000&maxPrice=500000&island=Jawa&clothingType=batik&gender=male&status=active&inStock=true&sortBy=price_desc',
     );
     await GET(req, { params: Promise.resolve({}) });
 
@@ -112,7 +110,7 @@ describe('GET /api/products', { tags: ['backend'] }, () => {
       minPrice: 100000,
       maxPrice: 500000,
       island: 'Jawa',
-      province: 'Jawa Tengah',
+      size: undefined,
       clothingType: 'batik',
       gender: 'male',
       status: 'active',
