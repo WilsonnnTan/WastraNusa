@@ -1,7 +1,6 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import {
-  CategoryFilters,
   EncyclopediaSection,
   FeaturedCards,
   HeroSection,
@@ -20,8 +19,6 @@ export default function HomePage() {
             <HeroSection />
             <FeaturedCards />
           </div>
-
-          <CategoryFilters />
         </section>
 
         <ProductCatalog />
