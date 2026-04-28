@@ -1,65 +1,47 @@
 import type {
   ArticleDashboardData,
   DashboardData,
-  PopularArticle,
+  ProductDashboardData,
 } from '@/types/dashboard';
 
-export const adminDashboardData = {
-  title: 'Dashboard Overview',
-  subtitle: 'WastraNusa Admin',
-  brandName: 'WastraNusa',
-  brandLabel: 'Admin Panel',
-  adminName: 'Admin WastraNusa',
-  adminRole: 'Super User',
-  lastUpdatedLabel: 'Ringkasan data terakhir diperbarui hari ini',
-  summary: [
-    {
-      title: 'Total Produk',
-      value: 12,
-      changeLabel: '+ 2 bulan ini',
-      tone: 'positive',
-      description: 'Total produk',
-      footnote: 'di seluruh kategori',
-      icon: 'package',
-    },
-    {
-      title: 'Stok Rendah / Habis',
-      value: 2,
-      changeLabel: 'perlu restok',
-      tone: 'warning',
-      description: 'Stok rendah / habis',
-      footnote: '1 habis - 1 kritis',
-      icon: 'triangle-alert',
-    },
-  ],
-  stockAlerts: [
-    {
-      name: 'Kain Gringsing Tenganan',
-      category: 'Tenun',
-      stockLabel: 'Rendah (5)',
-      severity: 'low',
-    },
-    {
-      name: 'Tenun Ikat Sumba Timur',
-      category: 'Tenun',
-      stockLabel: 'Habis',
-      severity: 'out',
-    },
-  ],
-  popularArticles: [] as PopularArticle[],
-} satisfies DashboardData;
-
 export function mergeArticleDashboardData(
-  baseData: DashboardData,
   articleData?: ArticleDashboardData,
-): DashboardData {
-  if (!articleData) {
-    return baseData;
+  productData?: ProductDashboardData,
+): Partial<DashboardData> {
+  const summary: DashboardData['summary'] = [];
+
+  if (productData) {
+    const outCount = productData.lowStockItems.filter(
+      (item) => item.severity === 'out',
+    ).length;
+    const lowCount = productData.lowStockItems.filter(
+      (item) => item.severity === 'low',
+    ).length;
+
+    summary.push(
+      {
+        title: 'Total Produk',
+        value: productData.totalProducts,
+        changeLabel: 'Live dari API',
+        tone: 'positive',
+        description: 'Total produk',
+        footnote: 'di seluruh kategori',
+        icon: 'package',
+      },
+      {
+        title: 'Stok Rendah / Habis',
+        value: productData.lowStockItems.length,
+        changeLabel: 'perlu restok',
+        tone: 'warning',
+        description: 'Stok rendah / habis',
+        footnote: `${outCount} habis - ${lowCount} rendah`,
+        icon: 'triangle-alert',
+      },
+    );
   }
 
-  // Construct live stats from API
-  const liveStats: DashboardData['summary'] = [
-    {
+  if (articleData) {
+    summary.unshift({
       title: 'Total Artikel',
       value: articleData.totalArticles,
       changeLabel: 'Live dari API',
@@ -67,12 +49,19 @@ export function mergeArticleDashboardData(
       description: 'Total artikel',
       footnote: 'ensiklopedia budaya',
       icon: 'book-open',
-    },
-  ];
+    });
+  }
 
   return {
-    ...baseData,
-    summary: [...liveStats, ...baseData.summary],
-    popularArticles: articleData.popularArticles,
+    summary,
+    stockAlerts:
+      productData?.lowStockItems.map((item) => ({
+        name: item.name,
+        category: item.category,
+        stockLabel:
+          item.severity === 'out' ? 'Habis' : `Rendah (${item.stock})`,
+        severity: item.severity,
+      })) ?? [],
+    popularArticles: articleData?.popularArticles ?? [],
   };
 }

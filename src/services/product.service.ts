@@ -8,6 +8,7 @@ import {
   type ProductVariantInput,
   type UpdateProductInput,
 } from '@/schemas/product.schema';
+import { type ProductDashboardData } from '@/types/dashboard';
 import {
   type ProductCatalogFilters,
   type ProductCatalogSortBy,
@@ -306,6 +307,27 @@ export const productService = {
     }
 
     return mapProduct(product);
+  },
+
+  getDashboardOverview: async (): Promise<ProductDashboardData> => {
+    const LOW_STOCK_THRESHOLD = 5;
+    const [totalProducts, lowStockItems] = await Promise.all([
+      productRepository.countAll(),
+      productRepository.findLowStock(LOW_STOCK_THRESHOLD, 6),
+    ]);
+
+    return {
+      totalProducts,
+      lowStockItems: lowStockItems.map((item) => ({
+        name: item.name,
+        category: item.clothingType,
+        stock: item.stock,
+        severity:
+          item.status === ProductStatus.out_of_stock || item.stock <= 0
+            ? 'out'
+            : 'low',
+      })),
+    };
   },
 
   createProduct: async (

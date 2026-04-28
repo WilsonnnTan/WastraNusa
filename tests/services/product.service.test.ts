@@ -194,6 +194,48 @@ describe('productService', { tags: ['backend'] }, () => {
 
   // ── createProduct ────────────────────────────────────────────────────────────
 
+  describe('getDashboardOverview', () => {
+    it('should return total products and low stock items', async () => {
+      mockProductRepo.countAll.mockResolvedValue(12);
+      mockProductRepo.findLowStock.mockResolvedValue([
+        {
+          name: 'Batik Premium',
+          clothingType: 'Batik',
+          stock: 0,
+          status: 'out_of_stock',
+        },
+        {
+          name: 'Tenun Sumba',
+          clothingType: 'Tenun',
+          stock: 3,
+          status: 'active',
+        },
+      ] as never);
+
+      const result = await productService.getDashboardOverview();
+
+      expect(mockProductRepo.countAll).toHaveBeenCalledWith();
+      expect(mockProductRepo.findLowStock).toHaveBeenCalledWith(5, 6);
+      expect(result).toEqual({
+        totalProducts: 12,
+        lowStockItems: [
+          {
+            name: 'Batik Premium',
+            category: 'Batik',
+            stock: 0,
+            severity: 'out',
+          },
+          {
+            name: 'Tenun Sumba',
+            category: 'Tenun',
+            stock: 3,
+            severity: 'low',
+          },
+        ],
+      });
+    });
+  });
+
   describe('createProduct', () => {
     const validInput = {
       articleId: 'article-1',

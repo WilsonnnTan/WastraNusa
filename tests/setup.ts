@@ -94,6 +94,8 @@ vi.mock('@/repositories/product.repository', () => ({
     countBySize: vi.fn(),
     countByGender: vi.fn(),
     countByStatus: vi.fn(),
+    countLowStock: vi.fn(),
+    findLowStock: vi.fn(),
     getPriceRange: vi.fn(),
     findByIdOrSlug: vi.fn(),
     create: vi.fn(),
@@ -113,6 +115,7 @@ vi.mock('@/services/product.service', () => ({
   productService: {
     getProducts: vi.fn(),
     getProductDetail: vi.fn(),
+    getDashboardOverview: vi.fn(),
     createProduct: vi.fn(),
     updateProduct: vi.fn(),
     deleteProduct: vi.fn(),

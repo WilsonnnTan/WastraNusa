@@ -37,13 +37,6 @@ export type PopularArticle = {
 };
 
 export type DashboardData = {
-  title: string;
-  subtitle: string;
-  brandName: string;
-  brandLabel: string;
-  adminName: string;
-  adminRole: string;
-  lastUpdatedLabel: string;
   summary: DashboardStat[];
   stockAlerts: StockAlertItem[];
   popularArticles: PopularArticle[];
@@ -52,4 +45,14 @@ export type DashboardData = {
 export type ArticleDashboardData = {
   totalArticles: number;
   popularArticles: PopularArticle[];
+};
+
+export type ProductDashboardData = {
+  totalProducts: number;
+  lowStockItems: Array<{
+    name: string;
+    category: string;
+    stock: number;
+    severity: StockAlertSeverity;
+  }>;
 };
