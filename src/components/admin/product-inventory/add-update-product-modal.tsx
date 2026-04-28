@@ -69,15 +69,22 @@ function buildProductFormValues(
     clothingType: initialData?.clothingType ?? '',
     gender: initialData?.gender ?? Gender.female,
     status: initialData?.status ?? ProductStatus.active,
-    variants:
-      initialData?.variants.map((variant) => ({
-        id: variant.id,
-        name: variant.name,
-        type: variant.type,
-        price: variant.price ?? Number.NaN,
-        stock: variant.stock,
-        sku: variant.sku,
-      })) ?? [],
+    variants: initialData?.variants.map((variant) => ({
+      id: variant.id,
+      name: variant.name,
+      type: variant.type,
+      price: variant.price ?? Number.NaN,
+      stock: variant.stock,
+      sku: variant.sku,
+    })) ?? [
+      {
+        name: '',
+        type: VariantType.size,
+        price: 0,
+        stock: 0,
+        sku: '',
+      },
+    ],
   };
 }
 
@@ -499,10 +506,11 @@ export default function AddUpdateProductModal({
               </Button>
             </div>
 
-            {fields.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-[#dccfbd] bg-[#f9f4ec] px-3 py-2 text-sm text-[#8f8377]">
-                Belum ada varian. Anda tetap bisa menyimpan produk tanpa varian.
-              </p>
+            <p className="text-sm text-[#8f8377]">
+              Produk wajib memiliki minimal 1 varian.
+            </p>
+            {errors.variants?.message ? (
+              <p className="text-sm text-red-500">{errors.variants.message}</p>
             ) : null}
 
             {fields.map((field, index) => (

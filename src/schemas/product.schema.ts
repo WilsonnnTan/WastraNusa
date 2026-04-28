@@ -22,6 +22,10 @@ const productVariantInputSchema = z
   })
   .strict();
 
+const requiredVariantsSchema = z
+  .array(productVariantInputSchema)
+  .min(1, 'Minimal harus ada 1 varian produk');
+
 const productPayloadSchema = z.object({
   articleId: z.string().min(1, 'Artikel wajib dipilih'),
   name: z.string().min(1, 'Nama produk wajib diisi'),
@@ -36,7 +40,7 @@ const productPayloadSchema = z.object({
   clothingType: z.string().min(1, 'Jenis pakaian wajib diisi'),
   gender: z.nativeEnum(Gender),
   status: z.nativeEnum(ProductStatus).optional(),
-  variants: z.array(productVariantInputSchema).optional(),
+  variants: requiredVariantsSchema,
 });
 
 export const createProductSchema = productPayloadSchema.strict();
@@ -45,6 +49,7 @@ export const updateProductSchema = productPayloadSchema
   .partial()
   .extend({
     slug: z.string().min(1, 'Slug produk wajib diisi'),
+    variants: requiredVariantsSchema,
   })
   .strict();
 
