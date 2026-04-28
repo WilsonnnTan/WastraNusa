@@ -17,6 +17,7 @@ import {
 } from '@/hooks/use-product-inventory';
 import {
   type CreateProductInput,
+  type UpdateProductInput,
   createProductSchema,
   updateProductSchema,
 } from '@/schemas/product.schema';
@@ -54,43 +55,10 @@ const VARIANT_TYPE_OPTIONS: { value: VariantType; label: string }[] = [
   { value: VariantType.color, label: 'Warna' },
 ];
 
-export default function AddUpdateProductModal({
-  isOpen,
-  onClose,
-  initialData,
-}: AddUpdateProductModalProps) {
-  const [showModal, setShowModal] = useState(isOpen);
-
-  const { mutate: createProduct, isPending: isCreating } =
-    useCreateProductInventory();
-  const { mutate: updateProduct, isPending: isUpdating } =
-    useUpdateProductInventory();
-  const {
-    data: articleOptionPages,
-    isLoading: isLoadingArticles,
-    hasNextPage: hasNextArticlePage,
-    isFetchingNextPage: isFetchingNextArticlePage,
-    fetchNextPage: fetchNextArticlePage,
-  } = useArticleOptions();
-
-  const isEdit = Boolean(initialData);
-  const isPending = isCreating || isUpdating;
-  const articleOptions =
-    articleOptionPages?.pages.flatMap((page) => page.items) ?? [];
-
-  const handleArticleSelectScroll = (event: UIEvent<HTMLDivElement>) => {
-    if (!hasNextArticlePage || isFetchingNextArticlePage) return;
-
-    const container = event.currentTarget;
-    const remainingScroll =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-
-    if (remainingScroll < 60) {
-      fetchNextArticlePage();
-    }
-  };
-
-  const defaultValues: CreateProductInput = {
+function buildProductFormValues(
+  initialData?: ProductInventoryItem | null,
+): CreateProductInput {
+  return {
     articleId: initialData?.articleId ?? '',
     name: initialData?.name ?? '',
     slug: initialData?.slug ?? '',
@@ -112,6 +80,58 @@ export default function AddUpdateProductModal({
         sku: variant.sku,
       })) ?? [],
   };
+}
+
+export default function AddUpdateProductModal({
+  isOpen,
+  onClose,
+  initialData,
+}: AddUpdateProductModalProps) {
+  const [showModal, setShowModal] = useState(isOpen);
+
+  const { mutate: createProduct, isPending: isCreating } =
+    useCreateProductInventory();
+  const { mutate: updateProduct, isPending: isUpdating } =
+    useUpdateProductInventory();
+  const {
+    data: articleOptionPages,
+    isLoading: isLoadingArticles,
+    hasNextPage: hasNextArticlePage,
+    isFetchingNextPage: isFetchingNextArticlePage,
+    fetchNextPage: fetchNextArticlePage,
+  } = useArticleOptions();
+
+  const isEdit = Boolean(initialData);
+  const isPending = isCreating || isUpdating;
+  const fetchedArticleOptions =
+    articleOptionPages?.pages.flatMap((page) => page.items) ?? [];
+  const articleOptions =
+    initialData &&
+    !fetchedArticleOptions.some(
+      (article) => article.id === initialData.articleId,
+    )
+      ? [
+          {
+            id: initialData.articleId,
+            title: initialData.articleTitle,
+            island: initialData.island,
+            province: initialData.province,
+          },
+          ...fetchedArticleOptions,
+        ]
+      : fetchedArticleOptions;
+
+  const handleArticleSelectScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (!hasNextArticlePage || isFetchingNextArticlePage) return;
+
+    const container = event.currentTarget;
+    const remainingScroll =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+
+    if (remainingScroll < 60) {
+      fetchNextArticlePage();
+    }
+  };
 
   const {
     register,
@@ -123,7 +143,7 @@ export default function AddUpdateProductModal({
     resolver: zodResolver(
       isEdit ? updateProductSchema : createProductSchema,
     ) as Resolver<CreateProductInput>,
-    defaultValues,
+    defaultValues: buildProductFormValues(initialData),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -133,8 +153,14 @@ export default function AddUpdateProductModal({
 
   const onSubmit = (data: CreateProductInput) => {
     if (isEdit && initialData) {
+      const updateData: UpdateProductInput = { ...data };
+
+      if (updateData.articleId === initialData.articleId) {
+        delete updateData.articleId;
+      }
+
       updateProduct(
-        { idOrSlug: initialData.id, data },
+        { idOrSlug: initialData.id, data: updateData },
         {
           onSuccess: () => {
             toast.success('Produk berhasil diperbarui');
@@ -173,12 +199,13 @@ export default function AddUpdateProductModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      reset(buildProductFormValues(initialData));
     } else {
       document.body.style.overflow = '';
       const timer = setTimeout(() => setShowModal(false), 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [initialData, isOpen, reset]);
 
   useEffect(() => {
     return () => {
