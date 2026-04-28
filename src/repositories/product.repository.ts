@@ -34,21 +34,45 @@ function buildProductWhereInput(
     inStock,
   } = filters;
 
-  const where: Prisma.ProductWhereInput = {
-    ...(island ? { island } : {}),
-    ...(size
-      ? {
-          variants: {
-            some: {
-              type: 'size',
-              name: size,
+  const andConditions: Prisma.ProductWhereInput[] = [];
+
+  if (size) {
+    andConditions.push({
+      variants: {
+        some: {
+          type: 'size',
+          name: size,
+        },
+      },
+    });
+  }
+
+  if (typeof inStock === 'boolean') {
+    andConditions.push(
+      inStock
+        ? {
+            variants: {
+              some: {
+                stock: { gt: 0 },
+              },
+            },
+          }
+        : {
+            variants: {
+              none: {
+                stock: { gt: 0 },
+              },
             },
           },
-        }
-      : {}),
+    );
+  }
+
+  const where: Prisma.ProductWhereInput = {
+    ...(island ? { island } : {}),
     ...(clothingType ? { clothingType } : {}),
     ...(gender ? { gender } : {}),
     ...(status ? { status } : {}),
+    ...(andConditions.length > 0 ? { AND: andConditions } : {}),
   };
 
   if (typeof minPrice === 'number' || typeof maxPrice === 'number') {
@@ -56,10 +80,6 @@ function buildProductWhereInput(
       ...(typeof minPrice === 'number' ? { gte: minPrice } : {}),
       ...(typeof maxPrice === 'number' ? { lte: maxPrice } : {}),
     };
-  }
-
-  if (typeof inStock === 'boolean') {
-    where.stock = inStock ? { gt: 0 } : 0;
   }
 
   return where;
@@ -89,13 +109,13 @@ export const productRepository = {
   findProductById: async (productId: string) => {
     return prisma.product.findUnique({
       where: { id: productId },
-    });
-  },
-
-  decrementProductStock: async (productId: string, quantity: number) => {
-    return prisma.product.update({
-      where: { id: productId },
-      data: { stock: { decrement: quantity } },
+      include: {
+        variants: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
     });
   },
 
@@ -207,27 +227,66 @@ export const productRepository = {
   },
 
   countLowStock: async (threshold: number = 5) => {
-    return prisma.product.count({
-      where: {
-        OR: [{ status: 'out_of_stock' }, { stock: { lte: threshold } }],
+    const products = await prisma.product.findMany({
+      select: {
+        status: true,
+        variants: {
+          select: {
+            stock: true,
+          },
+        },
       },
     });
+
+    return products.filter((product) => {
+      const totalStock = product.variants.reduce(
+        (total, variant) => total + variant.stock,
+        0,
+      );
+
+      return product.status === 'out_of_stock' || totalStock <= threshold;
+    }).length;
   },
 
   findLowStock: async (threshold: number = 5, limit: number = 6) => {
-    return prisma.product.findMany({
-      where: {
-        OR: [{ status: 'out_of_stock' }, { stock: { lte: threshold } }],
-      },
-      orderBy: [{ stock: 'asc' }, { updatedAt: 'desc' }],
-      take: limit,
+    const products = await prisma.product.findMany({
       select: {
         name: true,
         clothingType: true,
-        stock: true,
         status: true,
+        updatedAt: true,
+        variants: {
+          select: {
+            stock: true,
+          },
+        },
       },
     });
+
+    return products
+      .map((product) => ({
+        name: product.name,
+        clothingType: product.clothingType,
+        stock: product.variants.reduce(
+          (total, variant) => total + variant.stock,
+          0,
+        ),
+        status: product.status,
+        updatedAt: product.updatedAt,
+      }))
+      .filter(
+        (product) =>
+          product.status === 'out_of_stock' || product.stock <= threshold,
+      )
+      .sort((left, right) => {
+        if (left.stock !== right.stock) {
+          return left.stock - right.stock;
+        }
+
+        return right.updatedAt.getTime() - left.updatedAt.getTime();
+      })
+      .slice(0, limit)
+      .map(({ ...product }) => product);
   },
 
   getPriceRange: async (filters?: ProductCatalogFilters) => {

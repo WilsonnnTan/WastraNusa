@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
 import Link from 'next/link';
 
-import { formatRupiah } from '../utils';
+import { formatVariantPriceRange } from '../utils';
 
 type CatalogProductCardProps = {
   product: ProductInventoryItem;
@@ -83,12 +83,11 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
           <div className="mt-auto flex items-end justify-between pt-1">
             <div className="flex flex-col">
               <p className="text-2xl font-extrabold tracking-tight text-[#2f5f49]">
-                {formatRupiah(product.price)}
+                {formatVariantPriceRange(product.variants, product.price)}
               </p>
-              <p className="text-xs text-[#8c887e]">Terjual {product.sold}</p>
             </div>
             <p className="text-sm font-semibold text-[#4d6858]">
-              {isOutOfStock ? 'Habis' : `Stok: ${product.stock}`}
+              {isOutOfStock ? 'Habis' : `Total stok: ${product.stock}`}
             </p>
           </div>
         </div>

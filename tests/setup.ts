@@ -86,7 +86,6 @@ vi.mock('@/repositories/paymentTransaction.repository', () => ({
 vi.mock('@/repositories/product.repository', () => ({
   productRepository: {
     findProductById: vi.fn(),
-    decrementProductStock: vi.fn(),
     findAll: vi.fn(),
     countAll: vi.fn(),
     countByClothingType: vi.fn(),

@@ -33,6 +33,12 @@ const mapVariant = (variant: {
   sku: variant.sku,
 });
 
+const sumVariantStock = (
+  variants: Array<{
+    stock: number;
+  }>,
+) => variants.reduce((total, variant) => total + variant.stock, 0);
+
 const mapProduct = (product: {
   id: string;
   articleId: string;
@@ -41,7 +47,6 @@ const mapProduct = (product: {
   slug: string;
   description: string | null;
   price: { toNumber(): number };
-  stock: number;
   sku: string;
   weight: number;
   island?: string | null;
@@ -68,7 +73,7 @@ const mapProduct = (product: {
   slug: product.slug,
   description: product.description,
   price: product.price.toNumber(),
-  stock: product.stock,
+  stock: sumVariantStock(product.variants),
   sku: product.sku,
   weight: product.weight,
   island: product.island ?? '',
@@ -353,7 +358,6 @@ export const productService = {
       slug: data.slug,
       description: data.description ?? null,
       price: data.price,
-      stock: data.stock,
       sku: data.sku,
       weight: data.weight,
       island,
@@ -404,7 +408,6 @@ export const productService = {
       slug: data.slug,
       description: data.description,
       price: data.price,
-      stock: data.stock,
       sku: data.sku,
       weight: data.weight,
       island: nextIsland,

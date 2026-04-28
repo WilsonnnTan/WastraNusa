@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { getVariantResolvedPrice } from '../utils';
 import { CatalogDetailBreadcrumb } from './catalog-detail-breadcrumb';
 import { CatalogDetailContent, type DetailTab } from './catalog-detail-content';
 import { CatalogDetailEncyclopedia } from './catalog-detail-encyclopedia';
@@ -154,6 +155,23 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     effectiveSelectedSize,
     sizeVariants,
   ]);
+  const selectedVariantStock = useMemo(() => {
+    if (selectedVariantId) {
+      return (
+        product?.variants.find((variant) => variant.id === selectedVariantId)
+          ?.stock ?? 0
+      );
+    }
+
+    return product?.stock ?? 0;
+  }, [product, selectedVariantId]);
+  const selectedVariantPrice = useMemo(() => {
+    const selectedVariant =
+      product?.variants.find((variant) => variant.id === selectedVariantId) ??
+      null;
+
+    return getVariantResolvedPrice(selectedVariant, product?.price ?? 0);
+  }, [product, selectedVariantId]);
 
   if (isPending && !product) {
     return <CatalogDetailSkeleton />;
@@ -177,10 +195,10 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     );
   }
 
-  const safeQuantity = Math.min(
-    Math.max(quantity, 1),
-    Math.max(1, product.stock),
-  );
+  const safeQuantity =
+    selectedVariantStock > 0
+      ? Math.min(Math.max(quantity, 1), selectedVariantStock)
+      : 0;
   const isCartActionPending =
     addToCartMutation.isPending || updateCartItemMutation.isPending;
   const encyclopediaFacts: readonly [string, string][] = [
@@ -216,7 +234,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     if (existingItem) {
       const nextQuantity = Math.min(
         existingItem.quantity + safeQuantity,
-        product.stock,
+        selectedVariantStock,
       );
       await updateCartItemMutation.mutateAsync({
         id: existingItem.id,
@@ -281,7 +299,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
             name: product.name,
             variant:
               effectiveSelectedSize ?? effectiveSelectedColor ?? 'Default',
-            price: product.price,
+            price: selectedVariantPrice,
             quantity: safeQuantity,
           },
         ],
@@ -309,10 +327,12 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
           <CatalogDetailGallery category={product.clothingType} />
           <CatalogDetailProductSummary
             product={product}
-            sizeOptions={sizeVariants.map((variant) => variant.name)}
-            colorOptions={colorVariants.map((variant) => variant.name)}
+            sizeOptions={sizeVariants}
+            colorOptions={colorVariants}
             selectedColor={effectiveSelectedColor}
             selectedSize={effectiveSelectedSize}
+            selectedVariantPrice={selectedVariantPrice}
+            selectedVariantStock={selectedVariantStock}
             safeQuantity={safeQuantity}
             onColorChange={setSelectedColor}
             onSizeChange={setSelectedSize}
@@ -321,7 +341,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
             }
             onIncreaseQuantity={() =>
               setQuantity((value) =>
-                Math.min(Math.max(1, product.stock), value + 1),
+                Math.min(Math.max(1, selectedVariantStock), value + 1),
               )
             }
             onAddToCart={handleAddToCart}
@@ -335,6 +355,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
         <CatalogDetailContent
           activeTab={activeTab}
           product={product}
+          displayPrice={selectedVariantPrice}
           onTabChange={setActiveTab}
         />
         <CatalogDetailEncyclopedia

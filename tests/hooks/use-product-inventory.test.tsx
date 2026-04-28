@@ -56,7 +56,7 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
         id: 'prod-1',
         name: 'Product 1',
         price: 100000,
-        stock: 50,
+        stock: 20,
       },
     ],
     meta: {
@@ -72,8 +72,17 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
     id: 'prod-1',
     name: 'Product 1',
     price: 100000,
-    stock: 50,
-    variants: [],
+    stock: 20,
+    variants: [
+      {
+        id: 'variant-1',
+        name: 'Size M',
+        type: 'size',
+        price: 100000,
+        stock: 20,
+        sku: 'SKU-1-M',
+      },
+    ],
   };
 
   const MOCK_ARTICLE_OPTIONS = {
@@ -185,11 +194,19 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
       name: 'New Product',
       slug: 'new-product',
       price: 200000,
-      stock: 10,
       sku: 'SKU-1',
       weight: 500,
       clothingType: 'Batik',
       gender: 'male' as const,
+      variants: [
+        {
+          name: 'Size M',
+          type: 'size' as const,
+          price: 200000,
+          stock: 10,
+          sku: 'SKU-1-M',
+        },
+      ],
     };
 
     act(() => {
