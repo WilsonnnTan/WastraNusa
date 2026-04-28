@@ -198,8 +198,6 @@ model Product {
   description String?
 
   price Decimal
-
-  stock Int    @default(0)
   sku   String @unique
 
   weight Int
