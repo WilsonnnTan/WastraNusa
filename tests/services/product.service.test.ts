@@ -28,7 +28,6 @@ const MOCK_PRODUCT_RAW = {
   slug: 'premium-batik-shirt',
   description: 'A nice shirt.',
   price: { toNumber: () => 250000 },
-  stock: 50,
   sku: 'BPK-001',
   weight: 300,
   island: 'Jawa',
@@ -80,6 +79,7 @@ describe('productService', { tags: ['backend'] }, () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('prod-1');
       expect(result.items[0].price).toBe(250000);
+      expect(result.items[0].stock).toBe(20);
       expect(result.items[0].variantCount).toBe(1);
       expect(result.items[0].createdAt).toBe(
         MOCK_PRODUCT_RAW.createdAt.toISOString(),
@@ -242,7 +242,6 @@ describe('productService', { tags: ['backend'] }, () => {
       name: 'New Batik Shirt',
       slug: 'new-batik-shirt',
       price: 200000,
-      stock: 20,
       sku: 'NEW-001',
       weight: 300,
       clothingType: 'batik',

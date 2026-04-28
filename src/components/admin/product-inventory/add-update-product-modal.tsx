@@ -64,7 +64,6 @@ function buildProductFormValues(
     slug: initialData?.slug ?? '',
     description: initialData?.description ?? '',
     price: initialData?.price ?? 0,
-    stock: initialData?.stock ?? 0,
     sku: initialData?.sku ?? '',
     weight: initialData?.weight ?? 1,
     clothingType: initialData?.clothingType ?? '',
@@ -364,24 +363,6 @@ export default function AddUpdateProductModal({
               {errors.price && (
                 <p className="mt-1 text-xs text-red-500">
                   {errors.price.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
-                Stok Produk *
-              </label>
-              <Input
-                {...register('stock', { valueAsNumber: true })}
-                type="number"
-                min={0}
-                placeholder="20"
-                className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7]"
-              />
-              {errors.stock && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors.stock.message}
                 </p>
               )}
             </div>

@@ -73,6 +73,7 @@ describe('use-cart hooks', { tags: ['frontend'] }, () => {
           slug: 'prod-1',
           clothingType: 'T-Shirt',
           province: 'Jawa',
+          variants: [{ stock: 10 }],
         },
       },
     ],

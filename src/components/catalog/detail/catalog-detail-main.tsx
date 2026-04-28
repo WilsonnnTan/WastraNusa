@@ -154,6 +154,16 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     effectiveSelectedSize,
     sizeVariants,
   ]);
+  const selectedVariantStock = useMemo(() => {
+    if (selectedVariantId) {
+      return (
+        product?.variants.find((variant) => variant.id === selectedVariantId)
+          ?.stock ?? 0
+      );
+    }
+
+    return product?.stock ?? 0;
+  }, [product, selectedVariantId]);
 
   if (isPending && !product) {
     return <CatalogDetailSkeleton />;
@@ -177,10 +187,10 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     );
   }
 
-  const safeQuantity = Math.min(
-    Math.max(quantity, 1),
-    Math.max(1, product.stock),
-  );
+  const safeQuantity =
+    selectedVariantStock > 0
+      ? Math.min(Math.max(quantity, 1), selectedVariantStock)
+      : 0;
   const isCartActionPending =
     addToCartMutation.isPending || updateCartItemMutation.isPending;
   const encyclopediaFacts: readonly [string, string][] = [
@@ -216,7 +226,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     if (existingItem) {
       const nextQuantity = Math.min(
         existingItem.quantity + safeQuantity,
-        product.stock,
+        selectedVariantStock,
       );
       await updateCartItemMutation.mutateAsync({
         id: existingItem.id,
@@ -309,10 +319,11 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
           <CatalogDetailGallery category={product.clothingType} />
           <CatalogDetailProductSummary
             product={product}
-            sizeOptions={sizeVariants.map((variant) => variant.name)}
-            colorOptions={colorVariants.map((variant) => variant.name)}
+            sizeOptions={sizeVariants}
+            colorOptions={colorVariants}
             selectedColor={effectiveSelectedColor}
             selectedSize={effectiveSelectedSize}
+            selectedVariantStock={selectedVariantStock}
             safeQuantity={safeQuantity}
             onColorChange={setSelectedColor}
             onSizeChange={setSelectedSize}
@@ -321,7 +332,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
             }
             onIncreaseQuantity={() =>
               setQuantity((value) =>
-                Math.min(Math.max(1, product.stock), value + 1),
+                Math.min(Math.max(1, selectedVariantStock), value + 1),
               )
             }
             onAddToCart={handleAddToCart}

@@ -56,7 +56,7 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
         id: 'prod-1',
         name: 'Product 1',
         price: 100000,
-        stock: 50,
+        stock: 20,
       },
     ],
     meta: {
@@ -72,7 +72,7 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
     id: 'prod-1',
     name: 'Product 1',
     price: 100000,
-    stock: 50,
+    stock: 20,
     variants: [],
   };
 
@@ -185,7 +185,6 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
       name: 'New Product',
       slug: 'new-product',
       price: 200000,
-      stock: 10,
       sku: 'SKU-1',
       weight: 500,
       clothingType: 'Batik',

@@ -67,7 +67,7 @@ describe('use-product-catalog hooks', { tags: ['frontend'] }, () => {
         slug: 'premium-batik-shirt',
         description: 'A nice shirt.',
         price: 250000,
-        stock: 50,
+        stock: 20,
         sku: 'BPK-001',
         weight: 300,
         island: 'Jawa',

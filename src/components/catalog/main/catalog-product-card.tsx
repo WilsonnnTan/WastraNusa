@@ -88,7 +88,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
               <p className="text-xs text-[#8c887e]">Terjual {product.sold}</p>
             </div>
             <p className="text-sm font-semibold text-[#4d6858]">
-              {isOutOfStock ? 'Habis' : `Stok: ${product.stock}`}
+              {isOutOfStock ? 'Habis' : `Total stok: ${product.stock}`}
             </p>
           </div>
         </div>

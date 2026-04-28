@@ -93,7 +93,7 @@ export function CatalogDetailContent({
             ['Kategori', product.clothingType],
             ['Asal', `${product.province}, ${product.island}`],
             ['Harga', formatRupiah(product.price)],
-            ['Stok', `${product.stock} unit`],
+            ['Total Stok', `${product.stock} unit`],
             ['Berat', `${product.weight} gram`],
             ['Gender', product.gender],
             ['Status', product.status],

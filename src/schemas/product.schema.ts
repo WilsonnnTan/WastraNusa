@@ -28,7 +28,6 @@ const productPayloadSchema = z.object({
   slug: z.string().min(1, 'Slug produk wajib diisi'),
   description: z.string().nullish(),
   price: decimalNumberSchema,
-  stock: z.number().int().min(0, 'Stok produk tidak boleh negatif'),
   sku: z.string().min(1, 'SKU produk wajib diisi'),
   weight: z
     .number()

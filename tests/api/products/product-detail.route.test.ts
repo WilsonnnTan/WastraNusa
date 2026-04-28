@@ -15,7 +15,7 @@ const MOCK_PRODUCT = {
   slug: 'premium-batik-shirt',
   description: 'A nice shirt.',
   price: 250000,
-  stock: 50,
+  stock: 20,
   sku: 'BPK-001',
   weight: 300,
   island: 'Jawa',
@@ -109,7 +109,7 @@ describe('PUT /api/products/[id]', { tags: ['backend'] }, () => {
     const req = createRequest('http://localhost/api/products/prod-1', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stock: -5 }), // stock must be >= 0
+      body: JSON.stringify({ weight: 0 }), // weight must be >= 1
     });
     const res = await PUT(req, { params: Promise.resolve({ id: 'prod-1' }) });
     const body = await res.json();

@@ -9,10 +9,11 @@ import { formatRupiah } from '../utils';
 
 type CatalogDetailProductSummaryProps = {
   product: ProductInventoryItem;
-  sizeOptions: string[];
-  colorOptions: string[];
+  sizeOptions: ProductInventoryItem['variants'];
+  colorOptions: ProductInventoryItem['variants'];
   selectedColor?: string;
   selectedSize?: string;
+  selectedVariantStock: number;
   safeQuantity: number;
   onColorChange: (color?: string) => void;
   onSizeChange: (size?: string) => void;
@@ -29,6 +30,7 @@ export function CatalogDetailProductSummary({
   colorOptions,
   selectedColor,
   selectedSize,
+  selectedVariantStock,
   safeQuantity,
   onColorChange,
   onSizeChange,
@@ -39,6 +41,10 @@ export function CatalogDetailProductSummary({
   isCartActionPending = false,
 }: CatalogDetailProductSummaryProps) {
   const isOutOfStock = product.stock <= 0 || product.status === 'out_of_stock';
+  const hasVariantOptions = sizeOptions.length > 0 || colorOptions.length > 0;
+  const isSelectedVariantOutOfStock =
+    hasVariantOptions && selectedVariantStock <= 0;
+  const isPurchaseDisabled = isOutOfStock || isSelectedVariantOutOfStock;
 
   return (
     <div>
@@ -67,8 +73,15 @@ export function CatalogDetailProductSummary({
       </p>
       <p className="mt-2 inline-flex items-center gap-1.5 text-[#598a66]">
         <CircleCheck className="size-4" />
-        {isOutOfStock ? 'Stok habis' : `Stok: ${product.stock}`}
+        {isOutOfStock ? 'Stok habis' : `Total stok: ${product.stock}`}
       </p>
+      {hasVariantOptions ? (
+        <p className="mt-1 text-sm text-[#5f665e]">
+          {selectedVariantStock > 0
+            ? `Stok varian dipilih: ${selectedVariantStock}`
+            : 'Varian dipilih sedang habis'}
+        </p>
+      ) : null}
 
       <Card className="mt-4 rounded-2xl border border-[#ddd4c5] bg-[#efe9de] px-5 py-4">
         <h2 className="text-4xl font-extrabold tracking-tight text-[#2f5f49]">
@@ -92,17 +105,17 @@ export function CatalogDetailProductSummary({
           {colorOptions.length > 0 ? (
             colorOptions.map((color) => (
               <Button
-                key={color}
+                key={color.id}
                 type="button"
                 size="sm"
                 variant="outline"
                 className={cn(
                   'rounded-full border-[#ddd3c2] bg-[#f4efe5] text-[#4f6558]',
-                  selectedColor === color && 'bg-[#dfe8dd] text-[#315642]',
+                  selectedColor === color.name && 'bg-[#dfe8dd] text-[#315642]',
                 )}
-                onClick={() => onColorChange(color)}
+                onClick={() => onColorChange(color.name)}
               >
-                {color}
+                {color.name} ({color.stock})
               </Button>
             ))
           ) : (
@@ -120,17 +133,17 @@ export function CatalogDetailProductSummary({
           {sizeOptions.length > 0 ? (
             sizeOptions.map((size) => (
               <Button
-                key={size}
+                key={size.id}
                 type="button"
                 variant="outline"
                 className={cn(
                   'rounded-lg border-[#ddd4c5] bg-[#f5f0e7] text-[#496356]',
-                  selectedSize === size &&
+                  selectedSize === size.name &&
                     'border-[#2f5f49] bg-[#2f5f49] text-[#edf4ec]',
                 )}
-                onClick={() => onSizeChange(size)}
+                onClick={() => onSizeChange(size.name)}
               >
-                {size}
+                {size.name} ({size.stock})
               </Button>
             ))
           ) : (
@@ -149,7 +162,7 @@ export function CatalogDetailProductSummary({
             variant="ghost"
             className="rounded-md"
             onClick={onDecreaseQuantity}
-            disabled={safeQuantity <= 1 || isOutOfStock}
+            disabled={safeQuantity <= 1 || isPurchaseDisabled}
           >
             <Minus />
           </Button>
@@ -162,19 +175,21 @@ export function CatalogDetailProductSummary({
             variant="ghost"
             className="rounded-md"
             onClick={onIncreaseQuantity}
-            disabled={safeQuantity >= product.stock || isOutOfStock}
+            disabled={
+              isPurchaseDisabled || safeQuantity >= selectedVariantStock
+            }
           >
             <Plus />
           </Button>
         </Card>
         <span className="text-sm text-[#6c6962]">
-          Maks. {product.stock} unit
+          Maks. {selectedVariantStock} unit
         </span>
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <Button
-          disabled={isOutOfStock || isCartActionPending}
+          disabled={isPurchaseDisabled || isCartActionPending}
           className="h-11 rounded-xl bg-[#2f5f49] text-[#edf4ec] hover:bg-[#254a39]"
           onClick={onAddToCart}
         >
@@ -182,7 +197,7 @@ export function CatalogDetailProductSummary({
           {isCartActionPending ? 'Memproses...' : 'Tambah ke Keranjang'}
         </Button>
         <Button
-          disabled={isOutOfStock || isCartActionPending}
+          disabled={isPurchaseDisabled || isCartActionPending}
           className="h-11 rounded-xl bg-[#cc7543] text-white hover:bg-[#b56539]"
           onClick={onBuyNow}
         >
