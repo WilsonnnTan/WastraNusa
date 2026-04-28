@@ -9,12 +9,18 @@ import { type ArticleDashboardData } from '@/types/dashboard';
 import {
   type EncyclopediaArticleFilters,
   type EncyclopediaArticleListResponse,
-  type RegionFilter,
+  type IslandFilter,
 } from '@/types/encyclopedia';
 import type { LikedArticlesResponse } from '@/types/profile';
 
 const formatCount = (value: number) =>
   new Intl.NumberFormat('en-US').format(value);
+const formatRupiah = (value: number) =>
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(value);
 
 export const articleService = {
   getArticles: async (
@@ -24,7 +30,7 @@ export const articleService = {
   ): Promise<EncyclopediaArticleListResponse> => {
     const safeLimit = Math.min(Math.max(1, limit), 50);
     const offset = (Math.max(1, page) - 1) * safeLimit;
-    const region = filters.region || undefined;
+    const island = filters.island || undefined;
     const topic = filters.topic || undefined;
 
     const [
@@ -32,21 +38,21 @@ export const articleService = {
       totalItems,
       globalTotalItems,
       totalItemsByTopic,
-      regionCounts,
+      islandCounts,
       topicCounts,
       totalWastraTypes,
     ] = await Promise.all([
       articleRepository.findAll({
         offset,
         limit: safeLimit,
-        region,
+        island,
         topic,
       }),
-      articleRepository.countAll({ region, topic }),
+      articleRepository.countAll({ island, topic }),
       articleRepository.countAll(),
       articleRepository.countAll({ topic }),
-      articleRepository.countByRegion({ topic }),
-      articleRepository.countByTopic({ region }),
+      articleRepository.countByIsland({ topic }),
+      articleRepository.countByTopic({ island }),
       articleRepository.countDistinctMotifLabel(),
     ]);
 
@@ -64,13 +70,15 @@ export const articleService = {
     }));
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
-    const regions: RegionFilter[] = [
-      { name: 'Semua Wilayah', count: totalItemsByTopic, active: !region },
-      ...regionCounts.map((regionCount) => ({
-        name: regionCount.region,
-        count: regionCount._count.region,
-        active: regionCount.region === region,
-      })),
+    const islands: IslandFilter[] = [
+      { name: 'Semua Pulau', count: totalItemsByTopic, active: !island },
+      ...islandCounts
+        .filter((islandCount) => islandCount.island !== null)
+        .map((islandCount) => ({
+          name: islandCount.island as string,
+          count: islandCount._count.island,
+          active: islandCount.island === island,
+        })),
     ];
     const topics = topicCounts
       .map((topicCount) => topicCount.topic.trim())
@@ -84,11 +92,11 @@ export const articleService = {
         totalItems,
         totalPages,
         hasNextPage: Math.max(1, page) < totalPages,
-        regions,
+        islands,
         topics,
         stats: {
           totalArticles: globalTotalItems,
-          totalRegions: regionCounts.length,
+          totalIslands: islandCounts.length,
           totalWastraTypes,
         },
       },
@@ -135,6 +143,7 @@ export const articleService = {
 
     return {
       ...article,
+      gender: article.gender,
       author: article.creator?.name || 'Admin',
       publishedAt: article.createdAt.toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -157,7 +166,12 @@ export const articleService = {
         { label: 'Jenis Wastra', value: article.motifLabel },
         { label: 'Durasi Baca', value: `${article.readMinutes} menit` },
       ],
-      relatedProducts: [],
+      relatedProducts: (article.products ?? []).map((product) => ({
+        slug: product.slug,
+        name: product.name,
+        location: [product.province, product.island].filter(Boolean).join(', '),
+        price: formatRupiah(Number(product.price)),
+      })),
       discussionCount: 0,
       nextArticle: {
         slug: '',
@@ -207,6 +221,7 @@ export const articleService = {
         views: formatCount(article.engagement?.viewCount || 0),
         readMinutes: article.readMinutes,
         featured: article.featured,
+        status: article.status,
         imageUrl: article.wikimediaImageUrl,
       })),
       meta: {

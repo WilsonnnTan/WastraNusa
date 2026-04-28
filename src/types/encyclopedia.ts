@@ -1,3 +1,5 @@
+import { ArticleStatus, Gender } from '@/generated/prisma/enums';
+
 /**
  * Type definitions for Encyclopedia components
  */
@@ -7,14 +9,14 @@ export interface Stat {
   label: string;
 }
 
-export interface RegionFilter {
+export interface IslandFilter {
   name: string;
   count: number;
   active?: boolean;
 }
 
 export interface EncyclopediaArticleFilters {
-  region?: string;
+  island?: string;
   topic?: string;
 }
 
@@ -28,8 +30,16 @@ export interface EncyclopediaArticle {
   likes: number;
   isLiked?: boolean;
   views: string;
-  readMinutes?: number;
-  featured?: boolean;
+  readMinutes: number;
+  featured: boolean;
+  province?: string | null;
+  island?: string | null;
+  ethnicGroup?: string | null;
+  clothingType?: string | null;
+  gender?: Gender | null;
+  status: ArticleStatus;
+  summary?: string | null;
+  description?: string | null;
 }
 
 export interface EncyclopediaSection {
@@ -45,6 +55,7 @@ export interface EncyclopediaKeyFact {
 }
 
 export interface EncyclopediaRelatedProduct {
+  slug: string;
   name: string;
   location: string;
   price: string;
@@ -73,11 +84,11 @@ export interface EncyclopediaArticleListMeta {
   totalItems: number;
   totalPages: number;
   hasNextPage: boolean;
-  regions: RegionFilter[];
+  islands: IslandFilter[];
   topics: string[];
   stats?: {
     totalArticles: number;
-    totalRegions: number;
+    totalIslands: number;
     totalWastraTypes: number;
   };
 }

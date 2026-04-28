@@ -77,7 +77,7 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
         totalItems: 1,
         totalPages: 1,
         hasNextPage: false,
-        regions: [{ name: 'Semua Wilayah', count: 1, active: true }],
+        islands: [{ name: 'Semua Pulau', count: 1, active: true }],
       },
     };
     vi.spyOn(global, 'fetch').mockResolvedValue(
@@ -250,7 +250,7 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
           totalItems: 1,
           totalPages: 1,
           hasNextPage: false,
-          regions: [{ name: 'Semua Wilayah', count: 1, active: true }],
+          islands: [{ name: 'Semua Pulau', count: 1, active: true }],
         },
       }),
     );
@@ -260,7 +260,7 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
     expect(result.current.data?.meta.totalPages).toBe(1);
   });
 
-  it('should include region in the article list query', async () => {
+  it('should include island in the article list query', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
       createSuccessResponse({
         items: [],
@@ -270,16 +270,16 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
           totalItems: 0,
           totalPages: 1,
           hasNextPage: false,
-          regions: [{ name: 'Semua Wilayah', count: 0, active: true }],
+          islands: [{ name: 'Semua Pulau', count: 0, active: true }],
           topics: [],
         },
       }) as never,
     );
 
-    await fetchArticles(1, 10, { region: 'Jawa' });
+    await fetchArticles(1, 10, { island: 'Jawa' });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/articles?page=1&limit=10&region=Jawa',
+      '/api/articles?page=1&limit=10&island=Jawa',
       expect.objectContaining({
         headers: expect.objectContaining({
           'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
 'use client';
 
-import { EncyclopediaPagination } from '@/components/ensiklopedia';
+import { EncyclopediaPagination } from '@/components/encyclopedia';
 import { useLikedArticles } from '@/hooks/use-article';
 import { useState } from 'react';
 

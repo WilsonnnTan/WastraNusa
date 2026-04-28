@@ -2,6 +2,8 @@ import type { PaymentTransactionStatus } from '@/generated/prisma/client';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
+import { addressRepository } from '@/repositories/address.repository';
+import { cartRepository } from '@/repositories/cart.repository';
 import { orderRepository } from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
@@ -11,15 +13,21 @@ import type {
   MidtransNotificationInput,
 } from '@/schemas/payment.schema';
 
-/**
- * Generates a unique order number: ORD-{timestamp}-{random4chars}
- */
+interface CheckoutResolvedItem {
+  cartItemIds: string[];
+  productId: string;
+  variantId: string | null;
+  quantity: number;
+  productName: string;
+  variantName: string | null;
+  unitPrice: number;
+}
+
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = crypto.randomUUID().slice(0, 4).toUpperCase();
   return `ORD-${timestamp}-${random}`;
 }
-
 /**
  * Maps Midtrans transaction_status to our PaymentTransactionStatus enum.
  */
@@ -61,85 +69,286 @@ function mapPaymentStatus(
   }
 }
 
+function aggregateCheckoutItems(input: CheckoutInput): Array<{
+  cartItemIds: string[];
+  productId: string;
+  variantId: string | null;
+  quantity: number;
+}> {
+  const map = new Map<
+    string,
+    {
+      cartItemIds: string[];
+      productId: string;
+      variantId: string | null;
+      quantity: number;
+    }
+  >();
+
+  for (const item of input.items) {
+    const variantId = item.variantId ?? null;
+    const key = `${item.productId}:${variantId ?? 'default'}`;
+    const existing = map.get(key);
+
+    if (existing) {
+      existing.quantity += item.quantity;
+      if (item.cartItemId && !existing.cartItemIds.includes(item.cartItemId)) {
+        existing.cartItemIds.push(item.cartItemId);
+      }
+      continue;
+    }
+
+    map.set(key, {
+      cartItemIds: item.cartItemId ? [item.cartItemId] : [],
+      productId: item.productId,
+      variantId,
+      quantity: item.quantity,
+    });
+  }
+
+  return Array.from(map.values());
+}
+
+function parseJsonTag(customerNotes: string | null | undefined, tag: string) {
+  if (!customerNotes) return null;
+
+  const marker = `${tag}=`;
+  const start = customerNotes.indexOf(marker);
+  if (start < 0) return null;
+
+  const jsonStart = start + marker.length;
+  const jsonEnd = customerNotes.indexOf(' | ', jsonStart);
+  const jsonRaw =
+    jsonEnd >= 0
+      ? customerNotes.slice(jsonStart, jsonEnd)
+      : customerNotes.slice(jsonStart);
+
+  try {
+    return JSON.parse(jsonRaw);
+  } catch {
+    return null;
+  }
+}
+
+function extractPurchasedItemsFromOrder(order: {
+  productId: string;
+  variantId: string | null;
+  customerNotes: string | null;
+}) {
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{ productId?: string; variantId?: string | null }> | null;
+
+  if (checkoutItems && checkoutItems.length > 0) {
+    return checkoutItems
+      .filter((item) => typeof item.productId === 'string' && item.productId)
+      .map((item) => ({
+        productId: item.productId as string,
+        variantId: item.variantId ?? null,
+      }));
+  }
+
+  return [{ productId: order.productId, variantId: order.variantId }];
+}
+
+function extractPurchasedCartItemIds(order: { customerNotes: string | null }) {
+  const explicitIds = parseJsonTag(
+    order.customerNotes,
+    'checkout_cart_item_ids',
+  ) as string[] | null;
+
+  if (Array.isArray(explicitIds) && explicitIds.length > 0) {
+    return explicitIds.filter((id) => typeof id === 'string' && id.length > 0);
+  }
+
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{ cartItemIds?: string[] }> | null;
+
+  if (!checkoutItems || checkoutItems.length === 0) {
+    return [];
+  }
+
+  const uniqueIds = new Set<string>();
+  for (const item of checkoutItems) {
+    if (!Array.isArray(item.cartItemIds)) continue;
+    for (const id of item.cartItemIds) {
+      if (typeof id === 'string' && id.length > 0) {
+        uniqueIds.add(id);
+      }
+    }
+  }
+
+  return Array.from(uniqueIds);
+}
+
 export const paymentService = {
   checkout: async (input: CheckoutInput, userId: string) => {
-    // Look up the product
-    const product = await productRepository.findProductById(input.productId);
-    if (!product) {
-      throw new ApiError('Product not found', 404);
-    }
-    if (product.status !== 'active') {
-      throw new ApiError('Product is not available', 400);
-    }
+    let shippingAddressId: string;
 
-    // Optionally look up the variant
-    let variantName: string | null = null;
-    let productPrice = Number(product.price);
-
-    if (input.variantId) {
-      const variant = await productVariantRepository.findVariantById(
-        input.variantId,
+    if (input.shippingAddressId) {
+      const shippingAddress = await addressRepository.findById(
+        input.shippingAddressId,
+        userId,
       );
-      if (!variant) {
-        throw new ApiError('Product variant not found', 404);
+      if (!shippingAddress) {
+        throw new ApiError('Shipping address not found', 404);
       }
-      if (variant.productId !== product.id) {
-        throw new ApiError('Variant does not belong to this product', 400);
-      }
-      variantName = variant.name;
-      // Use variant price if set, otherwise fall back to product price
-      if (variant.price !== null) {
-        productPrice = Number(variant.price);
-      }
-
-      // Check variant stock
-      if (variant.stock < input.quantity) {
-        throw new ApiError('Insufficient variant stock', 400);
-      }
+      shippingAddressId = shippingAddress.id;
+      logger.info('use address id from req', {
+        shippingAddressId,
+      });
     } else {
-      // Check product stock
-      if (product.stock < input.quantity) {
-        throw new ApiError('Insufficient product stock', 400);
+      const defaultAddress = await addressRepository.findDefaultByUser(userId);
+      if (!defaultAddress) {
+        throw new ApiError('Default shipping address not found', 400);
       }
+      shippingAddressId = defaultAddress.id;
+      logger.info('use default id since no address id passed');
     }
 
-    const subtotal = productPrice * input.quantity;
+    const mergedItems = aggregateCheckoutItems(input);
+    const resolvedItems: CheckoutResolvedItem[] = [];
+
+    for (const item of mergedItems) {
+      const product = await productRepository.findProductById(item.productId);
+      if (!product) {
+        throw new ApiError(`Product not found: ${item.productId}`, 404);
+      }
+      if (product.status !== 'active') {
+        throw new ApiError(`Product is not available: ${product.name}`, 400);
+      }
+
+      let variantName: string | null = null;
+      let unitPrice = Number(product.price);
+      let resolvedVariantId: string | null = null;
+
+      if (item.variantId) {
+        const variant = await productVariantRepository.findVariantById(
+          item.variantId,
+        );
+        if (!variant) {
+          logger.warn('Variant not found, fallback to product checkout', {
+            productId: product.id,
+            requestedVariantId: item.variantId,
+          });
+        } else {
+          if (variant.productId !== product.id) {
+            throw new ApiError('Variant does not belong to this product', 400);
+          }
+          if (variant.stock < item.quantity) {
+            throw new ApiError(
+              `Insufficient variant stock for ${product.name}`,
+              400,
+            );
+          }
+
+          resolvedVariantId = variant.id;
+          variantName = variant.name;
+          if (variant.price !== null) {
+            unitPrice = Number(variant.price);
+          }
+        }
+      }
+
+      if (product.stock < item.quantity) {
+        throw new ApiError(
+          `Insufficient product stock for ${product.name}`,
+          400,
+        );
+      }
+
+      resolvedItems.push({
+        cartItemIds: item.cartItemIds,
+        productId: product.id,
+        variantId: resolvedVariantId,
+        quantity: item.quantity,
+        productName: product.name,
+        variantName,
+        unitPrice,
+      });
+    }
+
+    const subtotal = resolvedItems.reduce(
+      (acc, item) => acc + item.unitPrice * item.quantity,
+      0,
+    );
     const totalAmount = subtotal + input.shippingCost;
+
+    const totalQuantity = resolvedItems.reduce(
+      (acc, item) => acc + item.quantity,
+      0,
+    );
+    const primaryItem = resolvedItems[0];
+
+    if (!primaryItem) {
+      throw new ApiError('No checkout items were provided', 400);
+    }
 
     const orderId = crypto.randomUUID();
     const orderNumber = generateOrderNumber();
     const paymentTransactionId = crypto.randomUUID();
 
+    const itemSnapshot = resolvedItems.map((item) => ({
+      cartItemIds: item.cartItemIds,
+      productId: item.productId,
+      variantId: item.variantId,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+    }));
+    const checkoutCartItemIds = Array.from(
+      new Set(itemSnapshot.flatMap((item) => item.cartItemIds)),
+    );
+
+    const customerNotes = [
+      input.customerNotes,
+      resolvedItems.length > 1
+        ? `checkout_items=${JSON.stringify(itemSnapshot)}`
+        : null,
+      checkoutCartItemIds.length > 0
+        ? `checkout_cart_item_ids=${JSON.stringify(checkoutCartItemIds)}`
+        : null,
+    ]
+      .filter(Boolean)
+      .join(' | ');
+
     await orderRepository.createOrder({
       id: orderId,
       orderNumber,
       userId,
-      productId: input.productId,
-      variantId: input.variantId ?? null,
-      productName: product.name,
-      variantName,
-      quantity: input.quantity,
-      productPrice,
-      shippingAddressId: input.shippingAddressId,
+      productId: primaryItem.productId,
+      variantId: primaryItem.variantId,
+      productName:
+        resolvedItems.length === 1
+          ? primaryItem.productName
+          : `${primaryItem.productName} +${resolvedItems.length - 1} item(s)`,
+      variantName: resolvedItems.length === 1 ? primaryItem.variantName : null,
+      quantity: totalQuantity,
+      productPrice: subtotal,
+      shippingAddressId,
       courier: input.courier,
       courierService: input.courierService,
       estimatedDelivery: input.estimatedDelivery ?? null,
       subtotal,
       shippingCost: input.shippingCost,
       totalAmount,
-      customerNotes: input.customerNotes ?? null,
+      customerNotes: customerNotes || null,
     });
 
-    if (input.variantId) {
-      await productVariantRepository.decrementVariantStock(
-        input.variantId,
-        input.quantity,
+    for (const item of resolvedItems) {
+      if (item.variantId) {
+        await productVariantRepository.decrementVariantStock(
+          item.variantId,
+          item.quantity,
+        );
+      }
+      await productRepository.decrementProductStock(
+        item.productId,
+        item.quantity,
       );
     }
-    await productRepository.decrementProductStock(
-      input.productId,
-      input.quantity,
-    );
 
     let midtransResponse;
     try {
@@ -166,6 +375,7 @@ export const paymentService = {
       orderId,
       orderNumber,
       totalAmount,
+      itemCount: resolvedItems.length,
     });
 
     return {
@@ -176,9 +386,6 @@ export const paymentService = {
     };
   },
 
-  /**
-   * Handles Midtrans webhook notification.
-   */
   handleNotification: async (payload: MidtransNotificationInput) => {
     const {
       order_id,
@@ -200,6 +407,21 @@ export const paymentService = {
     if (!isValid) {
       logger.warn('Invalid Midtrans signature key', { order_id });
       throw new ApiError('Invalid signature key', 403);
+    }
+
+    const transaction =
+      await paymentTransactionRepository.findTransactionByExternalId(order_id);
+    if (!transaction) {
+      logger.warn('Payment transaction not found for notification', {
+        order_id,
+      });
+      return;
+    }
+
+    const order = await orderRepository.findOrderById(order_id);
+    if (!order) {
+      logger.warn('Order not found for notification', { order_id });
+      return;
     }
 
     if (
@@ -237,6 +459,35 @@ export const paymentService = {
       paidAt,
       ...(isPaid ? { orderStatus: 'confirmed' as const } : {}),
     });
+
+    if (isPaid) {
+      const order = await orderRepository.findOrderById(order_id);
+
+      if (!order) {
+        logger.warn('Paid order not found for cart cleanup', { order_id });
+      } else {
+        const cartItemIds = extractPurchasedCartItemIds(order);
+        const purchasedItems = extractPurchasedItemsFromOrder(order);
+
+        const byIdResult = await cartRepository.removePurchasedItemsById(
+          order.userId,
+          cartItemIds,
+        );
+        const byProductVariantResult =
+          await cartRepository.removePurchasedItemsByProductVariant(
+            order.userId,
+            purchasedItems,
+          );
+
+        logger.info('Removed purchased items from cart', {
+          order_id,
+          userId: order.userId,
+          removedByIdCount: byIdResult.count,
+          removedByProductVariantCount: byProductVariantResult.count,
+          purchasedItemCount: purchasedItems.length,
+        });
+      }
+    }
 
     logger.info('Midtrans notification processed', {
       order_id,

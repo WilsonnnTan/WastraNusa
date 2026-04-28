@@ -2,6 +2,8 @@ import 'dotenv/config';
 
 import { seedAddresses } from './address.seed';
 import { seedArticles } from './article.seed';
+import { seedCarts } from './cart.seed';
+import { seedOrders } from './order.seed';
 import { seedProducts } from './product.seed';
 import { seedUsers } from './user.seed';
 
@@ -17,6 +19,8 @@ async function main() {
   await seedArticles();
   await seedProducts();
   await seedAddresses();
+  await seedCarts();
+  await seedOrders();
 
   console.log('\nSeeding complete!');
 }

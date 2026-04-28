@@ -75,33 +75,33 @@ describe('articleRepository', { tags: ['db'] }, () => {
       expect(page1[0].id).not.toBe(page2[0].id);
     });
 
-    it('should filter by region', async () => {
+    it('should filter by island', async () => {
       const articles = await articleRepository.findAll({
         offset: 0,
         limit: 50,
-        region: 'Jawa',
+        island: 'Jawa',
       });
 
       expect(articles.length).toBeGreaterThan(0);
-      expect(articles.every((article) => article.region === 'Jawa')).toBe(true);
+      expect(articles.every((article) => article.island === 'Jawa')).toBe(true);
     });
   });
 
   describe('count queries', () => {
-    it('should count all articles for a region filter', async () => {
-      const count = await articleRepository.countAll({ region: 'Jawa' });
+    it('should count all articles for an island filter', async () => {
+      const count = await articleRepository.countAll({ island: 'Jawa' });
 
       expect(count).toBeGreaterThan(0);
     });
 
-    it('should return grouped region counts', async () => {
-      const regionCounts = await articleRepository.countByRegion();
+    it('should return grouped island counts', async () => {
+      const islandCounts = await articleRepository.countByIsland();
 
-      expect(regionCounts.length).toBeGreaterThan(0);
+      expect(islandCounts.length).toBeGreaterThan(0);
       expect(
-        regionCounts.some(
-          (regionCount) =>
-            regionCount.region === 'Jawa' && regionCount._count.region > 0,
+        islandCounts.some(
+          (islandCount) =>
+            islandCount.island === 'Jawa' && islandCount._count.island > 0,
         ),
       ).toBe(true);
     });
@@ -143,6 +143,19 @@ describe('articleRepository', { tags: ['db'] }, () => {
       expect(article).toBeDefined();
       expect(article?.id).toBe(SEED_ARTICLE_1.id);
       expect(article?.title).toBe(SEED_ARTICLE_1.title);
+      expect(article?.products).toBeDefined();
+      expect(Array.isArray(article?.products)).toBe(true);
+      if (article && article.products.length > 0) {
+        expect(article.products[0]).toEqual(
+          expect.objectContaining({
+            slug: expect.any(String),
+            name: expect.any(String),
+            province: expect.any(String),
+            island: expect.any(String),
+            price: expect.anything(),
+          }),
+        );
+      }
     });
 
     it('should find by slug', async () => {
@@ -152,6 +165,19 @@ describe('articleRepository', { tags: ['db'] }, () => {
 
       expect(article).toBeDefined();
       expect(article?.slug).toBe(SEED_ARTICLE_2.slug);
+      expect(article?.products).toBeDefined();
+      expect(Array.isArray(article?.products)).toBe(true);
+      if (article && article.products.length > 0) {
+        expect(article.products[0]).toEqual(
+          expect.objectContaining({
+            slug: expect.any(String),
+            name: expect.any(String),
+            province: expect.any(String),
+            island: expect.any(String),
+            price: expect.anything(),
+          }),
+        );
+      }
     });
 
     it('should return null for non-existent', async () => {

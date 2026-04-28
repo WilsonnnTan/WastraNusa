@@ -197,14 +197,14 @@ model Product {
   slug        String  @unique
   description String?
 
-  price          Decimal
-  compareAtPrice Decimal?
+  price Decimal
 
   stock Int    @default(0)
   sku   String @unique
 
   weight Int
 
+  island       String
   province     String
   clothingType String
   gender       Gender
@@ -221,6 +221,7 @@ model Product {
   orders   Order[]
   cartItems CartItem[]
 
+  @@index([island])
   @@index([province])
   @@index([clothingType])
   @@index([gender])

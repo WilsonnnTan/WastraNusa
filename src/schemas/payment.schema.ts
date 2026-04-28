@@ -1,10 +1,19 @@
 import { z } from 'zod';
 
-export const checkoutSchema = z.object({
+const checkoutItemSchema = z.object({
+  cartItemId: z.string().min(1).optional(),
   productId: z.string().min(1, 'Product ID is required'),
   variantId: z.string().nullish(),
   quantity: z.number().int().min(1, 'Quantity must be at least 1'),
-  shippingAddressId: z.string().min(1, 'Shipping address is required'),
+  frontendPrice: z.number().min(0).optional(),
+});
+
+export const checkoutSchema = z.object({
+  items: z.array(checkoutItemSchema).min(1, 'At least one item is required'),
+  shippingAddressId: z
+    .string()
+    .min(1, 'Shipping address is required')
+    .nullish(),
   courier: z.string().min(1, 'Courier is required'),
   courierService: z.string().min(1, 'Courier service is required'),
   estimatedDelivery: z.string().nullish(),
@@ -13,7 +22,7 @@ export const checkoutSchema = z.object({
 });
 
 /**
- * Schema for POST /api/webhooks/midtrans — Midtrans notification payload.
+ * Schema for POST /api/webhooks/midtrans - Midtrans notification payload.
  * @see https://docs.midtrans.com/docs/https-notification-webhooks
  */
 export const midtransNotificationSchema = z.object({

@@ -31,13 +31,13 @@ export default function Sidebar() {
       icon: <ShoppingBag size={16} />,
       label: 'Pesanan Saya',
       badge: null,
-      href: '/profile/pesanan',
+      href: '/profile/my-order',
     },
     {
       icon: <MapPin size={16} />,
       label: 'Alamat Tersimpan',
       badge: null,
-      href: '/profile/alamat',
+      href: '/profile/saved-address',
     },
     {
       icon: <BookOpen size={16} />,

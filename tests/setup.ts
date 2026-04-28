@@ -22,7 +22,7 @@ vi.mock('@/repositories/article.repository', () => ({
   articleRepository: {
     findAll: vi.fn(),
     countAll: vi.fn(),
-    countByRegion: vi.fn(),
+    countByIsland: vi.fn(),
     countByTopic: vi.fn(),
     countDistinctMotifLabel: vi.fn(),
     findMostPopular: vi.fn(),
@@ -55,7 +55,23 @@ vi.mock('@/repositories/order.repository', () => ({
   orderRepository: {
     createOrder: vi.fn(),
     findOrderById: vi.fn(),
+    findOrderDetailByIdentifier: vi.fn(),
     updateOrderPaymentStatus: vi.fn(),
+    findOrdersByUserId: vi.fn(),
+    countOrdersByUserId: vi.fn(),
+    findOrdersForAdmin: vi.fn(),
+    countOrdersForAdmin: vi.fn(),
+    findOrderForAdminByIdentifier: vi.fn(),
+    updateOrderForAdmin: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/order.service', () => ({
+  orderService: {
+    getUserOrders: vi.fn(),
+    getUserOrderDetail: vi.fn(),
+    getAdminOrders: vi.fn(),
+    updateOrderForAdmin: vi.fn(),
   },
 }));
 
@@ -63,6 +79,7 @@ vi.mock('@/repositories/paymentTransaction.repository', () => ({
   paymentTransactionRepository: {
     createPaymentTransaction: vi.fn(),
     updatePaymentStatus: vi.fn(),
+    findTransactionByExternalId: vi.fn(),
   },
 }));
 
@@ -70,6 +87,20 @@ vi.mock('@/repositories/product.repository', () => ({
   productRepository: {
     findProductById: vi.fn(),
     decrementProductStock: vi.fn(),
+    findAll: vi.fn(),
+    countAll: vi.fn(),
+    countByClothingType: vi.fn(),
+    countByIsland: vi.fn(),
+    countBySize: vi.fn(),
+    countByGender: vi.fn(),
+    countByStatus: vi.fn(),
+    countLowStock: vi.fn(),
+    findLowStock: vi.fn(),
+    getPriceRange: vi.fn(),
+    findByIdOrSlug: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -80,6 +111,17 @@ vi.mock('@/repositories/productVariant.repository', () => ({
   },
 }));
 
+vi.mock('@/services/product.service', () => ({
+  productService: {
+    getProducts: vi.fn(),
+    getProductDetail: vi.fn(),
+    getDashboardOverview: vi.fn(),
+    createProduct: vi.fn(),
+    updateProduct: vi.fn(),
+    deleteProduct: vi.fn(),
+  },
+}));
+
 vi.mock('@/services/payment.service', () => ({
   paymentService: {
     checkout: vi.fn(),
@@ -87,7 +129,58 @@ vi.mock('@/services/payment.service', () => ({
   },
 }));
 
+vi.mock('@/repositories/address.repository', () => ({
+  addressRepository: {
+    findAllByUser: vi.fn(),
+    findById: vi.fn(),
+    findDefaultByUser: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    clearDefaultsByUser: vi.fn(),
+    setDefault: vi.fn(),
+    countByUser: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/address.service', () => ({
+  addressService: {
+    getAddresses: vi.fn(),
+    createAddress: vi.fn(),
+    updateAddress: vi.fn(),
+    deleteAddress: vi.fn(),
+    setDefaultAddress: vi.fn(),
+  },
+}));
+
 vi.mock('@/lib/midtrans', () => ({
   createMidtransTransaction: vi.fn(),
   verifySignatureKey: vi.fn(),
+}));
+
+vi.mock('@/repositories/cart.repository', () => ({
+  cartRepository: {
+    findOrCreateByUser: vi.fn(),
+    findByUserId: vi.fn(),
+    addItem: vi.fn(),
+    updateItemQuantity: vi.fn(),
+    removeItem: vi.fn(),
+    clearCart: vi.fn(),
+    removeItems: vi.fn(),
+    removePurchasedItemsById: vi.fn(),
+    removePurchasedItemsByProductVariant: vi.fn(),
+    getCartItemCount: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/cart.service', () => ({
+  cartService: {
+    getCart: vi.fn(),
+    addToCart: vi.fn(),
+    updateCartItemQuantity: vi.fn(),
+    removeFromCart: vi.fn(),
+    removeMultipleFromCart: vi.fn(),
+    clearCart: vi.fn(),
+    getCartCount: vi.fn(),
+  },
 }));

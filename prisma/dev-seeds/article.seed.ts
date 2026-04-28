@@ -67,7 +67,7 @@ const buildDefaultSections = (article: {
 export const SEED_ARTICLE_1 = {
   id: 'b0000000-0000-0000-0000-000000000001',
   slug: 'sejarah-batik-jawa-warisan-dunia-unesco',
-  region: 'Jawa',
+  region: 'Kota Surakarta',
   topic: 'Sejarah & Asal Usul',
   motifLabel: 'Batik',
   title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
@@ -122,14 +122,14 @@ export const SEED_ARTICLE_1 = {
 export const SEED_ARTICLE_2 = {
   id: 'b0000000-0000-0000-0000-000000000002',
   slug: 'tenun-ikat-teknik-kuno-dari-kepulauan-nusantara',
-  region: 'Nusa Tenggara',
+  region: 'Kabupaten Sikka',
   topic: 'Teknik Pembuatan',
   motifLabel: 'Ikat',
   title: 'Tenun Ikat: Teknik Kuno dari Kepulauan Nusantara',
   excerpt:
     'Ikat is a dyeing technique from Southeast Asia used to pattern textiles that employs resist-dyeing on yarn before weaving.',
   province: 'Nusa Tenggara Timur',
-  island: 'Nusa Tenggara',
+  island: 'Nusa Tenggara Timur',
   clothingType: 'Ikat',
   gender: 'female' as const,
   description:
@@ -145,10 +145,12 @@ export const SEED_ARTICLE_2 = {
 export const SEED_ARTICLE_3 = {
   id: 'b0000000-0000-0000-0000-000000000003',
   slug: 'songket-kain-kebesaran-kerajaan-melayu',
-  region: 'Sumatra',
+  region: 'Kota Palembang',
   topic: 'Sejarah & Asal Usul',
-  motifLabel: 'Ikat',
+  motifLabel: 'Songket',
   title: 'Songket: Kain Kebesaran Kerajaan Melayu',
+  province: 'Sumatera Selatan',
+  island: 'Sumatera',
   excerpt:
     'Songket or sungkit is a tenun fabric that belongs to the brocade family of Indonesian-Malay textiles.',
   description:
@@ -168,10 +170,13 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000004',
     slug: 'kebaya-identitas-perempuan-nusantara',
-    region: 'Jawa',
+    region: 'Kota Bandung',
     topic: 'Motif & Simbolisme',
-    motifLabel: 'Ikat',
+    motifLabel: 'Kebaya',
     title: 'Kebaya: Identitas Perempuan Nusantara',
+    province: 'Jawa Barat',
+    island: 'Jawa',
+    gender: 'female' as const,
     excerpt:
       'A kebaya is an upper garment traditionally worn by women in Southeast Asia with deep cultural symbolism.',
     description:
@@ -186,10 +191,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000005',
     slug: 'ulos-batak-kain-adat-penuh-makna-spiritual',
-    region: 'Sumatra',
+    region: 'Kabupaten Toba',
     topic: 'Upacara Adat',
     motifLabel: 'Ulos',
     title: 'Ulos Batak: Kain Adat Penuh Makna Spiritual',
+    province: 'Sumatera Utara',
+    island: 'Sumatera',
     excerpt:
       'Ulos is the traditional tenun fabric of the Batak people of North Sumatra in Indonesia and carries ritual meaning.',
     description:
@@ -204,10 +211,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000006',
     slug: 'lurik-kain-garis-penjaga-tradisi-jawa',
-    region: 'Jawa',
+    region: 'Kabupaten Klaten',
     topic: 'Teknik Pembuatan',
     motifLabel: 'Lurik',
     title: 'Lurik: Kain Garis Penjaga Tradisi Jawa',
+    province: 'Jawa Tengah',
+    island: 'Jawa',
     excerpt:
       'Lurik cloth uses repetitive stripe patterns and has long been used for daily wear and traditional ceremonies.',
     description:
@@ -222,10 +231,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000007',
     slug: 'gringsing-tenganan-double-ikat-tersulit-di-dunia',
-    region: 'Bali',
+    region: 'Kabupaten Karangasem',
     topic: 'Teknik Pembuatan',
     motifLabel: 'Gringsing',
     title: 'Gringsing Tenganan: Double Ikat Tersulit di Dunia',
+    province: 'Bali',
+    island: 'Bali',
     excerpt:
       'Canting is a pen-like tool used to apply liquid hot wax in the traditional native methods of textile making.',
     description:
@@ -240,10 +251,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000008',
     slug: 'ragam-wastra-nusantara-dari-sabang-sampai-merauke',
-    region: 'Kalimantan',
+    region: 'Kabupaten Sintang',
     topic: 'Sejarah & Asal Usul',
-    motifLabel: 'Indonesian textiles',
+    motifLabel: 'Wastra Nusantara',
     title: 'Ragam Wastra Nusantara: dari Sabang sampai Merauke',
+    province: 'Kalimantan Barat',
+    island: 'Kalimantan',
     excerpt:
       'Mengenal benang merah sejarah dan variasi wastra dari berbagai suku, wilayah, dan tradisi di Indonesia.',
     description:
@@ -258,10 +271,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000009',
     slug: 'filosofi-motif-batik-keraton-yogyakarta',
-    region: 'Jawa',
+    region: 'Kota Yogyakarta',
     topic: 'Motif & Simbolisme',
     motifLabel: 'Batik',
     title: 'Filosofi Motif Batik Keraton Yogyakarta',
+    province: 'DI Yogyakarta',
+    island: 'Jawa',
     excerpt:
       'Batik is a dyeing technique using wax resist. The term is also used to describe symbolic patterned textiles.',
     description:
@@ -276,10 +291,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000010',
     slug: 'tenun-sumba-kosmologi-dalam-helai-kain',
-    region: 'Nusa Tenggara',
+    region: 'Kabupaten Sumba Timur',
     topic: 'Motif & Simbolisme',
-    motifLabel: 'Ikat',
+    motifLabel: 'Tenun Sumba',
     title: 'Tenun Sumba: Kosmologi dalam Helai Kain',
+    province: 'Nusa Tenggara Timur',
+    island: 'Nusa Tenggara Timur',
     excerpt:
       'Ikat is a dyeing technique from Southeast Asia used to pattern textiles that employs resistance methods.',
     description:
@@ -294,10 +311,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000011',
     slug: 'upacara-mangulosi-pemberian-ulos-dalam-adat-batak',
-    region: 'Sumatra',
+    region: 'Kabupaten Samosir',
     topic: 'Upacara Adat',
-    motifLabel: 'Ikat',
+    motifLabel: 'Ulos',
     title: 'Upacara Mangulosi: Pemberian Ulos dalam Adat Batak',
+    province: 'Sumatera Utara',
+    island: 'Sumatera',
     excerpt:
       'Ulos is the traditional tenun fabric of the Batak people of North Sumatra and central to sacred ceremonies.',
     description:
@@ -312,10 +331,12 @@ const encyclopediaArticles: SeedArticle[] = [
   {
     id: 'b0000000-0000-0000-0000-000000000012',
     slug: 'songket-minangkabau-emas-dalam-tenunan',
-    region: 'Sumatra',
+    region: 'Kota Padang',
     topic: 'Pengrajin Lokal',
-    motifLabel: 'Ikat',
+    motifLabel: 'Songket',
     title: 'Songket Minangkabau: Emas dalam Tenunan',
+    province: 'Sumatera Barat',
+    island: 'Sumatera',
     excerpt:
       'Songket or sungkit is a tenun fabric that belongs to the brocade family of Indonesian-Malay textiles.',
     description:

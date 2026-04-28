@@ -5,8 +5,8 @@ import {
   EncyclopediaSection,
   FeaturedCards,
   HeroSection,
+  IslandCards,
   ProductCatalog,
-  RegionCards,
 } from '@/components/landing-page';
 
 export default function HomePage() {
@@ -28,7 +28,7 @@ export default function HomePage() {
 
         <EncyclopediaSection />
 
-        <RegionCards />
+        <IslandCards />
       </main>
 
       <Footer />

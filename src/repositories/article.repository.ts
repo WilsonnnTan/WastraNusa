@@ -13,16 +13,16 @@ export const articleRepository = {
   findAll: async ({
     offset,
     limit,
-    region,
+    island,
     topic,
   }: {
     offset?: number;
     limit?: number;
-    region?: string;
+    island?: string;
     topic?: string;
   } = {}) => {
     const where: Prisma.ArticleWhereInput = {
-      ...(region ? { region } : {}),
+      ...(island ? { island } : {}),
       ...(topic ? { topic } : {}),
     };
 
@@ -41,40 +41,40 @@ export const articleRepository = {
   },
 
   countAll: async ({
-    region,
+    island,
     topic,
-  }: { region?: string; topic?: string } = {}) => {
+  }: { island?: string; topic?: string } = {}) => {
     const where: Prisma.ArticleWhereInput = {
-      ...(region ? { region } : {}),
+      ...(island ? { island } : {}),
       ...(topic ? { topic } : {}),
     };
 
     return prisma.article.count({ where });
   },
 
-  countByRegion: async ({ topic }: { topic?: string } = {}) => {
+  countByIsland: async ({ topic }: { topic?: string } = {}) => {
     return prisma.article.groupBy({
-      by: ['region'],
+      by: ['island'],
       where: topic
         ? {
             topic,
           }
         : undefined,
       _count: {
-        region: true,
+        island: true,
       },
       orderBy: {
-        region: 'asc',
+        island: 'asc',
       },
     });
   },
 
-  countByTopic: async ({ region }: { region?: string } = {}) => {
+  countByTopic: async ({ island }: { island?: string } = {}) => {
     return prisma.article.groupBy({
       by: ['topic'],
-      where: region
+      where: island
         ? {
-            region,
+            island,
           }
         : undefined,
       _count: {
@@ -124,6 +124,16 @@ export const articleRepository = {
           select: { id: true, name: true, image: true },
         },
         engagement: true,
+        products: {
+          select: {
+            slug: true,
+            name: true,
+            province: true,
+            island: true,
+            price: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
         sections: {
           orderBy: { order: 'asc' },
         },

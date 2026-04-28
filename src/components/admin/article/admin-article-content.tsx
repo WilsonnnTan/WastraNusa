@@ -24,7 +24,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import AddUpdateArticleModal from './add-update-article-modal';
@@ -84,23 +84,6 @@ export function AdminArticleContent() {
     }
   }, [page, articlesData, queryClient]);
 
-  const headerData = useMemo(
-    () => ({
-      title: 'Manajemen Artikel',
-      subtitle: 'Kelola konten edukasi wastra nusantara',
-      // Necessary fields for AdminHeader type but not used in UI
-      brandName: '',
-      brandLabel: '',
-      adminName: '',
-      adminRole: '',
-      lastUpdatedLabel: '',
-      summary: [],
-      stockAlerts: [],
-      popularArticles: [],
-    }),
-    [],
-  );
-
   const handleDelete = (slug: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus artikel ini?')) {
       deleteArticle(slug);
@@ -127,7 +110,10 @@ export function AdminArticleContent() {
 
   return (
     <main className="flex flex-col">
-      <AdminHeader data={headerData} />
+      <AdminHeader
+        title="Manajemen Artikel"
+        subtitle="Kelola konten edukasi wastra nusantara"
+      />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
@@ -213,7 +199,7 @@ export function AdminArticleContent() {
                               variant="secondary"
                               aria-label="Kunjungi artikel"
                               onClick={() =>
-                                router.push(`/ensiklopedia/${article.slug}`)
+                                router.push(`/encyclopedia/${article.slug}`)
                               }
                             >
                               <Eye />
@@ -319,6 +305,7 @@ export function AdminArticleContent() {
       </section>
 
       <AddUpdateArticleModal
+        key={editingArticle?.slug ?? 'new'}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={editingArticle}
