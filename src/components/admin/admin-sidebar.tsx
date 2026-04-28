@@ -46,8 +46,11 @@ const ADMIN_NAVIGATION = [
   { title: 'Pesanan', href: '/admin/pesanan' },
 ];
 
-function countStockAlerts(data: DashboardData, severity: StockAlertSeverity) {
-  return data.stockAlerts.filter((item) => item.severity === severity).length;
+function countStockAlerts(
+  stockAlerts: DashboardData['stockAlerts'],
+  severity: StockAlertSeverity,
+) {
+  return stockAlerts.filter((item) => item.severity === severity).length;
 }
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
@@ -80,11 +83,17 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   );
 }
 
-export function AdminSidebar({ data }: { data: DashboardData }) {
+export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
   const router = useRouter();
   const pathname = usePathname();
-  const outOfStockCount = countStockAlerts(data, 'out');
-  const lowStockCount = countStockAlerts(data, 'low');
+  const { data: session } = authClient.useSession();
+
+  const stockAlerts = data.stockAlerts ?? [];
+  const outOfStockCount = countStockAlerts(stockAlerts, 'out');
+  const lowStockCount = countStockAlerts(stockAlerts, 'low');
+
+  const adminName = session?.user?.name ?? 'Admin WastraNusa';
+  const adminRole = session?.user?.role === 'admin' ? 'Super User' : 'Staff';
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -105,9 +114,9 @@ export function AdminSidebar({ data }: { data: DashboardData }) {
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-[#f6efe3]">
-              {data.brandName}
+              WastraNusa
             </p>
-            <p className="text-xs text-[#b7c7bb]">{data.brandLabel}</p>
+            <p className="text-xs text-[#b7c7bb]">Admin Panel</p>
           </div>
         </div>
       </SidebarHeader>
@@ -127,14 +136,16 @@ export function AdminSidebar({ data }: { data: DashboardData }) {
           </SidebarMenu>
         </SidebarGroup>
 
-        <Alert className="mt-6 border-0 bg-[#7d4e46] text-[#faeee1] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-          <TriangleAlert />
-          <AlertTitle>Peringatan Stok</AlertTitle>
-          <AlertDescription className="text-[#f0d5c8] [&_p:not(:last-child)]:mb-1">
-            <p>{outOfStockCount} produk habis</p>
-            <p>{lowStockCount} produk stok rendah</p>
-          </AlertDescription>
-        </Alert>
+        {(outOfStockCount > 0 || lowStockCount > 0) && (
+          <Alert className="mt-6 border-0 bg-[#7d4e46] text-[#faeee1] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <TriangleAlert />
+            <AlertTitle>Peringatan Stok</AlertTitle>
+            <AlertDescription className="text-[#f0d5c8] [&_p:not(:last-child)]:mb-1">
+              {outOfStockCount > 0 && <p>{outOfStockCount} produk habis</p>}
+              {lowStockCount > 0 && <p>{lowStockCount} produk stok rendah</p>}
+            </AlertDescription>
+          </Alert>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="px-3 pb-4">
@@ -157,14 +168,14 @@ export function AdminSidebar({ data }: { data: DashboardData }) {
           <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
             <Avatar size="sm" className="size-9">
               <AvatarFallback className="bg-[#d2a36d] font-semibold text-[#fff5df]">
-                AD
+                {adminName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-white">
-                {data.adminName}
+                {adminName}
               </p>
-              <p className="text-xs text-[#adc2b6]">{data.adminRole}</p>
+              <p className="text-xs text-[#adc2b6]">{adminRole}</p>
             </div>
           </div>
         </SidebarGroup>

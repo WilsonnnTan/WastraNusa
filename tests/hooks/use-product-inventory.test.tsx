@@ -1,7 +1,9 @@
 import {
+  fetchProductDashboard,
   useArticleOptions,
   useCreateProductInventory,
   useDeleteProductInventory,
+  useProductDashboard,
   useProductInventories,
   useProductInventoryDetail,
   useUpdateProductInventory,
@@ -89,6 +91,18 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
     },
   };
 
+  const MOCK_PRODUCT_DASHBOARD = {
+    totalProducts: 4,
+    lowStockItems: [
+      {
+        name: 'Produk A',
+        category: 'Batik',
+        stock: 2,
+        severity: 'low',
+      },
+    ],
+  };
+
   it('should fetch product inventory list', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
       createSuccessResponse(MOCK_PRODUCT_LIST) as never,
@@ -141,6 +155,20 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
         province: 'Jawa Tengah',
       },
     ]);
+  });
+
+  it('should fetch product dashboard overview', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(MOCK_PRODUCT_DASHBOARD) as never,
+    );
+
+    const result = await fetchProductDashboard();
+
+    expect(result).toEqual(MOCK_PRODUCT_DASHBOARD);
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/products/dashboard',
+      expect.any(Object),
+    );
   });
 
   it('should create product inventory', async () => {
@@ -201,6 +229,19 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
         body: JSON.stringify(input),
       }),
     );
+  });
+
+  it('should expose success for useProductDashboard', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(MOCK_PRODUCT_DASHBOARD) as never,
+    );
+
+    const { result } = renderHook(() => useProductDashboard(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(MOCK_PRODUCT_DASHBOARD);
   });
 
   it('should delete product inventory', async () => {

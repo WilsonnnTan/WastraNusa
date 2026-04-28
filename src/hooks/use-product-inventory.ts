@@ -3,6 +3,7 @@ import {
   type CreateProductInput,
   type UpdateProductInput,
 } from '@/schemas/product.schema';
+import { type ProductDashboardData } from '@/types/dashboard';
 import type {
   ArticleOptionItem,
   ProductInventoryItem,
@@ -23,6 +24,7 @@ export const productInventoryKeys = {
   details: () => [...productInventoryKeys.all, 'detail'] as const,
   detail: (idOrSlug: string) =>
     [...productInventoryKeys.details(), idOrSlug] as const,
+  dashboard: () => [...productInventoryKeys.all, 'dashboard'] as const,
   articles: () => [...productInventoryKeys.all, 'article-options'] as const,
   articlePages: (limit: number) =>
     [...productInventoryKeys.articles(), 'pages', limit] as const,
@@ -92,6 +94,10 @@ export function fetchProductInventoryDetail(idOrSlug: string) {
   );
 }
 
+export function fetchProductDashboard() {
+  return fetchApi<ProductDashboardData>('/api/products/dashboard');
+}
+
 type ArticleOptionsPage = {
   items: ArticleOptionItem[];
   meta: {
@@ -143,6 +149,13 @@ export function useProductInventoryDetail(idOrSlug: string) {
     queryKey: productInventoryKeys.detail(idOrSlug),
     queryFn: () => fetchProductInventoryDetail(idOrSlug),
     enabled: Boolean(idOrSlug),
+  });
+}
+
+export function useProductDashboard() {
+  return useQuery({
+    queryKey: productInventoryKeys.dashboard(),
+    queryFn: () => fetchProductDashboard(),
   });
 }
 

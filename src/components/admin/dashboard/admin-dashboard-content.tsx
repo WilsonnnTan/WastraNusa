@@ -1,10 +1,7 @@
 'use client';
 
 import { AdminHeader } from '@/components/admin/admin-header';
-import {
-  adminDashboardData,
-  mergeArticleDashboardData,
-} from '@/components/admin/dashboard/dashboard-data';
+import { mergeArticleDashboardData } from '@/components/admin/dashboard/dashboard-data';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +14,8 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDashboard } from '@/hooks/use-article';
+import { useProductDashboard } from '@/hooks/use-product-inventory';
+import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import {
   type DashboardData,
@@ -130,22 +129,28 @@ function StockAlertsCard({ items }: { items: DashboardData['stockAlerts'] }) {
           Peringatan Stok
         </CardTitle>
         <CardAction>
-          <SectionActionButton href="#" />
+          <SectionActionButton href="/admin/product-inventory" />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 px-5 py-4">
-        {items.map((item) => (
-          <div
-            key={item.name}
-            className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
-          >
-            <div>
-              <p className="font-medium text-[#41372c]">{item.name}</p>
-              <p className="text-xs text-[#998d80]">{item.category}</p>
-            </div>
-            <StockStatusBadge item={item} />
+        {items.length === 0 ? (
+          <div className="text-sm text-[#8f8377]">
+            Belum ada produk dengan stok rendah atau habis.
           </div>
-        ))}
+        ) : (
+          items.map((item) => (
+            <div
+              key={item.name}
+              className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
+            >
+              <div>
+                <p className="font-medium text-[#41372c]">{item.name}</p>
+                <p className="text-xs text-[#998d80]">{item.category}</p>
+              </div>
+              <StockStatusBadge item={item} />
+            </div>
+          ))
+        )}
       </CardContent>
     </Card>
   );
@@ -208,13 +213,19 @@ function PopularArticlesCard({
   );
 }
 
-function DashboardStatusFooter({ label }: { label: string }) {
+function DashboardStatusFooter({
+  label,
+  adminName,
+}: {
+  label: string;
+  adminName: string;
+}) {
   return (
     <div className="flex justify-end">
       <div className="hidden items-center gap-3 rounded-full bg-white/60 px-3 py-2 text-xs text-[#8d806f] shadow-[0_1px_0_rgba(60,41,15,0.04)] ring-1 ring-[#e8decd] md:flex">
         <Avatar size="sm" className="size-7">
           <AvatarFallback className="bg-[#ecd9ba] text-[#8b6b37]">
-            AD
+            {adminName.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <span>{label}</span>
@@ -302,17 +313,23 @@ function PopularArticlesSkeleton() {
 }
 
 export function AdminDashboardContent() {
+  const { data: session } = authClient.useSession();
   const { data: articleDashboardData, isLoading } = useArticleDashboard();
+  const { data: productDashboardData, isLoading: isLoadingProducts } =
+    useProductDashboard();
 
   const dashboardData = useMemo(
-    () => mergeArticleDashboardData(adminDashboardData, articleDashboardData),
-    [articleDashboardData],
+    () => mergeArticleDashboardData(articleDashboardData, productDashboardData),
+    [articleDashboardData, productDashboardData],
   );
 
-  if (isLoading) {
+  const adminName = session?.user?.name ?? 'Admin WastraNusa';
+  const lastUpdatedLabel = 'Ringkasan data terakhir diperbarui hari ini';
+
+  if (isLoading || isLoadingProducts) {
     return (
       <main className="flex flex-1 flex-col">
-        <AdminHeader data={dashboardData} />
+        <AdminHeader title="Dashboard Overview" subtitle="WastraNusa Admin" />
         <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
           <section className="grid gap-4 xl:grid-cols-3">
             <SummaryCardSkeleton />
@@ -335,20 +352,20 @@ export function AdminDashboardContent() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <AdminHeader data={dashboardData} />
+      <AdminHeader title="Dashboard Overview" subtitle="WastraNusa Admin" />
       <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
         <section className="grid gap-4 xl:grid-cols-3">
-          {dashboardData.summary.map((stat) => (
+          {dashboardData.summary?.map((stat) => (
             <SummaryCard key={stat.title} stat={stat} />
           ))}
         </section>
 
         <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-          <StockAlertsCard items={dashboardData.stockAlerts} />
-          <PopularArticlesCard articles={dashboardData.popularArticles} />
+          <StockAlertsCard items={dashboardData.stockAlerts ?? []} />
+          <PopularArticlesCard articles={dashboardData.popularArticles ?? []} />
         </section>
 
-        <DashboardStatusFooter label={dashboardData.lastUpdatedLabel} />
+        <DashboardStatusFooter label={lastUpdatedLabel} adminName={adminName} />
       </div>
     </main>
   );

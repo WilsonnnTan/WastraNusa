@@ -17,6 +17,7 @@ import {
 } from '@/hooks/use-product-inventory';
 import {
   type CreateProductInput,
+  type UpdateProductInput,
   createProductSchema,
   updateProductSchema,
 } from '@/schemas/product.schema';
@@ -54,6 +55,33 @@ const VARIANT_TYPE_OPTIONS: { value: VariantType; label: string }[] = [
   { value: VariantType.color, label: 'Warna' },
 ];
 
+function buildProductFormValues(
+  initialData?: ProductInventoryItem | null,
+): CreateProductInput {
+  return {
+    articleId: initialData?.articleId ?? '',
+    name: initialData?.name ?? '',
+    slug: initialData?.slug ?? '',
+    description: initialData?.description ?? '',
+    price: initialData?.price ?? 0,
+    stock: initialData?.stock ?? 0,
+    sku: initialData?.sku ?? '',
+    weight: initialData?.weight ?? 1,
+    clothingType: initialData?.clothingType ?? '',
+    gender: initialData?.gender ?? Gender.female,
+    status: initialData?.status ?? ProductStatus.active,
+    variants:
+      initialData?.variants.map((variant) => ({
+        id: variant.id,
+        name: variant.name,
+        type: variant.type,
+        price: variant.price ?? Number.NaN,
+        stock: variant.stock,
+        sku: variant.sku,
+      })) ?? [],
+  };
+}
+
 export default function AddUpdateProductModal({
   isOpen,
   onClose,
@@ -75,8 +103,23 @@ export default function AddUpdateProductModal({
 
   const isEdit = Boolean(initialData);
   const isPending = isCreating || isUpdating;
-  const articleOptions =
+  const fetchedArticleOptions =
     articleOptionPages?.pages.flatMap((page) => page.items) ?? [];
+  const articleOptions =
+    initialData &&
+    !fetchedArticleOptions.some(
+      (article) => article.id === initialData.articleId,
+    )
+      ? [
+          {
+            id: initialData.articleId,
+            title: initialData.articleTitle,
+            island: initialData.island,
+            province: initialData.province,
+          },
+          ...fetchedArticleOptions,
+        ]
+      : fetchedArticleOptions;
 
   const handleArticleSelectScroll = (event: UIEvent<HTMLDivElement>) => {
     if (!hasNextArticlePage || isFetchingNextArticlePage) return;
@@ -90,29 +133,6 @@ export default function AddUpdateProductModal({
     }
   };
 
-  const defaultValues: CreateProductInput = {
-    articleId: initialData?.articleId ?? '',
-    name: initialData?.name ?? '',
-    slug: initialData?.slug ?? '',
-    description: initialData?.description ?? '',
-    price: initialData?.price ?? 0,
-    stock: initialData?.stock ?? 0,
-    sku: initialData?.sku ?? '',
-    weight: initialData?.weight ?? 1,
-    clothingType: initialData?.clothingType ?? '',
-    gender: initialData?.gender ?? Gender.female,
-    status: initialData?.status ?? ProductStatus.active,
-    variants:
-      initialData?.variants.map((variant) => ({
-        id: variant.id,
-        name: variant.name,
-        type: variant.type,
-        price: variant.price,
-        stock: variant.stock,
-        sku: variant.sku,
-      })) ?? [],
-  };
-
   const {
     register,
     control,
@@ -123,7 +143,7 @@ export default function AddUpdateProductModal({
     resolver: zodResolver(
       isEdit ? updateProductSchema : createProductSchema,
     ) as Resolver<CreateProductInput>,
-    defaultValues,
+    defaultValues: buildProductFormValues(initialData),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -133,8 +153,14 @@ export default function AddUpdateProductModal({
 
   const onSubmit = (data: CreateProductInput) => {
     if (isEdit && initialData) {
+      const updateData: UpdateProductInput = { ...data };
+
+      if (updateData.articleId === initialData.articleId) {
+        delete updateData.articleId;
+      }
+
       updateProduct(
-        { idOrSlug: initialData.id, data },
+        { idOrSlug: initialData.id, data: updateData },
         {
           onSuccess: () => {
             toast.success('Produk berhasil diperbarui');
@@ -173,12 +199,13 @@ export default function AddUpdateProductModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      reset(buildProductFormValues(initialData));
     } else {
       document.body.style.overflow = '';
       const timer = setTimeout(() => setShowModal(false), 300);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [initialData, isOpen, reset]);
 
   useEffect(() => {
     return () => {
@@ -479,7 +506,7 @@ export default function AddUpdateProductModal({
                   append({
                     name: '',
                     type: VariantType.size,
-                    price: null,
+                    price: 0,
                     stock: 0,
                     sku: '',
                   })
@@ -599,7 +626,7 @@ export default function AddUpdateProductModal({
 
                   <div className="md:col-span-2">
                     <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
-                      Harga Tambahan (Opsional)
+                      Harga Varian *
                     </label>
                     <Controller
                       control={control}
@@ -608,17 +635,26 @@ export default function AddUpdateProductModal({
                         <Input
                           type="number"
                           min={0}
-                          value={variantPriceField.value ?? ''}
+                          value={
+                            typeof variantPriceField.value === 'number' &&
+                            Number.isNaN(variantPriceField.value)
+                              ? ''
+                              : (variantPriceField.value ?? '')
+                          }
                           onChange={(event) => {
                             const value = event.target.value;
                             variantPriceField.onChange(
-                              value === '' ? null : Number(value),
+                              value === '' ? Number.NaN : Number(value),
                             );
                           }}
-                          placeholder="5000"
+                          placeholder="150000"
                         />
                       )}
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Harga ini adalah harga jual langsung untuk varian, bukan
+                      tambahan dari harga produk utama.
+                    </p>
                     {errors.variants?.[index]?.price && (
                       <p className="mt-1 text-xs text-red-500">
                         {errors.variants[index]?.price?.message}

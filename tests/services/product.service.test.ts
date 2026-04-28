@@ -194,6 +194,48 @@ describe('productService', { tags: ['backend'] }, () => {
 
   // ── createProduct ────────────────────────────────────────────────────────────
 
+  describe('getDashboardOverview', () => {
+    it('should return total products and low stock items', async () => {
+      mockProductRepo.countAll.mockResolvedValue(12);
+      mockProductRepo.findLowStock.mockResolvedValue([
+        {
+          name: 'Batik Premium',
+          clothingType: 'Batik',
+          stock: 0,
+          status: 'out_of_stock',
+        },
+        {
+          name: 'Tenun Sumba',
+          clothingType: 'Tenun',
+          stock: 3,
+          status: 'active',
+        },
+      ] as never);
+
+      const result = await productService.getDashboardOverview();
+
+      expect(mockProductRepo.countAll).toHaveBeenCalledWith();
+      expect(mockProductRepo.findLowStock).toHaveBeenCalledWith(5, 6);
+      expect(result).toEqual({
+        totalProducts: 12,
+        lowStockItems: [
+          {
+            name: 'Batik Premium',
+            category: 'Batik',
+            stock: 0,
+            severity: 'out',
+          },
+          {
+            name: 'Tenun Sumba',
+            category: 'Tenun',
+            stock: 3,
+            severity: 'low',
+          },
+        ],
+      });
+    });
+  });
+
   describe('createProduct', () => {
     const validInput = {
       articleId: 'article-1',
@@ -269,6 +311,36 @@ describe('productService', { tags: ['backend'] }, () => {
         expect.objectContaining({ status: 'active' }),
       );
     });
+
+    it('should persist variant price as the direct variant price', async () => {
+      mockArticleRepo.findByIdOrSlug.mockResolvedValue(MOCK_ARTICLE as never);
+      mockProductRepo.create.mockResolvedValue(MOCK_PRODUCT_RAW as never);
+
+      await productService.createProduct({
+        ...validInput,
+        variants: [
+          {
+            name: 'Size M',
+            type: 'size',
+            price: 175000,
+            stock: 5,
+            sku: 'VAR-M',
+          },
+        ],
+      });
+
+      expect(mockProductRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variants: {
+            create: [
+              expect.objectContaining({
+                price: 175000,
+              }),
+            ],
+          },
+        }),
+      );
+    });
   });
 
   // ── updateProduct ────────────────────────────────────────────────────────────
@@ -323,6 +395,41 @@ describe('productService', { tags: ['backend'] }, () => {
       });
 
       expect(mockArticleRepo.findByIdOrSlug).not.toHaveBeenCalled();
+    });
+
+    it('should update variant price as the direct variant price', async () => {
+      mockProductRepo.findByIdOrSlug.mockResolvedValue(
+        MOCK_PRODUCT_RAW as never,
+      );
+      mockProductRepo.update.mockResolvedValue(MOCK_PRODUCT_RAW as never);
+
+      await productService.updateProduct('prod-1', {
+        slug: 'premium-batik-shirt',
+        variants: [
+          {
+            id: 'variant-1',
+            name: 'Size L',
+            type: 'size',
+            price: 310000,
+            stock: 8,
+            sku: 'BPK-L',
+          },
+        ],
+      });
+
+      expect(mockProductRepo.update).toHaveBeenCalledWith(
+        'prod-1',
+        expect.objectContaining({
+          variants: {
+            deleteMany: {},
+            create: [
+              expect.objectContaining({
+                price: 310000,
+              }),
+            ],
+          },
+        }),
+      );
     });
 
     it('should throw ApiError(404) when product not found', async () => {

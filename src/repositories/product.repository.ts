@@ -206,6 +206,30 @@ export const productRepository = {
     });
   },
 
+  countLowStock: async (threshold: number = 5) => {
+    return prisma.product.count({
+      where: {
+        OR: [{ status: 'out_of_stock' }, { stock: { lte: threshold } }],
+      },
+    });
+  },
+
+  findLowStock: async (threshold: number = 5, limit: number = 6) => {
+    return prisma.product.findMany({
+      where: {
+        OR: [{ status: 'out_of_stock' }, { stock: { lte: threshold } }],
+      },
+      orderBy: [{ stock: 'asc' }, { updatedAt: 'desc' }],
+      take: limit,
+      select: {
+        name: true,
+        clothingType: true,
+        stock: true,
+        status: true,
+      },
+    });
+  },
+
   getPriceRange: async (filters?: ProductCatalogFilters) => {
     const aggregate = await prisma.product.aggregate({
       where: buildProductWhereInput(filters),

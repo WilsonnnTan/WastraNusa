@@ -298,6 +298,56 @@ describe('productRepository', { tags: ['db'] }, () => {
     });
   });
 
+  describe('low stock helpers', () => {
+    it('should count products with low stock or out of stock status', async () => {
+      const threshold = 3;
+      await createTestProduct({
+        name: 'Low Stock Product',
+        stock: threshold,
+        status: 'active',
+      });
+      await createTestProduct({
+        name: 'Out of Stock Product',
+        stock: 10,
+        status: 'out_of_stock',
+      });
+
+      const count = await productRepository.countLowStock(threshold);
+      expect(count).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should find products with low stock or out of stock status', async () => {
+      const threshold = 2;
+      const lowStockName = `Low-${crypto.randomUUID().slice(0, 8)}`;
+      const outOfStockName = `Out-${crypto.randomUUID().slice(0, 8)}`;
+
+      await createTestProduct({
+        name: lowStockName,
+        stock: threshold,
+        status: 'active',
+      });
+      await createTestProduct({
+        name: outOfStockName,
+        stock: 5,
+        status: 'out_of_stock',
+      });
+
+      const lowStockItems = await productRepository.findLowStock(threshold);
+
+      expect(lowStockItems.some((item) => item.name === lowStockName)).toBe(
+        true,
+      );
+      expect(lowStockItems.some((item) => item.name === outOfStockName)).toBe(
+        true,
+      );
+      expect(
+        lowStockItems.every(
+          (item) => item.stock <= threshold || item.status === 'out_of_stock',
+        ),
+      ).toBe(true);
+    });
+  });
+
   describe('findByIdOrSlug', () => {
     it('should find product by UUID', async () => {
       const product = await productRepository.findByIdOrSlug(SEED_PRODUCT_1.id);
