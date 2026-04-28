@@ -6,6 +6,8 @@ import { SEED_ARTICLE_1 } from '../../prisma/dev-seeds/article.seed';
 import {
   SEED_PRODUCT_1,
   SEED_PRODUCT_2,
+  SEED_VARIANT_1_1,
+  SEED_VARIANT_1_2,
 } from '../../prisma/dev-seeds/product.seed';
 
 vi.unmock('@/lib/prisma');
@@ -37,7 +39,6 @@ const createTestProduct = async (
     slug: overrides.slug ?? `repo-test-product-${id.slice(0, 8)}`,
     description: 'Repository test product',
     price: overrides.price ?? 100000,
-    stock: overrides.stock ?? 10,
     sku: overrides.sku ?? `REPO-SKU-${id.slice(0, 8)}`,
     weight: 250,
     island: overrides.island ?? SEED_ARTICLE_1.island,
@@ -45,6 +46,18 @@ const createTestProduct = async (
     clothingType: overrides.clothingType ?? SEED_ARTICLE_1.clothingType,
     gender: overrides.gender ?? SEED_ARTICLE_1.gender,
     status: overrides.status ?? 'active',
+    variants: {
+      create: [
+        {
+          id: crypto.randomUUID(),
+          name: 'Default',
+          type: 'size',
+          price: overrides.price ?? 100000,
+          stock: overrides.stock ?? 10,
+          sku: `REPO-VAR-${id.slice(0, 8)}`,
+        },
+      ],
+    },
   });
 };
 
@@ -96,28 +109,6 @@ describe('productRepository', { tags: ['db'] }, () => {
         '00000000-0000-0000-0000-000000000000',
       );
       expect(product).toBeNull();
-    });
-  });
-
-  describe('decrementProductStock', () => {
-    it('should decrement product stock', async () => {
-      const before = await prisma.product.findUnique({
-        where: { id: SEED_PRODUCT_1.id },
-      });
-
-      await productRepository.decrementProductStock(SEED_PRODUCT_1.id, 2);
-
-      const after = await prisma.product.findUnique({
-        where: { id: SEED_PRODUCT_1.id },
-      });
-
-      expect(after!.stock).toBe(before!.stock - 2);
-
-      // Restore stock for other tests
-      await prisma.product.update({
-        where: { id: SEED_PRODUCT_1.id },
-        data: { stock: before!.stock },
-      });
     });
   });
 
@@ -181,7 +172,15 @@ describe('productRepository', { tags: ['db'] }, () => {
       });
 
       expect(products.some((p) => p.id === created.id)).toBe(true);
-      expect(products.every((p) => p.stock === 0)).toBe(true);
+      expect(
+        products.every(
+          (product) =>
+            product.variants.reduce(
+              (total, variant) => total + variant.stock,
+              0,
+            ) === 0,
+        ),
+      ).toBe(true);
     });
 
     it('should sort products by price ascending and descending', async () => {
@@ -394,7 +393,6 @@ describe('productRepository', { tags: ['db'] }, () => {
         slug: `test-batik-shirt-${id.slice(0, 8)}`,
         description: 'A test batik shirt.',
         price: 100000,
-        stock: 10,
         sku: `TEST-SKU-${id.slice(0, 8)}`,
         weight: 250,
         island: SEED_ARTICLE_1.island,
@@ -402,6 +400,18 @@ describe('productRepository', { tags: ['db'] }, () => {
         clothingType: SEED_ARTICLE_1.clothingType,
         gender: SEED_ARTICLE_1.gender,
         status: 'active',
+        variants: {
+          create: [
+            {
+              id: crypto.randomUUID(),
+              name: 'Default',
+              type: 'size',
+              price: 100000,
+              stock: 10,
+              sku: `TEST-VAR-${id.slice(0, 8)}`,
+            },
+          ],
+        },
       });
 
       expect(product.id).toBe(id);
@@ -427,14 +437,46 @@ describe('productRepository', { tags: ['db'] }, () => {
 
     it('should update a product by slug', async () => {
       const updated = await productRepository.update(SEED_PRODUCT_1.slug, {
-        stock: 99,
+        variants: {
+          deleteMany: {},
+          create: [
+            {
+              id: crypto.randomUUID(),
+              name: 'Size XXL',
+              type: 'size',
+              price: 300000,
+              stock: 99,
+              sku: `BPK-PREM-XXL-${crypto.randomUUID().slice(0, 8)}`,
+            },
+          ],
+        },
       });
 
-      expect(updated.stock).toBe(99);
+      expect(updated.variants[0]?.stock).toBe(99);
 
-      // Restore original stock
+      // Restore original variants
       await productRepository.update(SEED_PRODUCT_1.slug, {
-        stock: SEED_PRODUCT_1.stock,
+        variants: {
+          deleteMany: {},
+          create: [
+            {
+              id: SEED_VARIANT_1_1.id,
+              name: SEED_VARIANT_1_1.name,
+              type: SEED_VARIANT_1_1.type,
+              price: SEED_VARIANT_1_1.price,
+              stock: SEED_VARIANT_1_1.stock,
+              sku: SEED_VARIANT_1_1.sku,
+            },
+            {
+              id: SEED_VARIANT_1_2.id,
+              name: SEED_VARIANT_1_2.name,
+              type: SEED_VARIANT_1_2.type,
+              price: SEED_VARIANT_1_2.price,
+              stock: SEED_VARIANT_1_2.stock,
+              sku: SEED_VARIANT_1_2.sku,
+            },
+          ],
+        },
       });
     });
   });
@@ -450,7 +492,6 @@ describe('productRepository', { tags: ['db'] }, () => {
         slug: `to-delete-${id.slice(0, 8)}`,
         description: null,
         price: 50000,
-        stock: 5,
         sku: `DEL-SKU-${id.slice(0, 8)}`,
         weight: 100,
         island: SEED_ARTICLE_1.island,
@@ -458,6 +499,18 @@ describe('productRepository', { tags: ['db'] }, () => {
         clothingType: SEED_ARTICLE_1.clothingType,
         gender: SEED_ARTICLE_1.gender,
         status: 'active',
+        variants: {
+          create: [
+            {
+              id: crypto.randomUUID(),
+              name: 'Default',
+              type: 'size',
+              price: 50000,
+              stock: 5,
+              sku: `DEL-VAR-${id.slice(0, 8)}`,
+            },
+          ],
+        },
       });
 
       const deleted = await productRepository.delete(id);

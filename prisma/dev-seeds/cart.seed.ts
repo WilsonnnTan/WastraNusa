@@ -3,6 +3,7 @@ import {
   SEED_PRODUCT_1,
   SEED_PRODUCT_2,
   SEED_VARIANT_1_1,
+  SEED_VARIANT_2_1,
 } from './product.seed';
 import { SEED_REGULAR_USER } from './user.seed';
 
@@ -22,7 +23,7 @@ export const SEED_CART_ITEM_1 = {
 export const SEED_CART_ITEM_2 = {
   id: 'c0000000-0000-0000-0000-000000000002',
   productId: SEED_PRODUCT_2.id,
-  variantId: null,
+  variantId: SEED_VARIANT_2_1.id,
   quantity: 1,
 };
 
@@ -40,7 +41,7 @@ export async function seedCarts() {
 
   await prisma.$transaction(async (tx) => {
     // Create or update cart
-    await tx.cart.upsert({
+    const cart = await tx.cart.upsert({
       where: { userId: regularUserId },
       update: {},
       create: cartData,
@@ -51,11 +52,11 @@ export async function seedCarts() {
     const cartItems = [
       {
         ...SEED_CART_ITEM_1,
-        cartId: cartData.id,
+        cartId: cart.id,
       },
       {
         ...SEED_CART_ITEM_2,
-        cartId: cartData.id,
+        cartId: cart.id,
       },
     ];
 

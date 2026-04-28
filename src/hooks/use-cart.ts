@@ -26,6 +26,9 @@ export interface CartItemWithRelations {
     slug: string;
     clothingType: string;
     province: string;
+    variants?: Array<{
+      stock: number;
+    }>;
   };
   variant?: {
     id: string;
@@ -201,6 +204,7 @@ export function useAddToCart() {
               slug: '',
               clothingType: '',
               province: '',
+              variants: [],
             },
           };
           updatedCart = {

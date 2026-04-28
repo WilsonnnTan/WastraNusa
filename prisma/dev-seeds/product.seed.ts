@@ -8,7 +8,6 @@ export const SEED_PRODUCT_1 = {
   slug: 'premium-batik-pekalongan-shirt',
   description: 'Handcrafted premium batik shirt from Pekalongan.',
   price: 250000,
-  stock: 50,
   sku: 'BPK-PREM-001',
   weight: 300,
   island: SEED_ARTICLE_1.island,
@@ -25,7 +24,6 @@ export const SEED_PRODUCT_2 = {
   slug: 'traditional-ulos-batak-scarf',
   description: 'Authentic hand-woven Ulos scarf.',
   price: 150000,
-  stock: 30,
   sku: 'UBS-TRAD-001',
   weight: 200,
   island: SEED_ARTICLE_2.island,
@@ -55,9 +53,19 @@ export const SEED_VARIANT_1_2 = {
   sku: 'BPK-PREM-XL',
 };
 
+export const SEED_VARIANT_2_1 = {
+  id: 'v0000000-0000-0000-0000-000000000021',
+  productId: SEED_PRODUCT_2.id,
+  name: 'Default',
+  type: 'size' as const,
+  price: 150000,
+  stock: 30,
+  sku: 'UBS-TRAD-DEFAULT',
+};
+
 export async function seedProducts() {
   const products = [SEED_PRODUCT_1, SEED_PRODUCT_2];
-  const variants = [SEED_VARIANT_1_1, SEED_VARIANT_1_2];
+  const variants = [SEED_VARIANT_1_1, SEED_VARIANT_1_2, SEED_VARIANT_2_1];
 
   await prisma.$transaction(async (tx) => {
     for (const prod of products) {

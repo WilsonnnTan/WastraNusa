@@ -1,3 +1,41 @@
-﻿export function formatRupiah(value: number) {
+export function formatRupiah(value: number) {
   return `Rp ${value.toLocaleString('id-ID')}`;
+}
+
+export function getVariantResolvedPrice(
+  variant: { price: number | null } | null | undefined,
+  fallbackPrice: number,
+) {
+  return variant?.price ?? fallbackPrice;
+}
+
+export function getVariantPriceRange(
+  variants: Array<{ price: number | null }>,
+  fallbackPrice: number,
+) {
+  if (variants.length === 0) {
+    return { min: fallbackPrice, max: fallbackPrice };
+  }
+
+  const prices = variants.map((variant) =>
+    getVariantResolvedPrice(variant, fallbackPrice),
+  );
+
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  };
+}
+
+export function formatVariantPriceRange(
+  variants: Array<{ price: number | null }>,
+  fallbackPrice: number,
+) {
+  const { min, max } = getVariantPriceRange(variants, fallbackPrice);
+
+  if (min === max) {
+    return formatRupiah(min);
+  }
+
+  return `${formatRupiah(min)} - ${formatRupiah(max)}`;
 }

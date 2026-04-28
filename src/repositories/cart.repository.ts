@@ -2,14 +2,30 @@ import prisma from '@/lib/prisma';
 
 export const cartRepository = {
   /**
-   * Get or create a cart for a user
+   * Common relation include for cart item payloads.
+   * Product stock is derived from variant rows, so variant stock must be loaded.
    */
   findOrCreateByUser: async (userId: string) => {
     return prisma.cart.upsert({
       where: { userId },
       update: {},
       create: { id: crypto.randomUUID(), userId },
-      include: { items: { include: { product: true, variant: true } } },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                variants: {
+                  select: {
+                    stock: true,
+                  },
+                },
+              },
+            },
+            variant: true,
+          },
+        },
+      },
     });
   },
 
@@ -22,7 +38,15 @@ export const cartRepository = {
       include: {
         items: {
           include: {
-            product: true,
+            product: {
+              include: {
+                variants: {
+                  select: {
+                    stock: true,
+                  },
+                },
+              },
+            },
             variant: true,
           },
           orderBy: { createdAt: 'desc' },
@@ -65,7 +89,18 @@ export const cartRepository = {
       return prisma.cartItem.update({
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity },
-        include: { product: true, variant: true },
+        include: {
+          product: {
+            include: {
+              variants: {
+                select: {
+                  stock: true,
+                },
+              },
+            },
+          },
+          variant: true,
+        },
       });
     }
 
@@ -77,7 +112,18 @@ export const cartRepository = {
         variantId,
         quantity,
       },
-      include: { product: true, variant: true },
+      include: {
+        product: {
+          include: {
+            variants: {
+              select: {
+                stock: true,
+              },
+            },
+          },
+        },
+        variant: true,
+      },
     });
   },
 
@@ -93,7 +139,18 @@ export const cartRepository = {
       return prisma.cartItem.update({
         where: { id: cartItemId },
         data: { quantity },
-        include: { product: true, variant: true },
+        include: {
+          product: {
+            include: {
+              variants: {
+                select: {
+                  stock: true,
+                },
+              },
+            },
+          },
+          variant: true,
+        },
       });
     }
 
@@ -104,7 +161,18 @@ export const cartRepository = {
 
     return prisma.cartItem.findFirst({
       where: { id: cartItemId, cart: { userId } },
-      include: { product: true, variant: true },
+      include: {
+        product: {
+          include: {
+            variants: {
+              select: {
+                stock: true,
+              },
+            },
+          },
+        },
+        variant: true,
+      },
     });
   },
 

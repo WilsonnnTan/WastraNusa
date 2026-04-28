@@ -17,7 +17,7 @@ const MOCK_PRODUCT_LIST = {
       slug: 'premium-batik-shirt',
       description: 'A nice shirt.',
       price: 250000,
-      stock: 50,
+      stock: 20,
       sku: 'BPK-001',
       weight: 300,
       island: 'Jawa',
@@ -26,8 +26,25 @@ const MOCK_PRODUCT_LIST = {
       gender: 'male',
       status: 'active',
       sold: 0,
-      variants: [],
-      variantCount: 0,
+      variants: [
+        {
+          id: 'variant-1',
+          name: 'Size L',
+          type: 'size',
+          price: 250000,
+          stock: 12,
+          sku: 'BPK-L',
+        },
+        {
+          id: 'variant-2',
+          name: 'Size XL',
+          type: 'size',
+          price: 275000,
+          stock: 8,
+          sku: 'BPK-XL',
+        },
+      ],
+      variantCount: 2,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -58,12 +75,20 @@ const VALID_CREATE_BODY = {
   articleId: 'article-1',
   name: 'New Batik Shirt',
   price: 200000,
-  stock: 20,
   sku: 'NEW-001',
   weight: 300,
   clothingType: 'batik',
   gender: 'male',
   slug: 'new-batik-shirt',
+  variants: [
+    {
+      name: 'Size M',
+      type: 'size',
+      price: 200000,
+      stock: 10,
+      sku: 'NEW-001-M',
+    },
+  ],
 };
 
 function createRequest(url: string, options: RequestInit = {}): Request {

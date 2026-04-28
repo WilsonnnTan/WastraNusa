@@ -107,18 +107,28 @@ export function CartMain() {
   const items: CartProduct[] = useMemo(() => {
     if (!cart || !cart.items) return [];
 
-    return cart.items.map((cartItem) => ({
-      id: cartItem.id,
-      productId: cartItem.productId,
-      variantId: cartItem.variantId,
-      name: cartItem.product.name,
-      price: Number(cartItem.product.price),
-      size: cartItem.variant?.name || 'Default',
-      stock: cartItem.product.stock,
-      quantity: localQuantities[cartItem.id] ?? cartItem.quantity,
-      clothingType: cartItem.product.clothingType,
-      province: cartItem.product.province,
-    }));
+    return cart.items.map((cartItem) => {
+      const availableStock =
+        cartItem.variant?.stock ??
+        cartItem.product.variants?.reduce(
+          (total, variant) => total + variant.stock,
+          0,
+        ) ??
+        0;
+
+      return {
+        id: cartItem.id,
+        productId: cartItem.productId,
+        variantId: cartItem.variantId,
+        name: cartItem.product.name,
+        price: Number(cartItem.product.price),
+        size: cartItem.variant?.name || 'Default',
+        stock: availableStock,
+        quantity: localQuantities[cartItem.id] ?? cartItem.quantity,
+        clothingType: cartItem.product.clothingType,
+        province: cartItem.product.province,
+      };
+    });
   }, [cart, localQuantities]);
 
   const toggleItem = (id: string) => {
@@ -134,7 +144,10 @@ export function CartMain() {
       localQuantities[id] ?? cart?.items.find((i) => i.id === id)?.quantity;
     if (baseQuantity == null) return;
 
-    const newQty = Math.max(1, baseQuantity + delta);
+    const stockLimit =
+      items.find((item) => item.id === id)?.stock ?? Number.MAX_SAFE_INTEGER;
+    if (stockLimit <= 0) return;
+    const newQty = Math.min(stockLimit, Math.max(1, baseQuantity + delta));
 
     setLocalQuantities((prev) => ({
       ...prev,

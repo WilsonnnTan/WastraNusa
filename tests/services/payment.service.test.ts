@@ -37,7 +37,7 @@ describe('paymentService', () => {
         status: 'active',
         price: 100000,
         name: 'Product 1',
-        stock: 10,
+        variants: [{ stock: 10 }],
       } as never);
 
       vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
@@ -64,10 +64,6 @@ describe('paymentService', () => {
       expect(
         productVariantRepository.decrementVariantStock,
       ).toHaveBeenCalledWith('var-1', 2);
-      expect(productRepository.decrementProductStock).toHaveBeenCalledWith(
-        'prod-1',
-        2,
-      );
     });
 
     it('should throw error if product not found', async () => {
@@ -92,7 +88,7 @@ describe('paymentService', () => {
         status: 'active',
         name: 'Product 1',
         price: 100000,
-        stock: 1, // Only 1 in stock
+        variants: [{ stock: 1 }], // Only 1 in stock
       } as never);
 
       await expect(
@@ -119,7 +115,7 @@ describe('paymentService', () => {
         status: 'active',
         name: 'Product 1',
         price: 100000,
-        stock: 10,
+        variants: [{ stock: 10 }],
       } as never);
 
       vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
@@ -148,7 +144,7 @@ describe('paymentService', () => {
         status: 'active',
         name: 'Product 1',
         price: 100000,
-        stock: 10,
+        variants: [{ stock: 10 }],
       } as never);
 
       vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
@@ -166,7 +162,7 @@ describe('paymentService', () => {
       );
     });
 
-    it('should fallback to product checkout when variant is not found', async () => {
+    it('should throw error when variant is not found', async () => {
       vi.mocked(addressRepository.findById).mockResolvedValue({
         id: 'addr-1',
         userId: mockUserId,
@@ -177,37 +173,16 @@ describe('paymentService', () => {
         status: 'active',
         price: 100000,
         name: 'Product 1',
-        stock: 10,
+        variants: [{ stock: 10 }],
       } as never);
 
       vi.mocked(productVariantRepository.findVariantById).mockResolvedValue(
         null,
       );
 
-      vi.mocked(createMidtransTransaction).mockResolvedValue({
-        token: 'snap-token',
-        redirect_url: 'https://checkout.midtrans.com/snap-token',
-      });
-
-      const result = await paymentService.checkout(mockInput, mockUserId);
-
-      expect(result.token).toBe('snap-token');
-      expect(orderRepository.createOrder).toHaveBeenCalledWith(
-        expect.objectContaining({
-          variantId: null,
-          variantName: null,
-          productPrice: 200000,
-          subtotal: 200000,
-          totalAmount: 215000,
-        }),
-      );
-      expect(
-        productVariantRepository.decrementVariantStock,
-      ).not.toHaveBeenCalled();
-      expect(productRepository.decrementProductStock).toHaveBeenCalledWith(
-        'prod-1',
-        2,
-      );
+      await expect(
+        paymentService.checkout(mockInput, mockUserId),
+      ).rejects.toThrow(new ApiError('Variant not found', 404));
     });
 
     it('should use default address when shippingAddressId is not provided', async () => {
@@ -221,7 +196,7 @@ describe('paymentService', () => {
         status: 'active',
         price: 100000,
         name: 'Product 1',
-        stock: 10,
+        variants: [{ stock: 10 }],
       } as never);
 
       vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({

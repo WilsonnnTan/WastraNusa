@@ -401,49 +401,55 @@ export async function seedArticles() {
 
   if (!regularUserId) throw new Error('Regular seed user not found');
 
-  await prisma.$transaction(async (tx) => {
-    for (const article of articles) {
-      await tx.article.upsert({
-        where: { id: article.id },
-        update: {
-          ...article,
-          createdBy: adminUserId,
-        },
+  await prisma.$transaction(
+    async (tx) => {
+      for (const article of articles) {
+        await tx.article.upsert({
+          where: { id: article.id },
+          update: {
+            ...article,
+            createdBy: adminUserId,
+          },
+          create: {
+            ...article,
+            createdBy: adminUserId,
+          },
+        });
+      }
+      console.log(`Seeded ${articles.length} articles`);
+
+      for (const engagement of engagements) {
+        await tx.articleEngagement.upsert({
+          where: { articleId: engagement.articleId },
+          update: engagement,
+          create: engagement,
+        });
+      }
+      console.log(`Seeded ${engagements.length} article engagements`);
+
+      for (const section of sections) {
+        await tx.articleSection.upsert({
+          where: { id: section.id },
+          update: section,
+          create: section,
+        });
+      }
+      console.log(`Seeded ${sections.length} article sections`);
+
+      await tx.userArticleLike.upsert({
+        where: { id: SEED_LIKE_1_ID },
+        update: {},
         create: {
-          ...article,
-          createdBy: adminUserId,
+          id: SEED_LIKE_1_ID,
+          articleId: SEED_ARTICLE_1.id,
+          userId: regularUserId,
         },
       });
-    }
-    console.log(`Seeded ${articles.length} articles`);
-
-    for (const engagement of engagements) {
-      await tx.articleEngagement.upsert({
-        where: { articleId: engagement.articleId },
-        update: engagement,
-        create: engagement,
-      });
-    }
-    console.log(`Seeded ${engagements.length} article engagements`);
-
-    for (const section of sections) {
-      await tx.articleSection.upsert({
-        where: { id: section.id },
-        update: section,
-        create: section,
-      });
-    }
-    console.log(`Seeded ${sections.length} article sections`);
-
-    await tx.userArticleLike.upsert({
-      where: { id: SEED_LIKE_1_ID },
-      update: {},
-      create: {
-        id: SEED_LIKE_1_ID,
-        articleId: SEED_ARTICLE_1.id,
-        userId: regularUserId,
-      },
-    });
-    console.log('Seeded 1 user article like');
-  });
+      console.log('Seeded 1 user article like');
+    },
+    {
+      maxWait: 30000,
+      timeout: 30000,
+    },
+  );
 }

@@ -23,6 +23,14 @@ interface CheckoutResolvedItem {
   unitPrice: number;
 }
 
+function sumVariantStock(
+  variants: Array<{
+    stock: number;
+  }>,
+) {
+  return variants.reduce((total, variant) => total + variant.stock, 0);
+}
+
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = crypto.randomUUID().slice(0, 4).toUpperCase();
@@ -230,30 +238,28 @@ export const paymentService = {
           item.variantId,
         );
         if (!variant) {
-          logger.warn('Variant not found, fallback to product checkout', {
-            productId: product.id,
-            requestedVariantId: item.variantId,
-          });
-        } else {
-          if (variant.productId !== product.id) {
-            throw new ApiError('Variant does not belong to this product', 400);
-          }
-          if (variant.stock < item.quantity) {
-            throw new ApiError(
-              `Insufficient variant stock for ${product.name}`,
-              400,
-            );
-          }
+          throw new ApiError('Variant not found', 404);
+        }
+        if (variant.productId !== product.id) {
+          throw new ApiError('Variant does not belong to this product', 400);
+        }
+        if (variant.stock < item.quantity) {
+          throw new ApiError(
+            `Insufficient variant stock for ${product.name}`,
+            400,
+          );
+        }
 
-          resolvedVariantId = variant.id;
-          variantName = variant.name;
-          if (variant.price !== null) {
-            unitPrice = Number(variant.price);
-          }
+        resolvedVariantId = variant.id;
+        variantName = variant.name;
+        if (variant.price !== null) {
+          unitPrice = Number(variant.price);
         }
       }
 
-      if (product.stock < item.quantity) {
+      const totalProductStock = sumVariantStock(product.variants);
+
+      if (totalProductStock < item.quantity) {
         throw new ApiError(
           `Insufficient product stock for ${product.name}`,
           400,
@@ -344,10 +350,6 @@ export const paymentService = {
           item.quantity,
         );
       }
-      await productRepository.decrementProductStock(
-        item.productId,
-        item.quantity,
-      );
     }
 
     let midtransResponse;
