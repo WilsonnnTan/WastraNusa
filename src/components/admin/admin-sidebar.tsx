@@ -56,7 +56,7 @@ function countStockAlerts(
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
   const buttonClassName = cn(
-    'h-10 rounded-xl px-3 text-[#dce6dd] hover:bg-white/8 hover:text-white',
+    'h-10 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
     'data-[active=true]:bg-[#4b6f5f] data-[active=true]:text-white',
   );
 
@@ -109,14 +109,14 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
     <Sidebar collapsible="offcanvas" className="border-r-0">
       <SidebarHeader className="gap-4 px-4 py-5">
         <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-[#416d59] text-sm font-semibold text-[#f4ead6] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+          <div className="flex size-10 items-center text-white justify-center rounded-xl bg-[#416d59] text-sm font-semibold text-sidebar-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
             W
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-[#f6efe3]">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">
               WastraNusa
             </p>
-            <p className="text-xs text-[#b7c7bb]">Admin Panel</p>
+            <p className="text-xs text-sidebar-foreground/75">Admin Panel</p>
           </div>
         </div>
       </SidebarHeader>
@@ -155,7 +155,7 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
               <SidebarMenuButton asChild>
                 <Button
                   variant="ghost"
-                  className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-[#bfd0c3] hover:bg-white/8 hover:text-white"
+                  className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   onClick={handleSignOut}
                 >
                   <LogOut className="size-4" />
@@ -167,15 +167,15 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
           <SidebarSeparator className="bg-white/10" />
           <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
             <Avatar size="sm" className="size-9">
-              <AvatarFallback className="bg-[#d2a36d] font-semibold text-[#fff5df]">
+              <AvatarFallback className="bg-[#d2a36d] font-semibold text-sidebar-foreground">
                 {adminName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">
+              <p className="truncate text-sm font-medium text-sidebar-foreground">
                 {adminName}
               </p>
-              <p className="text-xs text-[#adc2b6]">{adminRole}</p>
+              <p className="text-xs text-sidebar-foreground/75">{adminRole}</p>
             </div>
           </div>
         </SidebarGroup>
