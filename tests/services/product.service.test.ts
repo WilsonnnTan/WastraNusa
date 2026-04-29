@@ -232,9 +232,9 @@ describe('productService', { tags: ['backend'] }, () => {
 
       expect(mockProductRepo.countAll).toHaveBeenCalledWith();
       expect(mockProductRepo.countCreatedSince).toHaveBeenCalledTimes(2);
-      expect(mockProductRepo.countLowStock).toHaveBeenCalledWith(5);
+      expect(mockProductRepo.countLowStock).toHaveBeenCalledWith(20);
       expect(mockProductRepo.countOutOfStock).toHaveBeenCalledWith();
-      expect(mockProductRepo.findLowStock).toHaveBeenCalledWith(5, 6);
+      expect(mockProductRepo.findLowStock).toHaveBeenCalledWith(20, 6);
       expect(result).toEqual({
         totalProducts: 12,
         weeklyDelta: 2,

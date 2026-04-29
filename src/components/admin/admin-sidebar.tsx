@@ -16,11 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
-import {
-  type DashboardData,
-  type DashboardNavItem,
-  type StockAlertSeverity,
-} from '@/types/dashboard';
+import { type DashboardData, type DashboardNavItem } from '@/types/dashboard';
 import {
   BookOpen,
   LayoutDashboard,
@@ -45,13 +41,6 @@ const ADMIN_NAVIGATION = [
   { title: 'Produk & Inventori', href: '/admin/product-inventory' },
   { title: 'Pesanan', href: '/admin/pesanan' },
 ];
-
-function countStockAlerts(
-  stockAlerts: DashboardData['stockAlerts'],
-  severity: StockAlertSeverity,
-) {
-  return stockAlerts.filter((item) => item.severity === severity).length;
-}
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
@@ -89,8 +78,15 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
   const { data: session } = authClient.useSession();
 
   const stockAlerts = data.stockAlerts ?? [];
-  const outOfStockCount = countStockAlerts(stockAlerts, 'out');
-  const lowStockCount = countStockAlerts(stockAlerts, 'low');
+  const outOfStockCount = stockAlerts.filter(
+    (item) => item.stockLabel === 'Habis',
+  ).length;
+  const criticalStockCount = stockAlerts.filter(
+    (item) => item.stockLabel === 'Kritis',
+  ).length;
+  const lowStockCount = stockAlerts.filter((item) =>
+    item.stockLabel.startsWith('Rendah'),
+  ).length;
 
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
   const adminRole = session?.user?.role === 'admin' ? 'Super User' : 'Staff';
@@ -136,13 +132,16 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
           </SidebarMenu>
         </SidebarGroup>
 
-        {(outOfStockCount > 0 || lowStockCount > 0) && (
+        {(outOfStockCount > 0 ||
+          criticalStockCount > 0 ||
+          lowStockCount > 0) && (
           <Alert className="mt-6 border-0 bg-[#7d4e46] text-[#faeee1] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
             <TriangleAlert />
             <AlertTitle>Peringatan Stok</AlertTitle>
             <AlertDescription className="text-[#f0d5c8] [&_p:not(:last-child)]:mb-1">
-              {outOfStockCount > 0 && <p>{outOfStockCount} produk habis</p>}
-              {lowStockCount > 0 && <p>{lowStockCount} produk stok rendah</p>}
+              <p>{outOfStockCount} Produk Habis</p>
+              <p>{criticalStockCount} Produk Kritis</p>
+              <p>{lowStockCount} Produk Rendah</p>
             </AlertDescription>
           </Alert>
         )}

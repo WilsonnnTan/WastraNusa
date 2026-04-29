@@ -314,7 +314,7 @@ export const productService = {
   },
 
   getDashboardOverview: async (): Promise<ProductDashboardData> => {
-    const LOW_STOCK_THRESHOLD = 5;
+    const LOW_STOCK_THRESHOLD = 20;
     const [totalProducts, lowStockItems] = await Promise.all([
       productRepository.countAll(),
       productRepository.findLowStock(LOW_STOCK_THRESHOLD, 6),

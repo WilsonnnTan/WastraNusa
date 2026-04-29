@@ -27,16 +27,16 @@ export function mergeArticleDashboardData(
   }
 
   if (productData) {
-    const outCount =
-      productData.outOfStockCount ??
-      productData.lowStockItems.filter((item) => item.severity === 'out')
-        .length;
-    const lowCombined =
-      productData.lowStockCount ?? productData.lowStockItems.length;
-    const lowCount = Math.max(
-      0,
-      lowCombined - (productData.outOfStockCount ?? 0),
-    );
+    const habisCount = productData.lowStockItems.filter(
+      (item) => item.stock === 0,
+    ).length;
+    const kritisCount = productData.lowStockItems.filter(
+      (item) => item.stock > 0 && item.stock < 5,
+    ).length;
+    const rendahCount = productData.lowStockItems.filter(
+      (item) => item.stock >= 5 && item.stock < 20,
+    ).length;
+    const lowCombined = habisCount + kritisCount + rendahCount;
 
     summary.push(
       {
@@ -57,7 +57,7 @@ export function mergeArticleDashboardData(
         changeLabel: 'Perlu Restock',
         tone: 'warning',
         description: 'Stok Rendah / Habis',
-        footnote: `${outCount} Kritis - ${lowCount} Habis`,
+        footnote: `${kritisCount} Kritis - ${habisCount} Habis - ${rendahCount} Rendah`,
         icon: 'triangle-alert',
       },
     );
@@ -92,10 +92,12 @@ export function mergeArticleDashboardData(
         category: item.category,
         stockLabel:
           item.stock === 0
-            ? 'Kritis'
+            ? 'Habis'
             : item.stock < 5
-              ? 'Habis'
-              : `Rendah (${item.stock})`,
+              ? 'Kritis'
+              : item.stock < 20
+                ? `Rendah (${item.stock})`
+                : `${item.stock}`,
         severity: item.severity,
       })) ?? [],
     popularArticles: articleData?.popularArticles ?? [],
