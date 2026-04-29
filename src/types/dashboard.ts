@@ -45,6 +45,8 @@ export type DashboardData = {
 export type ArticleDashboardData = {
   totalArticles: number;
   popularArticles: PopularArticle[];
+  weeklyDelta?: number;
+  monthlyDelta?: number;
 };
 
 export type ProductDashboardData = {
@@ -55,4 +57,8 @@ export type ProductDashboardData = {
     stock: number;
     severity: StockAlertSeverity;
   }>;
+  weeklyDelta?: number;
+  monthlyDelta?: number;
+  lowStockCount?: number;
+  outOfStockCount?: number;
 };

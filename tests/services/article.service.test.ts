@@ -224,6 +224,9 @@ describe('articleService', { tags: ['backend'] }, () => {
   describe('getDashboardOverview', () => {
     it('should return total articles and map popular articles from repository data', async () => {
       mockRepo.countAll.mockResolvedValue(12);
+      mockRepo.countCreatedSince
+        .mockResolvedValueOnce(3)
+        .mockResolvedValueOnce(9);
       mockRepo.findMostPopular.mockResolvedValue([
         {
           id: 'eng-1',
@@ -258,9 +261,12 @@ describe('articleService', { tags: ['backend'] }, () => {
       const result = await articleService.getDashboardOverview();
 
       expect(mockRepo.countAll).toHaveBeenCalledWith();
+      expect(mockRepo.countCreatedSince).toHaveBeenCalledTimes(2);
       expect(mockRepo.findMostPopular).toHaveBeenCalledWith(6);
       expect(result).toEqual({
         totalArticles: 12,
+        weeklyDelta: 3,
+        monthlyDelta: 9,
         popularArticles: [
           {
             rank: 1,

@@ -208,6 +208,11 @@ describe('productService', { tags: ['backend'] }, () => {
   describe('getDashboardOverview', () => {
     it('should return total products and low stock items', async () => {
       mockProductRepo.countAll.mockResolvedValue(12);
+      mockProductRepo.countCreatedSince
+        .mockResolvedValueOnce(2)
+        .mockResolvedValueOnce(7);
+      mockProductRepo.countLowStock.mockResolvedValue(5);
+      mockProductRepo.countOutOfStock.mockResolvedValue(1);
       mockProductRepo.findLowStock.mockResolvedValue([
         {
           name: 'Batik Premium',
@@ -226,9 +231,16 @@ describe('productService', { tags: ['backend'] }, () => {
       const result = await productService.getDashboardOverview();
 
       expect(mockProductRepo.countAll).toHaveBeenCalledWith();
-      expect(mockProductRepo.findLowStock).toHaveBeenCalledWith(5, 6);
+      expect(mockProductRepo.countCreatedSince).toHaveBeenCalledTimes(2);
+      expect(mockProductRepo.countLowStock).toHaveBeenCalledWith(20);
+      expect(mockProductRepo.countOutOfStock).toHaveBeenCalledWith();
+      expect(mockProductRepo.findLowStock).toHaveBeenCalledWith(20, 6);
       expect(result).toEqual({
         totalProducts: 12,
+        weeklyDelta: 2,
+        monthlyDelta: 7,
+        lowStockCount: 5,
+        outOfStockCount: 1,
         lowStockItems: [
           {
             name: 'Batik Premium',
@@ -374,6 +386,7 @@ describe('productService', { tags: ['backend'] }, () => {
       const result = await productService.updateProduct('prod-1', {
         slug: 'premium-batik-shirt',
         name: 'Updated Batik Shirt',
+        variants: [],
       });
 
       expect(mockProductRepo.findByIdOrSlug).toHaveBeenCalledWith('prod-1');
@@ -394,6 +407,7 @@ describe('productService', { tags: ['backend'] }, () => {
         productService.updateProduct('prod-1', {
           slug: 'premium-batik-shirt',
           articleId: 'nonexistent',
+          variants: [],
         }),
       ).rejects.toMatchObject({ status: 404 });
 
@@ -411,6 +425,7 @@ describe('productService', { tags: ['backend'] }, () => {
       await productService.updateProduct('prod-1', {
         slug: 'premium-batik-shirt',
         name: 'No Article Change',
+        variants: [],
       });
 
       expect(mockArticleRepo.findByIdOrSlug).not.toHaveBeenCalled();
@@ -458,6 +473,7 @@ describe('productService', { tags: ['backend'] }, () => {
         productService.updateProduct('nonexistent', {
           slug: 'premium-batik-shirt',
           name: 'X',
+          variants: [],
         }),
       ).rejects.toMatchObject({ status: 404 });
     });
