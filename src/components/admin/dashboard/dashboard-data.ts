@@ -25,16 +25,16 @@ export function mergeArticleDashboardData(
         changeLabel: 'Live dari API',
         tone: 'positive',
         description: 'Total produk',
-        footnote: 'di seluruh kategori',
+        footnote: 'Di Seluruh Kategori',
         icon: 'package',
       },
       {
         title: 'Stok Rendah / Habis',
         value: productData.lowStockItems.length,
-        changeLabel: 'perlu restok',
+        changeLabel: 'Perlu Restock',
         tone: 'warning',
-        description: 'Stok rendah / habis',
-        footnote: `${outCount} habis - ${lowCount} rendah`,
+        description: 'Stok Rendah / Habis',
+        footnote: `${outCount} Habis - ${lowCount} Rendah`,
         icon: 'triangle-alert',
       },
     );
@@ -47,7 +47,7 @@ export function mergeArticleDashboardData(
       changeLabel: 'Live dari API',
       tone: 'positive',
       description: 'Total artikel',
-      footnote: 'ensiklopedia budaya',
+      footnote: 'Ensiklopedia Budaya',
       icon: 'book-open',
     });
   }

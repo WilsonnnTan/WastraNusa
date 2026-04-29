@@ -269,7 +269,7 @@ export function AdminOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-10 w-full rounded-xl border-[#ddd6c9] bg-white sm:w-[190px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[190px]">
                   <SelectValue placeholder="Status Pesanan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -289,7 +289,7 @@ export function AdminOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-10 w-full rounded-xl border-[#ddd6c9] bg-white sm:w-[180px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[180px]">
                   <SelectValue placeholder="Status Pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -403,7 +403,7 @@ export function AdminOrderContent() {
                                 }
                                 disabled={!editable}
                               >
-                                <SelectTrigger className="h-9 rounded-lg border-[#ddd6c9] bg-white text-xs">
+                                <SelectTrigger className="h-9 w-36 rounded-lg border-[#ddd6c9] bg-white text-xs">
                                   <SelectValue placeholder="Pilih status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -476,7 +476,7 @@ export function AdminOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="h-9 w-9 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) => Math.max(1, currentPage - 1))
                   }
@@ -487,7 +487,7 @@ export function AdminOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="h-9 w-9 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) =>
                       Math.min(orderData.meta.totalPages, currentPage + 1),
