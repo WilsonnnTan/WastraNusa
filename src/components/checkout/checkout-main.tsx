@@ -1,7 +1,5 @@
 'use client';
 
-import { Footer } from '@/components/footer';
-import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import {
   getCheckoutSession,
@@ -121,80 +119,76 @@ export function CheckoutMain() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf8f2] flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-10 max-w-[1320px]">
-        <div className="mb-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-[#8e8476]">
-          <span className="text-brand">Keranjang</span>
-          <span className="text-[#d8cfbf]">/</span>
-          <span className="text-[#3d5446] border-b-2 border-brand pb-1">
-            Pengiriman
-          </span>
-          <span className="text-[#d8cfbf]">/</span>
-          <span className="text-[#d8cfbf]">Pembayaran</span>
+    <>
+      <div className="mb-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-[#8e8476]">
+        <span className="text-brand">Keranjang</span>
+        <span className="text-[#d8cfbf]">/</span>
+        <span className="text-[#3d5446] border-b-2 border-brand pb-1">
+          Pengiriman
+        </span>
+        <span className="text-[#d8cfbf]">/</span>
+        <span className="text-[#d8cfbf]">Pembayaran</span>
+      </div>
+
+      {selectedItems.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
+          <p className="text-lg font-bold text-[#3d5446]">
+            Belum ada produk checkout
+          </p>
+          <p className="text-[#8e8476] mt-2">
+            Pilih produk dari keranjang terlebih dahulu.
+          </p>
+          <Link href="/cart" className="inline-block mt-6">
+            <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
+              Kembali ke Keranjang
+            </Button>
+          </Link>
         </div>
+      ) : (
+        <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <AddressSection
+              initialSelectedAddressId={selectedAddress?.id}
+              onSelectAddress={setSelectedAddress}
+            />
+            <ShippingMethodSection
+              options={shippingOptions}
+              selectedId={selectedShippingId}
+              onSelect={setSelectedShippingId}
+            />
 
-        {selectedItems.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
-            <p className="text-lg font-bold text-[#3d5446]">
-              Belum ada produk checkout
-            </p>
-            <p className="text-[#8e8476] mt-2">
-              Pilih produk dari keranjang terlebih dahulu.
-            </p>
-            <Link href="/cart" className="inline-block mt-6">
-              <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
-                Kembali ke Keranjang
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-8 space-y-6">
-              <AddressSection
-                initialSelectedAddressId={selectedAddress?.id}
-                onSelectAddress={setSelectedAddress}
-              />
-              <ShippingMethodSection
-                options={shippingOptions}
-                selectedId={selectedShippingId}
-                onSelect={setSelectedShippingId}
-              />
-
-              <div className="mt-10 pt-6 border-t border-[#e8e2d5] flex flex-col sm:flex-row justify-between items-center gap-4">
-                <Link href="/cart">
-                  <Button
-                    variant="ghost"
-                    className="text-brand font-bold gap-2 hover:bg-brand/5 px-0 sm:px-4"
-                  >
-                    <ChevronLeft size={18} /> Kembali ke Keranjang
-                  </Button>
-                </Link>
-
+            <div className="mt-10 pt-6 border-t border-[#e8e2d5] flex flex-col sm:flex-row justify-between items-center gap-4">
+              <Link href="/cart">
                 <Button
-                  onClick={handleContinueToPayment}
-                  disabled={!selectedAddress}
-                  className="w-full sm:w-auto bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95"
+                  variant="ghost"
+                  className="text-brand font-bold gap-2 hover:bg-brand/5 px-0 sm:px-4"
                 >
-                  Tinjau & Konfirmasi -&gt;
+                  <ChevronLeft size={18} /> Kembali ke Keranjang
                 </Button>
-              </div>
+              </Link>
 
-              <div className="flex items-center justify-center gap-2 text-[#8e8476] mt-4">
-                <ShieldCheck size={14} />
-                <p className="text-[10px] font-medium uppercase tracking-tighter">
-                  Pembayaran Aman & Terenkripsi
-                </p>
-              </div>
+              <Button
+                onClick={handleContinueToPayment}
+                disabled={!selectedAddress}
+                className="w-full sm:w-auto bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95"
+              >
+                Tinjau & Konfirmasi -&gt;
+              </Button>
             </div>
 
-            <aside className="lg:col-span-4">
-              <CheckoutSummary totals={totals} items={selectedItems} />
-            </aside>
+            <div className="flex items-center justify-center gap-2 text-[#8e8476] mt-4">
+              <ShieldCheck size={14} />
+              <p className="text-[10px] font-medium uppercase tracking-tighter">
+                Pembayaran Aman & Terenkripsi
+              </p>
+            </div>
           </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+
+          <aside className="lg:col-span-4">
+            <CheckoutSummary totals={totals} items={selectedItems} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
