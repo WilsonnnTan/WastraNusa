@@ -4,17 +4,9 @@ import React from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
-  title?: string | React.ReactNode;
-  description?: string;
-  maxWidth?: string;
 }
 
-export function Layout({
-  children,
-  title,
-  description,
-  maxWidth = '345px',
-}: LayoutProps) {
+export default function ForgotResetPasswordLayout({ children }: LayoutProps) {
   return (
     <div className="relative min-h-screen bg-[#e8e0d0] flex flex-col font-segoe">
       {/* Logo - Absolute positioning to avoid impacting flex center */}
@@ -34,21 +26,8 @@ export function Layout({
       </div>
 
       <div className="flex flex-1 items-center justify-center px-10">
-        <div className="w-full" style={{ maxWidth }}>
-          <div className="flex flex-col gap-6">
-            <div className="text-center">
-              {title && (
-                <h1 className="text-2xl font-bold tracking-tight text-[#2d2318]">
-                  {title}
-                </h1>
-              )}
-              {description && (
-                <p className="mt-2 text-xs text-[#7a6e62]">{description}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-4">{children}</div>
-          </div>
+        <div className="w-full" style={{ maxWidth: '345px' }}>
+          <div className="flex flex-col gap-6">{children}</div>
         </div>
       </div>
     </div>
