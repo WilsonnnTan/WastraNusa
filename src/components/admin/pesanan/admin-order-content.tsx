@@ -314,8 +314,8 @@ export function AdminOrderContent() {
                     <th className="px-4 py-3">Produk</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Pembayaran</th>
-                    <th className="px-4 py-3">No. Resi</th>
-                    <th className="px-4 py-3 text-right">Aksi</th>
+                    <th className="px-4 py-3 text-center">No. Resi</th>
+                    <th className="px-4 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>

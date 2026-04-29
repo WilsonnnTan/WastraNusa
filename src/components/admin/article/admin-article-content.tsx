@@ -134,11 +134,11 @@ export function AdminArticleContent() {
               <table className="w-full min-w-[900px] text-left">
                 <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] uppercase">
                   <tr>
-                    <th className="px-4 py-3">Judul Artikel</th>
-                    <th className="px-4 py-3">Topik</th>
+                    <th className="px-4 py-3 ">Judul Artikel</th>
+                    <th className="px-4 py-3 ">Topik</th>
                     <th className="px-4 py-3">Wilayah</th>
-                    <th className="px-4 py-3 text-right">Ditonton</th>
-                    <th className="px-4 py-3 text-right">Baca (mnt)</th>
+                    <th className="px-4 py-3 text-center">Ditonton</th>
+                    <th className="px-4 py-3 text-center">Baca (mnt)</th>
                     <th className="px-4 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
@@ -186,10 +186,10 @@ export function AdminArticleContent() {
                             {article.region}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {article.views}
                         </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {article.readMinutes}
                         </td>
                         <td className="px-4 py-3">

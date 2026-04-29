@@ -157,9 +157,9 @@ export function AdminProductInventoryContent() {
                     <th className="px-4 py-3">Produk</th>
                     <th className="px-4 py-3">Artikel</th>
                     <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Harga</th>
-                    <th className="px-4 py-3 text-right">Stok</th>
-                    <th className="px-4 py-3 text-right">Varian</th>
+                    <th className="px-4 py-3 text-center">Harga</th>
+                    <th className="px-4 py-3 text-center">Stok</th>
+                    <th className="px-4 py-3 text-center">Varian</th>
                     <th className="px-4 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
@@ -208,10 +208,10 @@ export function AdminProductInventoryContent() {
                         <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
                           {formatPrice(product.price)}
                         </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {product.stock}
                         </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {product.variantCount}
                         </td>
                         <td className="px-4 py-3">
