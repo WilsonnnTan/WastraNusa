@@ -326,7 +326,7 @@ export function AdminDashboardContent() {
 
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
   const adminHeaderSubtitle = useMemo(() => {
-    const dateLabel = new Intl.DateTimeFormat('us-EN', {
+    const dateLabel = new Intl.DateTimeFormat('en-US', {
       day: '2-digit',
       weekday: 'long',
       month: 'long',
