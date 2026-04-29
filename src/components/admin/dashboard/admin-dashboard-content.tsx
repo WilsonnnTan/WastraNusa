@@ -326,14 +326,39 @@ export function AdminDashboardContent() {
 
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
   const adminHeaderSubtitle = useMemo(() => {
-    const dateLabel = new Intl.DateTimeFormat('en-US', {
-      day: '2-digit',
-      weekday: 'long',
-      month: 'long',
-      year: 'numeric',
-    }).format(new Date());
+    const now = new Date();
+    const weekdays = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
 
-    return `WastraNusa Admin · ${dateLabel[0].toUpperCase()}${dateLabel.slice(1)}`;
+    const weekday = weekdays[now.getDay()];
+    const month = months[now.getMonth()];
+    const day = String(now.getDate()).padStart(2, '0');
+    const year = now.getFullYear();
+
+    const dateLabel = `${weekday}, ${day} ${month} ${year}`;
+
+    return `WastraNusa Admin · ${dateLabel}`;
   }, []);
   const lastUpdatedLabel = 'Ringkasan data terakhir diperbarui hari ini';
 
