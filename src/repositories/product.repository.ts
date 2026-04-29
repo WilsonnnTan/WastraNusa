@@ -224,6 +224,16 @@ export const productRepository = {
     });
   },
 
+  countCreatedSince: async (since: Date) => {
+    return prisma.product.count({
+      where: {
+        createdAt: {
+          gte: since,
+        },
+      },
+    });
+  },
+
   countLowStock: async (threshold: number = 5) => {
     const products = await prisma.product.findMany({
       select: {
@@ -243,6 +253,28 @@ export const productRepository = {
       );
 
       return product.status === 'out_of_stock' || totalStock <= threshold;
+    }).length;
+  },
+
+  countOutOfStock: async () => {
+    const products = await prisma.product.findMany({
+      select: {
+        status: true,
+        variants: {
+          select: {
+            stock: true,
+          },
+        },
+      },
+    });
+
+    return products.filter((product) => {
+      const totalStock = product.variants.reduce(
+        (total, variant) => total + variant.stock,
+        0,
+      );
+
+      return product.status === 'out_of_stock' || totalStock === 0;
     }).length;
   },
 

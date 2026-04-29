@@ -199,6 +199,16 @@ export const articleRepository = {
     });
   },
 
+  countCreatedSince: async (since: Date) => {
+    return prisma.article.count({
+      where: {
+        createdAt: {
+          gte: since,
+        },
+      },
+    });
+  },
+
   findLikedByUser: async ({
     userId,
     offset,

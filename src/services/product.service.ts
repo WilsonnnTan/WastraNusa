@@ -319,9 +319,26 @@ export const productService = {
       productRepository.countAll(),
       productRepository.findLowStock(LOW_STOCK_THRESHOLD, 6),
     ]);
+    // compute weekly/monthly deltas
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [weeklyDelta, monthlyDelta] = await Promise.all([
+      productRepository.countCreatedSince(weekAgo),
+      productRepository.countCreatedSince(monthAgo),
+    ]);
+
+    const lowStockCount =
+      await productRepository.countLowStock(LOW_STOCK_THRESHOLD);
+    const outOfStockCount = await productRepository.countOutOfStock();
 
     return {
       totalProducts,
+      weeklyDelta,
+      monthlyDelta,
+      lowStockCount,
+      outOfStockCount,
       lowStockItems: lowStockItems.map((item) => ({
         name: item.name,
         category: item.clothingType,

@@ -24,6 +24,7 @@ import {
   type StockAlertItem,
 } from '@/types/dashboard';
 import {
+  ArrowDownRight,
   ArrowUpRight,
   BookOpen,
   ChevronRight,
@@ -60,13 +61,13 @@ function SummaryTrendBadge({ stat }: { stat: DashboardStat }) {
       variant={stat.tone === 'warning' ? 'destructive' : 'secondary'}
       className={cn(
         'rounded-full border-0 px-2 py-0.5 text-[11px] shadow-none',
-        stat.tone === 'warning'
-          ? 'bg-[#f5dfd8] text-[#b45843]'
-          : 'bg-[#eef5e8] text-[#5f865a]',
+        stat.tone === 'warning' ? 'text-[#b45843]' : 'text-[#5f865a]',
       )}
     >
       {stat.tone === 'positive' ? (
         <ArrowUpRight data-icon="inline-start" />
+      ) : stat.tone === 'warning' ? (
+        <ArrowDownRight data-icon="inline-start" />
       ) : null}
       {stat.changeLabel}
     </Badge>
@@ -324,12 +325,25 @@ export function AdminDashboardContent() {
   );
 
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
+  const adminHeaderSubtitle = useMemo(() => {
+    const dateLabel = new Intl.DateTimeFormat('us-EN', {
+      day: '2-digit',
+      weekday: 'long',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date());
+
+    return `WastraNusa Admin · ${dateLabel[0].toUpperCase()}${dateLabel.slice(1)}`;
+  }, []);
   const lastUpdatedLabel = 'Ringkasan data terakhir diperbarui hari ini';
 
   if (isLoading || isLoadingProducts) {
     return (
       <main className="flex flex-1 flex-col">
-        <AdminHeader title="Dashboard Overview" subtitle="WastraNusa Admin" />
+        <AdminHeader
+          title="Dashboard Overview"
+          subtitle={adminHeaderSubtitle}
+        />
         <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
           <section className="grid gap-4 xl:grid-cols-3">
             <SummaryCardSkeleton />
@@ -352,7 +366,7 @@ export function AdminDashboardContent() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <AdminHeader title="Dashboard Overview" subtitle="WastraNusa Admin" />
+      <AdminHeader title="Dashboard Overview" subtitle={adminHeaderSubtitle} />
       <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
         <section className="grid gap-4 xl:grid-cols-3">
           {dashboardData.summary?.map((stat) => (
