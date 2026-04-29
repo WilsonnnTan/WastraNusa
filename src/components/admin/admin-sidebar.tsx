@@ -24,6 +24,7 @@ import {
   Package2,
   ShoppingBag,
   TriangleAlert,
+  UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -150,6 +151,17 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
       <SidebarFooter className="px-3 pb-4">
         <SidebarGroup className="gap-3 py-0">
           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link
+                  href="/"
+                  className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                >
+                  <UserRound className="size-4" />
+                  <span>Halaman Pengguna</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Button
