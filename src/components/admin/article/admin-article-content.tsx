@@ -112,7 +112,7 @@ export function AdminArticleContent() {
     <main className="flex flex-col">
       <AdminHeader
         title="Manajemen Artikel"
-        subtitle="Kelola konten edukasi wastra nusantara"
+        subtitle="Kelola Konten Edukasi Wastra Nusantara"
       />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">

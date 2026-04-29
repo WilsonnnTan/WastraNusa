@@ -251,7 +251,7 @@ export function AdminOrderContent() {
     <main className="flex flex-col">
       <AdminHeader
         title="Manajemen Pesanan"
-        subtitle="Kelola status pesanan pelanggan"
+        subtitle="Kelola Status Pesanan Pelanggan"
       />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
@@ -419,7 +419,7 @@ export function AdminOrderContent() {
                               </Select>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-center">
                             <Badge
                               variant="secondary"
                               className={getPaymentStatusBadgeClass(

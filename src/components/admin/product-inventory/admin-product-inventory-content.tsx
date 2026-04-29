@@ -134,7 +134,7 @@ export function AdminProductInventoryContent() {
     <main className="flex flex-col">
       <AdminHeader
         title="Produk & Inventory"
-        subtitle="Kelola produk, varian, dan stok"
+        subtitle="Kelola Produk, Varian, dan Stok"
       />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
