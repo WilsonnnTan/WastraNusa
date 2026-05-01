@@ -47,7 +47,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
   const buttonClassName = cn(
     'h-10 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-    'data-[active=true]:bg-[#4b6f5f] data-[active=true]:text-white',
+    'data-[active=true]:bg-[#4b6f5f] data-[active=true]:text-[#C0653B]',
   );
 
   return (
@@ -120,7 +120,7 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
 
       <SidebarContent className="px-3">
         <SidebarGroup className="gap-2 py-0">
-          <SidebarMenu>
+          <SidebarMenu className="space-y-2">
             {ADMIN_NAVIGATION.map((item) => {
               const isActive = pathname === item.href;
               return (
