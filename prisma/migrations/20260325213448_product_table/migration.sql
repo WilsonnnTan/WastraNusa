@@ -17,6 +17,7 @@ CREATE TABLE "product" (
     "gender" "Gender" NOT NULL,
     "status" "ProductStatus" NOT NULL DEFAULT 'active',
     "sold" INTEGER NOT NULL DEFAULT 0,
+    "imageURL" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

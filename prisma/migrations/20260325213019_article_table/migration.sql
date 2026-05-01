@@ -21,11 +21,7 @@ CREATE TABLE "article" (
     "gender" "Gender",
     "readMinutes" INTEGER NOT NULL DEFAULT 6,
     "featured" BOOLEAN NOT NULL DEFAULT false,
-    "wikipediaPageId" TEXT,
-    "wikipediaUrl" TEXT,
-    "wikimediaImageUrl" TEXT,
-    "wikimediaVideoUrl" TEXT,
-    "wikipediaLastSync" TIMESTAMP(3),
+    "imageURL" TEXT,
     "summary" TEXT,
     "status" "ArticleStatus" NOT NULL DEFAULT 'published',
     "createdBy" TEXT NOT NULL,
@@ -37,9 +33,6 @@ CREATE TABLE "article" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "article_slug_key" ON "article"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "article_wikipediaPageId_key" ON "article"("wikipediaPageId");
 
 -- CreateIndex
 CREATE INDEX "article_province_idx" ON "article"("province");
@@ -64,6 +57,7 @@ CREATE TABLE "article_section" (
     "content" TEXT NOT NULL,
     "imageLabel" TEXT,
     "imageCaption" TEXT,
+    "imageURL" TEXT,
     "order" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "article_section_pkey" PRIMARY KEY ("id")
