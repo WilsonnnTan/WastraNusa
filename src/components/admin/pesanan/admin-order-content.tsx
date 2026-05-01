@@ -306,7 +306,7 @@ export function AdminOrderContent() {
 
           <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1280px] text-left">
+              <table className="w-full text-left">
                 <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] uppercase">
                   <tr>
                     <th className="px-4 py-3">Pesanan</th>
