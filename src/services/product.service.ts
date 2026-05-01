@@ -24,6 +24,7 @@ const mapVariant = (variant: {
   price: { toNumber(): number } | null;
   stock: number;
   sku: string;
+  imageURL: string | null;
 }) => ({
   id: variant.id,
   name: variant.name,
@@ -31,6 +32,7 @@ const mapVariant = (variant: {
   price: variant.price ? variant.price.toNumber() : null,
   stock: variant.stock,
   sku: variant.sku,
+  imageURL: variant.imageURL,
 });
 
 const sumVariantStock = (
@@ -49,6 +51,7 @@ const mapProduct = (product: {
   price: { toNumber(): number };
   sku: string;
   weight: number;
+  imageURL: string | null;
   island?: string | null;
   province: string;
   clothingType: string;
@@ -62,6 +65,7 @@ const mapProduct = (product: {
     price: { toNumber(): number } | null;
     stock: number;
     sku: string;
+    imageURL: string | null;
   }[];
   createdAt: Date;
   updatedAt: Date;
@@ -76,6 +80,7 @@ const mapProduct = (product: {
   stock: sumVariantStock(product.variants),
   sku: product.sku,
   weight: product.weight,
+  imageURL: product.imageURL,
   island: product.island ?? '',
   province: product.province,
   clothingType: product.clothingType,
@@ -170,6 +175,7 @@ const normalizeVariantsForCreate = (variants?: ProductVariantInput[]) =>
     price: variant.price,
     stock: variant.stock,
     sku: variant.sku,
+    imageURL: variant.imageURL,
   }));
 
 const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
@@ -181,6 +187,7 @@ const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
     price: variant.price,
     stock: variant.stock,
     sku: variant.sku,
+    imageURL: variant.imageURL,
   })),
 });
 
@@ -376,6 +383,7 @@ export const productService = {
       price: data.price,
       sku: data.sku,
       weight: data.weight,
+      imageURL: data.imageURL,
       island,
       province,
       clothingType: data.clothingType,
@@ -426,6 +434,7 @@ export const productService = {
       price: data.price,
       sku: data.sku,
       weight: data.weight,
+      imageURL: data.imageURL,
       island: nextIsland,
       province: nextProvince,
       clothingType: data.clothingType,

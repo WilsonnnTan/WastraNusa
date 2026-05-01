@@ -19,6 +19,7 @@ const productVariantInputSchema = z
     price: requiredVariantPriceSchema,
     stock: z.number().int().min(0, 'Stok varian tidak boleh negatif'),
     sku: z.string().min(1, 'SKU varian wajib diisi'),
+    imageURL: z.string().url('Format URL tidak valid').nullish(),
   })
   .strict();
 
@@ -40,6 +41,7 @@ const productPayloadSchema = z.object({
   clothingType: z.string().min(1, 'Jenis pakaian wajib diisi'),
   gender: z.nativeEnum(Gender),
   status: z.nativeEnum(ProductStatus).optional(),
+  imageURL: z.url('Format URL tidak valid').nullish(),
   variants: requiredVariantsSchema,
 });
 

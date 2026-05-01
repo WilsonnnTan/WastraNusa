@@ -23,11 +23,7 @@ const MOCK_ARTICLE = {
   gender: 'male' as const,
   readMinutes: 6,
   featured: false,
-  wikipediaPageId: 'wp-test',
-  wikipediaUrl: 'https://en.wikipedia.org/wiki/Test',
-  wikimediaImageUrl: null,
-  wikimediaVideoUrl: null,
-  wikipediaLastSync: null,
+  imageURL: null,
   sections: [],
   products: [],
   summary: 'Test summary',
@@ -425,8 +421,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         clothingType: 'endek',
         motifLabel: 'Endek',
         gender: 'female' as const,
-        wikipediaPageId: 'wp-new',
-        wikipediaUrl: 'https://en.wikipedia.org/wiki/New',
+        imageURL: 'https://example.com/image.jpg',
         sections: [],
       };
 
@@ -455,8 +450,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         clothingType: 'endek',
         motifLabel: 'Endek',
         gender: 'female' as const,
-        wikipediaPageId: 'wp-custom',
-        wikipediaUrl: 'https://en.wikipedia.org/wiki/Custom',
+        imageURL: 'https://example.com/custom.jpg',
         sections: [],
       };
 

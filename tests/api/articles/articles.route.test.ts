@@ -110,8 +110,7 @@ describe('POST /api/articles', { tags: ['backend'] }, () => {
     clothingType: 'endek',
     motifLabel: 'Endek',
     gender: 'female',
-    wikipediaPageId: 'wp-new',
-    wikipediaUrl: 'https://en.wikipedia.org/wiki/New',
+    imageURL: 'https://example.com/image.jpg',
     sections: [
       {
         title: 'Pembuka',

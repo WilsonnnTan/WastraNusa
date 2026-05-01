@@ -230,8 +230,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
         clothingType: 'endek',
         motifLabel: 'Endek',
         gender: 'female',
-        wikipediaPageId: `wp-test-${id.slice(0, 8)}`,
-        wikipediaUrl: 'https://en.wikipedia.org/wiki/Test',
+        imageURL: 'https://example.com/image.jpg',
         summary: 'Test content for article creation.',
         createdBy: adminUserId,
       });
@@ -278,8 +277,7 @@ describe('articleRepository', { tags: ['db'] }, () => {
         clothingType: 'koteka',
         motifLabel: 'Koteka',
         gender: 'male',
-        wikipediaPageId: `wp-delete-${id.slice(0, 8)}`,
-        wikipediaUrl: 'https://en.wikipedia.org/wiki/Delete',
+        imageURL: 'https://example.com/delete.jpg',
         summary: 'Temp article.',
         createdBy: adminUserId,
       });

@@ -171,6 +171,7 @@ export const articleService = {
           content: section.content,
           imageLabel: section.imageLabel ?? undefined,
           imageCaption: section.imageCaption ?? undefined,
+          imageURL: section.imageURL ?? undefined,
         })) || [],
       keyFacts: [
         { label: 'Wilayah Utama', value: article.region },
@@ -234,7 +235,7 @@ export const articleService = {
         readMinutes: article.readMinutes,
         featured: article.featured,
         status: article.status,
-        imageUrl: article.wikimediaImageUrl,
+        imageUrl: article.imageURL,
       })),
       meta: {
         page: safePage,

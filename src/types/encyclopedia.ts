@@ -40,6 +40,7 @@ export interface EncyclopediaArticle {
   status: ArticleStatus;
   summary?: string | null;
   description?: string | null;
+  imageURL?: string | null;
 }
 
 export interface EncyclopediaSection {
@@ -47,6 +48,7 @@ export interface EncyclopediaSection {
   content: string;
   imageLabel?: string;
   imageCaption?: string;
+  imageURL?: string;
 }
 
 export interface EncyclopediaKeyFact {

@@ -1,7 +1,8 @@
-﻿import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { Eye, Heart } from 'lucide-react';
+import Image from 'next/image';
 
 interface EncyclopediaArticleCardProps {
   article: EncyclopediaArticle;
@@ -19,12 +20,21 @@ export function EncyclopediaArticleCard({
     >
       {/* Image Placeholder */}
       <div className="relative h-44 border-b border-dashed border-[#ded3c1] bg-[#ece1d0]">
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="flex flex-col items-center gap-2 text-[#726759]">
-            <span className="h-4 w-4 rotate-45 border border-[#ccbda4]" />
-            <span className="text-sm font-medium">{article.motifLabel}</span>
+        {article.imageURL ? (
+          <Image
+            src={article.imageURL}
+            alt={article.title}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center">
+            <div className="flex flex-col items-center gap-2 text-[#726759]">
+              <span className="h-4 w-4 rotate-45 border border-[#ccbda4]" />
+              <span className="text-sm font-medium">{article.motifLabel}</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Content */}
