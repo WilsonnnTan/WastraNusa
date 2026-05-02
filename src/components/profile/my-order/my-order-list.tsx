@@ -1,11 +1,13 @@
 import { EncyclopediaPagination as Pagination } from '@/components/encyclopedia/encyclopedia-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { OrderItem, useOrders } from '@/hooks/use-order';
+import { OrderItem, useCancelOrder, useOrders } from '@/hooks/use-order';
 import { Eye, Hexagon, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 import type { OrderStatus } from './my-order-main';
+import { PaymentDeadlineBadge } from './payment-deadline-badge';
 
 interface MyOrderListProps {
   activeTab: OrderStatus;
@@ -14,7 +16,13 @@ interface MyOrderListProps {
 }
 
 export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
-  const { data: response, isLoading, isError } = useOrders(activeTab, page, 5);
+  const {
+    data: response,
+    isLoading,
+    isError,
+    refetch,
+  } = useOrders(activeTab, page, 5);
+  const cancelOrderMutation = useCancelOrder();
 
   if (isLoading) {
     return (
@@ -138,6 +146,26 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
             </div>
 
             <div className="flex items-center gap-2">
+              {order.canCancel && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-lg border-[#d8b5a7] text-[#b56d56] hover:bg-[#fdf6f2] hover:text-[#9d5a46] text-xs font-semibold px-4"
+                  disabled={cancelOrderMutation.isPending}
+                  onClick={() => {
+                    cancelOrderMutation.mutate(order.id, {
+                      onSuccess: () => {
+                        toast.success('Pesanan berhasil dibatalkan.');
+                      },
+                      onError: (error) => {
+                        toast.error(error.message);
+                      },
+                    });
+                  }}
+                >
+                  Batalkan
+                </Button>
+              )}
               {order.actions.includes('Lacak Pesanan') && (
                 <Button
                   variant="outline"
@@ -164,6 +192,15 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
               )}
             </div>
           </div>
+
+          {order.paymentDeadlineAt && order.status === 'Menunggu Bayar' && (
+            <PaymentDeadlineBadge
+              deadlineAt={order.paymentDeadlineAt}
+              onExpire={() => {
+                void refetch();
+              }}
+            />
+          )}
 
           <div className="h-px w-full bg-[#ece7dd] mt-2 mb-1 last:hidden block" />
         </div>
