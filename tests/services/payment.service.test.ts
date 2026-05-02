@@ -6,6 +6,7 @@ import { orderRepository } from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { productVariantRepository } from '@/repositories/productVariant.repository';
+import { orderService } from '@/services/order.service';
 import { paymentService } from '@/services/payment.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -61,6 +62,14 @@ describe('paymentService', () => {
         mockUserId,
       );
       expect(orderRepository.createOrder).toHaveBeenCalled();
+      expect(
+        paymentTransactionRepository.createPaymentTransaction,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'pending',
+          expiredAt: expect.any(Date),
+        }),
+      );
       expect(
         productVariantRepository.decrementVariantStock,
       ).toHaveBeenCalledWith('var-1', 2);
@@ -317,6 +326,10 @@ describe('paymentService', () => {
       ).toHaveBeenCalledWith(
         'order-123',
         expect.objectContaining({ status: 'failed' }),
+      );
+      expect(orderService.cancelOrderBySystemId).toHaveBeenCalledWith(
+        'order-123',
+        'failed',
       );
       expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
       expect(

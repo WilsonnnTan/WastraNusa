@@ -50,4 +50,28 @@ describe('productVariantRepository', { tags: ['db'] }, () => {
       });
     });
   });
+
+  describe('incrementVariantStock', () => {
+    it('should increment variant stock', async () => {
+      const before = await prisma.productVariant.findUnique({
+        where: { id: SEED_VARIANT_1_1.id },
+      });
+
+      await productVariantRepository.incrementVariantStock(
+        SEED_VARIANT_1_1.id,
+        3,
+      );
+
+      const after = await prisma.productVariant.findUnique({
+        where: { id: SEED_VARIANT_1_1.id },
+      });
+
+      expect(after!.stock).toBe(before!.stock + 3);
+
+      await prisma.productVariant.update({
+        where: { id: SEED_VARIANT_1_1.id },
+        data: { stock: before!.stock },
+      });
+    });
+  });
 });
