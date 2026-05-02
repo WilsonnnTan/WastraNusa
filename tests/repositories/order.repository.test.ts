@@ -3,10 +3,7 @@ import { orderRepository } from '@/repositories/order.repository';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { SEED_ADDRESS_USER } from '../../prisma/dev-seeds/address.seed';
-import {
-  SEED_PRODUCT_1,
-  SEED_VARIANT_1_1,
-} from '../../prisma/dev-seeds/product.seed';
+import { SEED_PRODUCT_1 } from '../../prisma/dev-seeds/product.seed';
 import { SEED_REGULAR_USER } from '../../prisma/dev-seeds/user.seed';
 
 vi.unmock('@/lib/prisma');
@@ -15,6 +12,7 @@ vi.unmock('@/repositories/order.repository');
 describe('orderRepository', { tags: ['db'] }, () => {
   let userId: string;
   const orderIds: string[] = [];
+  const variantIds: string[] = [];
 
   beforeAll(async () => {
     const user = await prisma.user.findFirst({
@@ -31,6 +29,9 @@ describe('orderRepository', { tags: ['db'] }, () => {
   afterAll(async () => {
     for (const id of orderIds) {
       await prisma.order.delete({ where: { id } }).catch(() => {});
+    }
+    for (const id of variantIds) {
+      await prisma.productVariant.delete({ where: { id } }).catch(() => {});
     }
   });
 
@@ -354,17 +355,31 @@ describe('orderRepository', { tags: ['db'] }, () => {
     it('should cancel order, expire pending payment transaction, and restore stock', async () => {
       const id = crypto.randomUUID();
       orderIds.push(id);
+      const variantId = crypto.randomUUID();
+      variantIds.push(variantId);
       const externalId = `EXT-CANCEL-${id.slice(0, 8)}`;
       const expiredAt = new Date('2026-05-02T00:00:00.000Z');
+
+      await prisma.productVariant.create({
+        data: {
+          id: variantId,
+          productId: SEED_PRODUCT_1.id,
+          name: `Restore Variant ${variantId.slice(0, 8)}`,
+          type: 'size',
+          price: Number(SEED_PRODUCT_1.price),
+          stock: 20,
+          sku: `TEST-RESTORE-VAR-${variantId.slice(0, 8)}`,
+        },
+      });
 
       await orderRepository.createOrder({
         id,
         orderNumber: `TEST-RESTORE-${id.slice(0, 8)}`,
         userId,
         productId: SEED_PRODUCT_1.id,
-        variantId: SEED_VARIANT_1_1.id,
+        variantId,
         productName: SEED_PRODUCT_1.name,
-        variantName: SEED_VARIANT_1_1.name,
+        variantName: `Restore Variant ${variantId.slice(0, 8)}`,
         quantity: 2,
         productPrice: Number(SEED_PRODUCT_1.price),
         shippingAddressId: SEED_ADDRESS_USER.id,
@@ -387,17 +402,17 @@ describe('orderRepository', { tags: ['db'] }, () => {
       });
 
       const stockBefore = await prisma.productVariant.findUnique({
-        where: { id: SEED_VARIANT_1_1.id },
+        where: { id: variantId },
       });
 
       await prisma.productVariant.update({
-        where: { id: SEED_VARIANT_1_1.id },
+        where: { id: variantId },
         data: { stock: { decrement: 2 } },
       });
 
       await orderRepository.cancelOrderAndRestoreStock(
         id,
-        [{ variantId: SEED_VARIANT_1_1.id, quantity: 2 }],
+        [{ variantId, quantity: 2 }],
         'expired',
         expiredAt,
       );
@@ -409,7 +424,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
         where: { externalId },
       });
       const stockAfter = await prisma.productVariant.findUnique({
-        where: { id: SEED_VARIANT_1_1.id },
+        where: { id: variantId },
       });
 
       expect(orderAfter?.orderStatus).toBe('cancelled');
