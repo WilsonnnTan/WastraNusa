@@ -19,11 +19,7 @@ export const createArticleSchema = z.object({
   readMinutes: z.number().int().min(1).optional(),
   featured: z.boolean().optional(),
 
-  wikipediaPageId: z.string().min(1, 'Wikipedia Page ID wajib diisi').nullish(),
-  wikipediaUrl: z.url('Format URL tidak valid').nullish(),
-  wikimediaImageUrl: z.string().url().nullish(),
-  wikimediaVideoUrl: z.string().url().nullish(),
-  wikipediaLastSync: z.union([z.string().datetime(), z.date()]).nullish(),
+  imageURL: z.string().url().nullish(),
 
   sections: z
     .array(
@@ -32,6 +28,7 @@ export const createArticleSchema = z.object({
         content: z.string().min(1, 'Konten section wajib diisi'),
         imageLabel: z.string().nullish(),
         imageCaption: z.string().nullish(),
+        imageURL: z.string().url().nullish(),
         order: z.number().int(),
       }),
     )

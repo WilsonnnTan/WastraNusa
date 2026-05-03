@@ -220,6 +220,81 @@ describe('productRepository', { tags: ['db'] }, () => {
     });
   });
 
+  describe('countCreatedSince & countOutOfStock', () => {
+    it('should count products created since a given date', async () => {
+      const id = crypto.randomUUID();
+      createdProductIds.push(id);
+
+      await productRepository.create({
+        id,
+        articleId: SEED_ARTICLE_1.id,
+        name: `Since Test ${id.slice(0, 8)}`,
+        slug: `since-test-${id.slice(0, 8)}`,
+        description: 'Since test',
+        price: 100000,
+        sku: `SIN-SKU-${id.slice(0, 8)}`,
+        weight: 100,
+        island: SEED_ARTICLE_1.island,
+        province: SEED_ARTICLE_1.province,
+        clothingType: SEED_ARTICLE_1.clothingType,
+        gender: SEED_ARTICLE_1.gender,
+        status: 'active',
+        variants: {
+          create: [
+            {
+              id: crypto.randomUUID(),
+              name: 'Default',
+              type: 'size',
+              price: 100000,
+              stock: 5,
+              sku: `SIN-VAR-${id.slice(0, 8)}`,
+            },
+          ],
+        },
+      });
+
+      const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7); // 7 days ago
+      const count = await productRepository.countCreatedSince(since);
+      expect(count).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should count out of stock products', async () => {
+      const id = crypto.randomUUID();
+      createdProductIds.push(id);
+
+      await productRepository.create({
+        id,
+        articleId: SEED_ARTICLE_1.id,
+        name: `OOS Test ${id.slice(0, 8)}`,
+        slug: `oos-test-${id.slice(0, 8)}`,
+        description: 'OOS test',
+        price: 100000,
+        sku: `OOS-SKU-${id.slice(0, 8)}`,
+        weight: 100,
+        island: SEED_ARTICLE_1.island,
+        province: SEED_ARTICLE_1.province,
+        clothingType: SEED_ARTICLE_1.clothingType,
+        gender: SEED_ARTICLE_1.gender,
+        status: 'out_of_stock',
+        variants: {
+          create: [
+            {
+              id: crypto.randomUUID(),
+              name: 'Default',
+              type: 'size',
+              price: 100000,
+              stock: 0,
+              sku: `OOS-VAR-${id.slice(0, 8)}`,
+            },
+          ],
+        },
+      });
+
+      const count = await productRepository.countOutOfStock();
+      expect(count).toBeGreaterThanOrEqual(1);
+    });
+  });
+
   describe('aggregation helpers', () => {
     it('should group product counts by clothing type', async () => {
       const grouped = await productRepository.countByClothingType();

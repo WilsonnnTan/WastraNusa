@@ -251,7 +251,7 @@ export function AdminOrderContent() {
     <main className="flex flex-col">
       <AdminHeader
         title="Manajemen Pesanan"
-        subtitle="Kelola status pesanan pelanggan"
+        subtitle="Kelola Status Pesanan Pelanggan"
       />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
@@ -269,7 +269,7 @@ export function AdminOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-10 w-full rounded-xl border-[#ddd6c9] bg-white sm:w-[190px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[190px]">
                   <SelectValue placeholder="Status Pesanan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -289,7 +289,7 @@ export function AdminOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-10 w-full rounded-xl border-[#ddd6c9] bg-white sm:w-[180px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[180px]">
                   <SelectValue placeholder="Status Pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -314,8 +314,8 @@ export function AdminOrderContent() {
                     <th className="px-4 py-3">Produk</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Pembayaran</th>
-                    <th className="px-4 py-3">No. Resi</th>
-                    <th className="px-4 py-3 text-right">Aksi</th>
+                    <th className="px-4 py-3 text-center">No. Resi</th>
+                    <th className="px-4 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -403,7 +403,7 @@ export function AdminOrderContent() {
                                 }
                                 disabled={!editable}
                               >
-                                <SelectTrigger className="h-9 rounded-lg border-[#ddd6c9] bg-white text-xs">
+                                <SelectTrigger className="h-9 w-36 rounded-lg border-[#ddd6c9] bg-white text-xs">
                                   <SelectValue placeholder="Pilih status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -419,7 +419,7 @@ export function AdminOrderContent() {
                               </Select>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-center">
                             <Badge
                               variant="secondary"
                               className={getPaymentStatusBadgeClass(
@@ -476,7 +476,7 @@ export function AdminOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="h-9 w-9 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) => Math.max(1, currentPage - 1))
                   }
@@ -487,7 +487,7 @@ export function AdminOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="h-9 w-9 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) =>
                       Math.min(orderData.meta.totalPages, currentPage + 1),

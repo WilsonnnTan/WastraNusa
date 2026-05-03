@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -25,6 +25,7 @@ import {
   Quote,
   UserRound,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -195,14 +196,26 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
       <section className="mt-4 overflow-hidden rounded-2xl border border-[#dacfbf] bg-[#ece1d0]">
         <div className="relative min-h-[340px] border-b border-dashed border-[#d8ccbb]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_22%,rgba(242,229,205,0.9)_0%,rgba(218,202,178,0.72)_42%,rgba(154,133,108,0.88)_100%)]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#4a3c2f]/90 via-[#5a4a3a]/25 to-transparent" />
 
-          <div className="absolute inset-0 grid place-items-center">
-            <div className="flex flex-col items-center gap-2 text-[#5f503e]">
-              <span className="h-5 w-5 rotate-45 border border-[#ccbda4]" />
-              <span className="text-sm font-medium">{article.motifLabel}</span>
+          {article.imageURL ? (
+            <Image
+              src={article.imageURL}
+              alt={article.title}
+              fill
+              className="object-cover mix-blend-overlay"
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center">
+              <div className="flex flex-col items-center gap-2 text-[#5f503e]">
+                <span className="h-5 w-5 rotate-45 border border-[#ccbda4]" />
+                <span className="text-sm font-medium">
+                  {article.motifLabel}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#4a3c2f]/90 via-[#5a4a3a]/25 to-transparent" />
 
           <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -313,14 +326,23 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   {showVisual ? (
                     <Card className="overflow-hidden rounded-xl border border-[#dfd4c2] bg-[#f5f1e8]">
                       <div className="relative min-h-[200px] border-b border-dashed border-[#d9cebc] bg-[#ece1d0]">
-                        <div className="absolute inset-0 grid place-items-center">
-                          <div className="flex flex-col items-center gap-2 text-[#6f604e]">
-                            <span className="h-4 w-4 rotate-45 border border-[#ccbda4]" />
-                            <span className="text-sm font-medium">
-                              {section.imageLabel ?? article.motifLabel}
-                            </span>
+                        {section.imageURL ? (
+                          <Image
+                            src={section.imageURL}
+                            alt={section.imageCaption || ''}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 grid place-items-center">
+                            <div className="flex flex-col items-center gap-2 text-[#6f604e]">
+                              <span className="h-4 w-4 rotate-45 border border-[#ccbda4]" />
+                              <span className="text-sm font-medium">
+                                {section.imageLabel ?? article.motifLabel}
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       <p className="px-3 py-2 text-xs text-[#5b5f59]">

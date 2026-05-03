@@ -10,6 +10,7 @@ CREATE TABLE "product_variant" (
     "price" DECIMAL(65,30),
     "stock" INTEGER NOT NULL DEFAULT 0,
     "sku" TEXT NOT NULL,
+    "imageURL" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

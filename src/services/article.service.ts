@@ -109,8 +109,20 @@ export const articleService = {
       articleRepository.findMostPopular(6),
     ]);
 
+    // compute weekly and monthly deltas (new items)
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [weeklyDelta, monthlyDelta] = await Promise.all([
+      articleRepository.countCreatedSince(weekAgo),
+      articleRepository.countCreatedSince(monthAgo),
+    ]);
+
     return {
       totalArticles,
+      weeklyDelta,
+      monthlyDelta,
       popularArticles: mostPopularArticles.map((item, index) => ({
         rank: index + 1,
         slug: item.article.slug,
@@ -159,6 +171,7 @@ export const articleService = {
           content: section.content,
           imageLabel: section.imageLabel ?? undefined,
           imageCaption: section.imageCaption ?? undefined,
+          imageURL: section.imageURL ?? undefined,
         })) || [],
       keyFacts: [
         { label: 'Wilayah Utama', value: article.region },
@@ -222,7 +235,7 @@ export const articleService = {
         readMinutes: article.readMinutes,
         featured: article.featured,
         status: article.status,
-        imageUrl: article.wikimediaImageUrl,
+        imageUrl: article.imageURL,
       })),
       meta: {
         page: safePage,

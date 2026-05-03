@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail } from '@/hooks/use-article';
@@ -324,7 +324,10 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
         />
 
         <div className="mt-4 grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
-          <CatalogDetailGallery category={product.clothingType} />
+          <CatalogDetailGallery
+            category={product.clothingType}
+            imageURL={product.imageURL}
+          />
           <CatalogDetailProductSummary
             product={product}
             sizeOptions={sizeVariants}

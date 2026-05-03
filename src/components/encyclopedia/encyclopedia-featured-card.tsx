@@ -1,8 +1,9 @@
-﻿import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { ArrowRight, Clock3, Eye } from 'lucide-react';
+import Image from 'next/image';
 
 interface EncyclopediaFeaturedCardProps {
   article: EncyclopediaArticle;
@@ -18,14 +19,23 @@ export function EncyclopediaFeaturedCard({
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)]">
         {/* Image Placeholder */}
         <div className="relative min-h-[185px] border-b border-dashed border-[#dacfbf] bg-[#ece1d0] md:min-h-[220px] md:border-b-0 md:border-r">
-          <div className="absolute inset-0 grid place-items-center">
-            <div className="flex flex-col items-center gap-2 text-[#766a56]">
-              <span className="h-5 w-5 rotate-45 border border-[#ccbda4]" />
-              <span className="text-sm font-semibold">
-                {article.motifLabel}
-              </span>
+          {article.imageURL ? (
+            <Image
+              src={article.imageURL}
+              alt={article.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center">
+              <div className="flex flex-col items-center gap-2 text-[#766a56]">
+                <span className="h-5 w-5 rotate-45 border border-[#ccbda4]" />
+                <span className="text-sm font-semibold">
+                  {article.motifLabel}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Content */}

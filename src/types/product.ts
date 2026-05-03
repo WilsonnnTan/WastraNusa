@@ -7,6 +7,7 @@ export interface ProductVariantItem {
   price: number | null;
   stock: number;
   sku: string;
+  imageURL?: string | null;
 }
 
 export interface ProductInventoryItem {
@@ -20,6 +21,7 @@ export interface ProductInventoryItem {
   stock: number;
   sku: string;
   weight: number;
+  imageURL?: string | null;
   island: string;
   province: string;
   clothingType: string;

@@ -5,7 +5,7 @@ type LayoutProps = {
   children: React.ReactNode;
 };
 
-export function Layout({ children }: LayoutProps) {
+export default function AuthLayout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen bg-[#e8e0d0] font-segoe">
       {/* Left: form panel — form sits slightly above center, left-aligned with padding */}

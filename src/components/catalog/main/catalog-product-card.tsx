@@ -1,7 +1,8 @@
-﻿import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { formatVariantPriceRange } from '../utils';
@@ -42,12 +43,21 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
             </Badge>
           ) : null}
 
-          <div className="absolute inset-0 grid place-items-center">
-            <div className="flex flex-col items-center gap-2 text-[#7c6c54]">
-              <span className="size-4 rotate-45 border border-[#cebda2]" />
-              <span className="text-sm font-medium">Gambar Placeholder</span>
+          {product.imageURL ? (
+            <Image
+              src={product.imageURL}
+              alt={product.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center">
+              <div className="flex flex-col items-center gap-2 text-[#7c6c54]">
+                <span className="size-4 rotate-45 border border-[#cebda2]" />
+                <span className="text-sm font-medium">Gambar Placeholder</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col gap-2 p-3">

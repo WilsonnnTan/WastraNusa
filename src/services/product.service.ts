@@ -24,6 +24,7 @@ const mapVariant = (variant: {
   price: { toNumber(): number } | null;
   stock: number;
   sku: string;
+  imageURL: string | null;
 }) => ({
   id: variant.id,
   name: variant.name,
@@ -31,6 +32,7 @@ const mapVariant = (variant: {
   price: variant.price ? variant.price.toNumber() : null,
   stock: variant.stock,
   sku: variant.sku,
+  imageURL: variant.imageURL,
 });
 
 const sumVariantStock = (
@@ -49,6 +51,7 @@ const mapProduct = (product: {
   price: { toNumber(): number };
   sku: string;
   weight: number;
+  imageURL: string | null;
   island?: string | null;
   province: string;
   clothingType: string;
@@ -62,6 +65,7 @@ const mapProduct = (product: {
     price: { toNumber(): number } | null;
     stock: number;
     sku: string;
+    imageURL: string | null;
   }[];
   createdAt: Date;
   updatedAt: Date;
@@ -76,6 +80,7 @@ const mapProduct = (product: {
   stock: sumVariantStock(product.variants),
   sku: product.sku,
   weight: product.weight,
+  imageURL: product.imageURL,
   island: product.island ?? '',
   province: product.province,
   clothingType: product.clothingType,
@@ -170,6 +175,7 @@ const normalizeVariantsForCreate = (variants?: ProductVariantInput[]) =>
     price: variant.price,
     stock: variant.stock,
     sku: variant.sku,
+    imageURL: variant.imageURL,
   }));
 
 const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
@@ -181,6 +187,7 @@ const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
     price: variant.price,
     stock: variant.stock,
     sku: variant.sku,
+    imageURL: variant.imageURL,
   })),
 });
 
@@ -314,14 +321,31 @@ export const productService = {
   },
 
   getDashboardOverview: async (): Promise<ProductDashboardData> => {
-    const LOW_STOCK_THRESHOLD = 5;
+    const LOW_STOCK_THRESHOLD = 20;
     const [totalProducts, lowStockItems] = await Promise.all([
       productRepository.countAll(),
       productRepository.findLowStock(LOW_STOCK_THRESHOLD, 6),
     ]);
+    // compute weekly/monthly deltas
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [weeklyDelta, monthlyDelta] = await Promise.all([
+      productRepository.countCreatedSince(weekAgo),
+      productRepository.countCreatedSince(monthAgo),
+    ]);
+
+    const lowStockCount =
+      await productRepository.countLowStock(LOW_STOCK_THRESHOLD);
+    const outOfStockCount = await productRepository.countOutOfStock();
 
     return {
       totalProducts,
+      weeklyDelta,
+      monthlyDelta,
+      lowStockCount,
+      outOfStockCount,
       lowStockItems: lowStockItems.map((item) => ({
         name: item.name,
         category: item.clothingType,
@@ -359,6 +383,7 @@ export const productService = {
       price: data.price,
       sku: data.sku,
       weight: data.weight,
+      imageURL: data.imageURL,
       island,
       province,
       clothingType: data.clothingType,
@@ -409,6 +434,7 @@ export const productService = {
       price: data.price,
       sku: data.sku,
       weight: data.weight,
+      imageURL: data.imageURL,
       island: nextIsland,
       province: nextProvince,
       clothingType: data.clothingType,

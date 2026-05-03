@@ -69,6 +69,7 @@ function buildProductFormValues(
     clothingType: initialData?.clothingType ?? '',
     gender: initialData?.gender ?? Gender.female,
     status: initialData?.status ?? ProductStatus.active,
+    imageURL: initialData?.imageURL ?? '',
     variants: initialData?.variants.map((variant) => ({
       id: variant.id,
       name: variant.name,
@@ -76,6 +77,7 @@ function buildProductFormValues(
       price: variant.price ?? Number.NaN,
       stock: variant.stock,
       sku: variant.sku,
+      imageURL: variant.imageURL ?? '',
     })) ?? [
       {
         name: '',
@@ -83,6 +85,7 @@ function buildProductFormValues(
         price: 0,
         stock: 0,
         sku: '',
+        imageURL: '',
       },
     ],
   };
@@ -469,6 +472,22 @@ export default function AddUpdateProductModal({
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              URL Gambar Produk (Opsional)
+            </label>
+            <Input
+              {...register('imageURL')}
+              placeholder="https://example.com/image.jpg"
+              className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7]"
+            />
+            {errors.imageURL && (
+              <p className="mt-1 text-xs text-red-500">
+                {errors.imageURL.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-600">
               Deskripsi (Opsional)
             </label>
             <textarea
@@ -497,6 +516,7 @@ export default function AddUpdateProductModal({
                     price: 0,
                     stock: 0,
                     sku: '',
+                    imageURL: '',
                   })
                 }
                 className="flex items-center gap-2 border-[#c26a3d] text-[#c26a3d] hover:bg-[#c26a3d]/10"
@@ -609,6 +629,21 @@ export default function AddUpdateProductModal({
                     {errors.variants?.[index]?.stock && (
                       <p className="mt-1 text-xs text-red-500">
                         {errors.variants[index]?.stock?.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                      URL Gambar Varian (Opsional)
+                    </label>
+                    <Input
+                      {...register(`variants.${index}.imageURL` as const)}
+                      placeholder="https://example.com/variant-image.jpg"
+                    />
+                    {errors.variants?.[index]?.imageURL && (
+                      <p className="mt-1 text-xs text-red-500">
+                        {errors.variants[index]?.imageURL?.message}
                       </p>
                     )}
                   </div>

@@ -96,13 +96,15 @@ export default function AddUpdateArticleModal({
     status: initialData?.status ?? ArticleStatus.published,
     summary: initialData?.summary ?? '',
     description: initialData?.description ?? '',
+    imageURL: initialData?.imageURL ?? '',
     sections: initialData?.sections?.length
       ? initialData.sections.map((s, i) => ({
           title: s.title,
           content: s.content,
+          imageURL: s.imageURL ?? '',
           order: i,
         }))
-      : [{ title: '', content: '', order: 0 }],
+      : [{ title: '', content: '', imageURL: '', order: 0 }],
   };
 
   const {
@@ -585,6 +587,23 @@ export default function AddUpdateArticleModal({
                 </p>
               )}
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                URL Gambar Utama (Opsional)
+              </label>
+              <Input
+                {...register('imageURL')}
+                type="text"
+                placeholder="https://example.com/image.jpg"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+              />
+              {errors.imageURL && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.imageURL.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <hr className="border-[#ebdxc2]" />
@@ -653,6 +672,22 @@ export default function AddUpdateArticleModal({
                   {errors.sections?.[index]?.content && (
                     <p className="text-xs text-red-500 mt-1 italic">
                       {errors.sections[index]?.content?.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    URL Gambar Section (Opsional)
+                  </label>
+                  <Input
+                    {...register(`sections.${index}.imageURL` as const)}
+                    placeholder="https://example.com/section-image.jpg"
+                    className="h-10 bg-white"
+                  />
+                  {errors.sections?.[index]?.imageURL && (
+                    <p className="text-xs text-red-500 mt-1 italic">
+                      {errors.sections[index]?.imageURL?.message}
                     </p>
                   )}
                 </div>

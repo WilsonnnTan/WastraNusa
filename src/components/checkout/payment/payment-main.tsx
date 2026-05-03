@@ -1,7 +1,5 @@
 'use client';
 
-import { Footer } from '@/components/footer';
-import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/hooks/use-checkout';
 import {
@@ -96,74 +94,65 @@ export function PaymentMain() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf8f2] flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-10 max-w-[1320px]">
-        {items.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
-            <p className="text-lg font-bold text-[#3d5446]">
-              Belum ada data checkout
-            </p>
-            <p className="text-[#8e8476] mt-2">
-              Kembali ke keranjang dan pilih produk terlebih dahulu.
-            </p>
-            <Link href="/cart" className="inline-block mt-6">
-              <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
-                Kembali ke Keranjang
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-8 space-y-6">
-              <ReviewItems
-                items={items}
-                shipping={shipping}
-                address={address}
-              />
+    <>
+      {items.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
+          <p className="text-lg font-bold text-[#3d5446]">
+            Belum ada data checkout
+          </p>
+          <p className="text-[#8e8476] mt-2">
+            Kembali ke keranjang dan pilih produk terlebih dahulu.
+          </p>
+          <Link href="/cart" className="inline-block mt-6">
+            <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
+              Kembali ke Keranjang
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <ReviewItems items={items} shipping={shipping} address={address} />
 
-              {errorMessage && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  {errorMessage}
-                </div>
-              )}
-
-              <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <Link href="/cart/checkout">
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto text-[#3d5446] border-[#d8cfbf] font-bold gap-2 hover:bg-[#f4efe6] px-6 py-6 rounded-xl"
-                  >
-                    <ChevronLeft size={18} /> Kembali
-                  </Button>
-                </Link>
-
-                <Button
-                  onClick={handleConfirmAndPay}
-                  disabled={isProcessing}
-                  className="w-full sm:w-auto bg-[#cc6644] hover:bg-[#b3593b] text-white px-8 py-6 rounded-xl font-bold shadow-lg shadow-[#cc6644]/20 transition-all active:scale-95 gap-2"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />{' '}
-                      Memproses...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={18} /> Konfirmasi & Bayar Sekarang
-                    </>
-                  )}
-                </Button>
+            {errorMessage && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {errorMessage}
               </div>
-            </div>
+            )}
 
-            <aside className="lg:col-span-4">
-              <CheckoutSummary totals={totals} items={items} />
-            </aside>
+            <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <Link href="/cart/checkout">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto text-[#3d5446] border-[#d8cfbf] font-bold gap-2 hover:bg-[#f4efe6] px-6 py-6 rounded-xl"
+                >
+                  <ChevronLeft size={18} /> Kembali
+                </Button>
+              </Link>
+
+              <Button
+                onClick={handleConfirmAndPay}
+                disabled={isProcessing}
+                className="w-full sm:w-auto bg-[#cc6644] hover:bg-[#b3593b] text-white px-8 py-6 rounded-xl font-bold shadow-lg shadow-[#cc6644]/20 transition-all active:scale-95 gap-2"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" /> Memproses...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard size={18} /> Konfirmasi & Bayar Sekarang
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+
+          <aside className="lg:col-span-4">
+            <CheckoutSummary totals={totals} items={items} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

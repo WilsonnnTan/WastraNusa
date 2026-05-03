@@ -1,7 +1,5 @@
 'use client';
 
-import { Footer } from '@/components/footer';
-import { Header } from '@/components/header';
 import {
   useCart,
   useRemoveMultipleFromCart,
@@ -203,59 +201,55 @@ export function CartMain() {
   }, [selectedIds, items]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fbf8f2]">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-[1320px]">
-        <div className="flex items-center gap-2 mb-8">
-          <ShoppingCart className="text-brand" />
-          <h1 className="text-2xl font-bold text-[#3d5446]">
-            Keranjang Belanja{' '}
-            <span className="text-[#8e8476] font-normal text-lg">
-              ({items.length} produk)
-            </span>
-          </h1>
-        </div>
+    <>
+      <div className="flex items-center gap-2 mb-8">
+        <ShoppingCart className="text-brand" />
+        <h1 className="text-2xl font-bold text-[#3d5446]">
+          Keranjang Belanja{' '}
+          <span className="text-[#8e8476] font-normal text-lg">
+            ({items.length} produk)
+          </span>
+        </h1>
+      </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-brand" />
-            <span className="ml-2 text-[#3d5446]">Memuat keranjang...</span>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-brand" />
+          <span className="ml-2 text-[#3d5446]">Memuat keranjang...</span>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+          <p className="font-bold">Gagal memuat keranjang</p>
+          <p className="text-sm mt-1">{error.message}</p>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="bg-white rounded-xl border border-[#e8e2d5] p-8 text-center">
+          <ShoppingCart className="w-12 h-12 mx-auto text-[#8e8476] mb-4" />
+          <p className="text-lg font-semibold text-[#3d5446]">
+            Keranjang Anda kosong
+          </p>
+          <p className="text-[#8e8476] mt-2">Tambahkan produk favorit Anda</p>
+        </div>
+      ) : (
+        <div className="lg:grid lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8">
+            <CartList
+              items={items}
+              selectedIds={selectedIds}
+              onToggleItem={toggleItem}
+              onToggleAll={toggleAll}
+              onUpdateQty={handleUpdateQuantity}
+              onDeleteSelected={handleDeleteSelected}
+            />
           </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
-            <p className="font-bold">Gagal memuat keranjang</p>
-            <p className="text-sm mt-1">{error.message}</p>
+          <div className="lg:col-span-4">
+            <CartSummary
+              totals={totals}
+              selectedItems={selectedItemsForSummary}
+            />
           </div>
-        ) : items.length === 0 ? (
-          <div className="bg-white rounded-xl border border-[#e8e2d5] p-8 text-center">
-            <ShoppingCart className="w-12 h-12 mx-auto text-[#8e8476] mb-4" />
-            <p className="text-lg font-semibold text-[#3d5446]">
-              Keranjang Anda kosong
-            </p>
-            <p className="text-[#8e8476] mt-2">Tambahkan produk favorit Anda</p>
-          </div>
-        ) : (
-          <div className="lg:grid lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8">
-              <CartList
-                items={items}
-                selectedIds={selectedIds}
-                onToggleItem={toggleItem}
-                onToggleAll={toggleAll}
-                onUpdateQty={handleUpdateQuantity}
-                onDeleteSelected={handleDeleteSelected}
-              />
-            </div>
-            <div className="lg:col-span-4">
-              <CartSummary
-                totals={totals}
-                selectedItems={selectedItemsForSummary}
-              />
-            </div>
-          </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -78,7 +78,7 @@ model User {
   customerAddresses CustomerAddress[]
   orders            Order[]
   userArticleLikes  UserArticleLike[]
-  cart Cart?
+  cart              Cart?
 
   role       String?
   banned     Boolean?  @default(false)
@@ -159,14 +159,10 @@ model Article {
   clothingType String?
   motifLabel   String
   gender       Gender?
-  readMinutes  Int      @default(6)
-  featured     Boolean  @default(false)
+  readMinutes  Int     @default(6)
+  featured     Boolean @default(false)
 
-  wikipediaPageId   String?   @unique
-  wikipediaUrl      String?
-  wikimediaImageUrl String?
-  wikimediaVideoUrl String?
-  wikipediaLastSync DateTime?
+  imageURL String?
 
   summary String?
 
@@ -198,7 +194,7 @@ model Product {
   description String?
 
   price Decimal
-  sku   String @unique
+  sku   String  @unique
 
   weight Int
 
@@ -210,13 +206,15 @@ model Product {
   status ProductStatus @default(active)
   sold   Int           @default(0)
 
+  imageURL String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  article  Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
-  variants ProductVariant[]
-  orders   Order[]
+  article   Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  variants  ProductVariant[]
+  orders    Order[]
   cartItems CartItem[]
 
   @@index([island])
@@ -236,12 +234,14 @@ model ProductVariant {
   stock Int         @default(0)
   sku   String      @unique
 
+  imageURL String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orders  Order[]
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orders    Order[]
   cartItems CartItem[]
 
   @@index([type])
@@ -376,13 +376,13 @@ model UserArticleLike {
 }
 
 model Cart {
-  id        String     @id
-  userId    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
 
   @@map("cart")
 }
@@ -396,9 +396,9 @@ model CartItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cart      Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  cart    Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@unique([cartId, productId, variantId])
   @@index([cartId])
@@ -413,6 +413,7 @@ model ArticleSection {
   content      String
   imageLabel   String?
   imageCaption String?
+  imageURL     String?
   order        Int     @default(0)
 
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
