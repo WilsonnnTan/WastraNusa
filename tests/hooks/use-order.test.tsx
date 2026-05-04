@@ -1,11 +1,12 @@
 import {
   type OrderDetail,
   type PaginatedOrders,
+  useCancelOrder,
   useOrderDetail,
   useOrders,
 } from '@/hooks/use-order';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -51,6 +52,10 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
         date: '2026-01-01',
         totalPrice: '150000',
         status: 'Dikonfirmasi',
+        paymentStatus: 'paid',
+        paymentStatusLabel: 'Lunas',
+        paymentDeadlineAt: null,
+        canCancel: false,
         product: {
           category: 'Batik',
           name: 'Kemeja Batik',
@@ -74,7 +79,10 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
     orderDate: '1 Jan 2026',
     orderStatus: 'Dikonfirmasi',
     paymentStatus: 'paid',
+    paymentStatusLabel: 'Lunas',
     paymentMethod: 'bank_transfer',
+    paymentDeadlineAt: null,
+    canCancel: false,
     totals: {
       subtotal: 'Rp 120.000',
       shippingCost: 'Rp 30.000',
@@ -108,6 +116,7 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
       paymentUrl: null,
       vaNumber: '123456789',
       paidAt: null,
+      expiredAt: null,
       createdAt: '2026-01-01T00:00:00.000Z',
     },
     customerNotes: null,
@@ -167,5 +176,42 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(MOCK_ORDER_DETAIL);
     expect(global.fetch).toHaveBeenCalledWith('/api/orders/ORD-1');
+  });
+
+  it('should cancel an order and invalidate order queries', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      createSuccessResponse(MOCK_ORDER_DETAIL) as never,
+    );
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useCancelOrder(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync('ORD-1');
+    });
+
+    expect(global.fetch).toHaveBeenCalledWith('/api/orders/ORD-1', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action: 'cancel' }),
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ['orders'] }),
+    );
+    expect(invalidateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ['orders', 'detail', 'ORD-1'] }),
+    );
   });
 });
