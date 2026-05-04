@@ -1,5 +1,6 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { ArticleStatus } from '@/generated/prisma/enums';
 import { useCreateArticle, useUpdateArticle } from '@/hooks/use-article';
+import { useWikipediaSummaryImport } from '@/hooks/use-wikipedia-summary';
 import {
   type CreateArticleInput,
   createArticleSchema,
@@ -19,7 +21,8 @@ import {
 import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { kabupaten, provinsi } from 'daftar-wilayah-indonesia';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Download, Loader2, Plus, Trash2, X } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Controller,
@@ -80,6 +83,8 @@ export default function AddUpdateArticleModal({
   const isEdit = !!initialData;
   const isPending = isCreating || isUpdating;
 
+  const wiki = useWikipediaSummaryImport(isOpen);
+
   const defaultValues: CreateArticleInput = {
     title: initialData?.title ?? '',
     excerpt: initialData?.excerpt ?? '',
@@ -139,6 +144,20 @@ export default function AddUpdateArticleModal({
     control,
     name: 'sections',
   });
+
+  const handleApplyWikimediaPreview = () => {
+    if (!wiki.preview) return;
+    const { mapped } = wiki.preview;
+    setValue('title', mapped.title, { shouldDirty: true });
+    setValue('excerpt', mapped.excerpt, { shouldDirty: true });
+    setValue('summary', mapped.summary, { shouldDirty: true });
+    setValue('description', mapped.description, { shouldDirty: true });
+    if (mapped.imageURL) {
+      setValue('imageURL', mapped.imageURL, { shouldDirty: true });
+    }
+    toast.success('Data Wikipedia diterapkan ke form.');
+    wiki.discardPreview();
+  };
 
   const onSubmit = (data: CreateArticleInput) => {
     if (isEdit && initialData) {
@@ -250,6 +269,128 @@ export default function AddUpdateArticleModal({
 
         {/* Body / Form */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar">
+          {/* Impor ringkasan Wikipedia (fetch di browser) */}
+          <div className="rounded-2xl border border-[#e5ded5] bg-[#fdfaf7]/80 p-4 space-y-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">
+                  Impor dari Wikipedia
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Tempel URL artikel (mis.{' '}
+                  <span className="font-mono text-[11px]">
+                    https://id.wikipedia.org/wiki/Batik
+                  </span>
+                  ), lalu tarik ringkasan REST API tanpa menyalin manual.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                placeholder="https://id.wikipedia.org/wiki/..."
+                value={wiki.url}
+                onChange={(e) => wiki.setUrl(e.target.value)}
+                disabled={wiki.isLoading}
+                className="h-11 flex-1 px-4 bg-white border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={
+                  wiki.isLoading || !wiki.urlLooksValid || !!wiki.urlHint
+                }
+                onClick={() => void wiki.fetchSummary()}
+                className="h-11 shrink-0 border-[#305645] text-[#305645] hover:bg-[#305645]/10 gap-2"
+              >
+                {wiki.isLoading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                    Memuat…
+                  </>
+                ) : (
+                  <>
+                    <Download className="size-4" aria-hidden />
+                    Tarik Data
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {wiki.url.trim().length > 0 && wiki.urlHint && (
+              <p className="text-xs text-amber-700">{wiki.urlHint}</p>
+            )}
+
+            {wiki.error && (
+              <Alert
+                variant="destructive"
+                className="border-red-200 bg-red-50/90"
+              >
+                <AlertTitle>Gagal mengambil data</AlertTitle>
+                <AlertDescription>{wiki.error}</AlertDescription>
+              </Alert>
+            )}
+
+            {wiki.preview && (
+              <div className="rounded-xl border border-[#cde3d8] bg-white p-3 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#305645]">
+                  Pratinjau — terapkan ke form
+                </p>
+                {wiki.preview.wikiType === 'disambiguation' && (
+                  <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5">
+                    Halaman ini berupa disambiguasi Wikipedia; ringkasan mungkin
+                    pendek — selalu sesuaikan untuk konteks WastraNusa.
+                  </p>
+                )}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {wiki.preview.mapped.imageURL ? (
+                    <Image
+                      src={wiki.preview.mapped.imageURL}
+                      alt=""
+                      width={112}
+                      height={112}
+                      unoptimized
+                      className="w-full sm:w-28 h-28 object-cover rounded-lg border border-[#e5ded5] bg-[#f5f3ec]"
+                    />
+                  ) : (
+                    <div className="w-full sm:w-28 h-28 rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] flex items-center justify-center text-[11px] text-gray-400 text-center px-2">
+                      Tidak ada gambar thumbnail
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="font-medium text-gray-900 leading-snug">
+                      {wiki.preview.mapped.title}
+                    </p>
+                    <p className="text-sm text-gray-600 line-clamp-4">
+                      {wiki.preview.mapped.summary}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="bg-[#305645] hover:bg-[#264538] text-white"
+                    onClick={handleApplyWikimediaPreview}
+                  >
+                    Terapkan ke form
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={wiki.discardPreview}
+                  >
+                    Buang pratinjau
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Judul Artikel */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1.5">
