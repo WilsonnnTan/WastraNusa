@@ -119,10 +119,7 @@ function truncateForExcerpt(text: string, maxLen: number): string {
 export function mapWikipediaSummaryToArticleFields(
   data: WikipediaSummarySuccess,
 ): MappedArticleFieldsFromWikipedia {
-  const title = (data.displaytitle ?? data.title ?? '').replace(
-    /<\/?[^>]+>/g,
-    '',
-  );
+  const title = (data.displaytitle ?? data.title ?? '').replace(/[<>]/g, '');
   const extractRaw = (data.extract ?? '').trim();
 
   const excerpt =
