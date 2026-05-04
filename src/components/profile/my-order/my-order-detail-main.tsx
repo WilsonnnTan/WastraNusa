@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useOrderDetail } from '@/hooks/use-order';
+import { useCancelOrder, useOrderDetail } from '@/hooks/use-order';
 import {
   ArrowLeft,
   Box,
@@ -12,6 +12,9 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
+
+import { PaymentDeadlineBadge } from './payment-deadline-badge';
 
 interface MyOrderDetailMainProps {
   orderId: string;
@@ -31,7 +34,8 @@ function getStatusBadgeColor(status: string) {
 }
 
 export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
-  const { data: order, isLoading, isError } = useOrderDetail(orderId);
+  const { data: order, isLoading, isError, refetch } = useOrderDetail(orderId);
+  const cancelOrderMutation = useCancelOrder();
 
   if (isLoading) {
     return (
@@ -101,9 +105,39 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
               {order.orderStatus}
             </Badge>
             <span className="text-xs text-[#8f9b94]">
-              Pembayaran: {order.paymentStatus}
+              Pembayaran: {order.paymentStatusLabel}
             </span>
           </div>
+          {order.paymentDeadlineAt && (
+            <div className="mt-3">
+              <PaymentDeadlineBadge
+                deadlineAt={order.paymentDeadlineAt}
+                onExpire={() => {
+                  void refetch();
+                }}
+              />
+            </div>
+          )}
+          {order.canCancel && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 rounded-lg border-[#d8b5a7] text-[#b56d56] hover:bg-[#fdf6f2] hover:text-[#9d5a46]"
+              disabled={cancelOrderMutation.isPending}
+              onClick={() => {
+                cancelOrderMutation.mutate(order.orderNumber, {
+                  onSuccess: () => {
+                    toast.success('Pesanan berhasil dibatalkan.');
+                  },
+                  onError: (error) => {
+                    toast.error(error.message);
+                  },
+                });
+              }}
+            >
+              Batalkan Pesanan
+            </Button>
+          )}
         </div>
 
         <div className="rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4">
@@ -161,6 +195,23 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
             {order.paymentTransaction?.vaNumber && (
               <p>VA Number: {order.paymentTransaction.vaNumber}</p>
             )}
+            {order.paymentTransaction?.paymentUrl &&
+              order.paymentStatus === 'unpaid' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 rounded-lg border-[#5c7365] text-[#4d6356] hover:bg-[#eef3ef]"
+                  asChild
+                >
+                  <a
+                    href={order.paymentTransaction.paymentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Lanjutkan Pembayaran
+                  </a>
+                </Button>
+              )}
           </div>
         </div>
       </div>

@@ -100,6 +100,33 @@ describe('paymentTransactionRepository', { tags: ['db'] }, () => {
       expect(updated.status).toBe('success');
       expect(updated.paidAt).not.toBeNull();
     });
+
+    it('should update transaction expiredAt when provided', async () => {
+      const id = crypto.randomUUID();
+      txIds.push(id);
+      const externalId = `EXT-EXP-${id.slice(0, 8)}`;
+      const expiredAt = new Date('2026-05-02T00:00:00.000Z');
+
+      await paymentTransactionRepository.createPaymentTransaction({
+        id,
+        orderId,
+        externalId,
+        amount: 250000 + 15000,
+        status: 'pending',
+        createdAt: new Date(),
+      });
+
+      const updated = await paymentTransactionRepository.updatePaymentStatus(
+        externalId,
+        {
+          status: 'expired',
+          expiredAt,
+        },
+      );
+
+      expect(updated.status).toBe('expired');
+      expect(updated.expiredAt?.toISOString()).toBe(expiredAt.toISOString());
+    });
   });
 
   describe('findTransactionByExternalId', () => {

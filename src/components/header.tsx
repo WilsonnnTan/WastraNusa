@@ -1,6 +1,10 @@
-﻿import {
+﻿'use client';
+
+import { authClient } from '@/lib/auth/auth-client';
+import {
   BookOpenText,
   Grid2X2,
+  LayoutDashboard,
   Search,
   ShoppingCart,
   UserRound,
@@ -9,6 +13,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const menuItems = [
+  {
+    label: 'Admin',
+    icon: LayoutDashboard,
+    href: '/admin/dashboard',
+    adminOnly: true,
+  },
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
   { label: 'Catalog', icon: Grid2X2, href: '/catalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
@@ -20,6 +30,13 @@ type HeaderProps = {
 };
 
 export function Header({ homeHref = '/' }: HeaderProps) {
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
+
+  const visibleMenuItems = menuItems.filter(
+    (item) => !item.adminOnly || isAdmin,
+  );
+
   return (
     <header className="border-b-4 border-[#2F4F3F] bg-[#f9f7f2]">
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
@@ -39,7 +56,7 @@ export function Header({ homeHref = '/' }: HeaderProps) {
           </Link>
 
           <nav className="ml-auto hidden items-center gap-5 md:flex lg:gap-6">
-            {menuItems.map(({ label, icon: Icon, href }) => {
+            {visibleMenuItems.map(({ label, icon: Icon, href }) => {
               const content = (
                 <>
                   <div className="relative">

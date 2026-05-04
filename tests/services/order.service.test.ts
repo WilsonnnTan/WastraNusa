@@ -9,6 +9,7 @@ const mockRepo = vi.mocked(orderRepository);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockRepo.findExpiredPendingOrders.mockResolvedValue([] as never);
 });
 
 describe('orderService', { tags: ['backend'] }, () => {
@@ -21,6 +22,10 @@ describe('orderService', { tags: ['backend'] }, () => {
           userId: 'user-1',
           orderStatus: 'pending',
           paymentStatus: 'unpaid',
+          paymentTransactions: [],
+          customerNotes: null,
+          productId: 'prod-1',
+          variantId: 'var-1',
           createdAt: new Date('2025-03-14T00:00:00.000Z'),
           totalAmount: 100000, // BigInt representation
           quantity: 1,
@@ -52,6 +57,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.data[0].id).toBe('ORD-1');
       expect(result.data[0].orderId).toBe('1');
       expect(result.data[0].status).toBe('Menunggu Bayar');
+      expect(result.data[0].canCancel).toBe(true);
+      expect(result.data[0].paymentStatusLabel).toBe('Belum Bayar');
 
       expect(result.meta.page).toBe(2);
       expect(result.meta.limit).toBe(5);
@@ -70,6 +77,18 @@ describe('orderService', { tags: ['backend'] }, () => {
         { orderStatus: 'confirmed' },
         0,
         10,
+      );
+    });
+
+    it('should reconcile expired orders before returning list', async () => {
+      mockRepo.findOrdersByUserId.mockResolvedValue([] as never);
+      mockRepo.countOrdersByUserId.mockResolvedValue(0);
+
+      await orderService.getUserOrders('user-1');
+
+      expect(mockRepo.findExpiredPendingOrders).toHaveBeenCalledWith(
+        expect.any(Date),
+        'user-1',
       );
     });
   });
@@ -116,6 +135,7 @@ describe('orderService', { tags: ['backend'] }, () => {
             paymentUrl: null,
             vaNumber: '123456',
             paidAt: null,
+            expiredAt: null,
             createdAt: new Date('2025-03-14T00:00:00.000Z'),
           },
         ],
@@ -131,6 +151,7 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.orderNumber).toBe('ORD-1');
       expect(result.orderStatus).toBe('Dikonfirmasi');
       expect(result.paymentStatus).toBe('paid');
+      expect(result.paymentStatusLabel).toBe('Lunas');
       expect(result.totals.totalAmount).toContain('Rp');
     });
 
@@ -140,6 +161,175 @@ describe('orderService', { tags: ['backend'] }, () => {
       await expect(
         orderService.getUserOrderDetail('user-1', 'ORD-404'),
       ).rejects.toThrow(ApiError);
+    });
+  });
+
+  describe('cancelUserOrder', () => {
+    it('should cancel unpaid pending order', async () => {
+      mockRepo.findOrderForUserByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        userId: 'user-1',
+        orderStatus: 'pending',
+        paymentStatus: 'unpaid',
+        paymentMethod: null,
+        productId: 'prod-1',
+        variantId: 'var-1',
+        quantity: 2,
+        productPrice: 120000,
+        subtotal: 120000,
+        shippingCost: 30000,
+        totalAmount: 150000,
+        courier: 'JNE',
+        courierService: 'REG',
+        trackingNumber: null,
+        estimatedDelivery: null,
+        customerNotes: null,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        paymentTransactions: [
+          {
+            id: 'trx-1',
+            status: 'pending',
+            expiredAt: new Date('2099-03-14T00:30:00.000Z'),
+            paidAt: null,
+            createdAt: new Date('2025-03-14T00:00:00.000Z'),
+          },
+        ],
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+      mockRepo.findOrderDetailByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'cancelled',
+        paymentStatus: 'failed',
+        paymentMethod: null,
+        productId: 'prod-1',
+        variantId: 'var-1',
+        quantity: 2,
+        productPrice: 120000,
+        subtotal: 120000,
+        shippingCost: 30000,
+        totalAmount: 150000,
+        courier: 'JNE',
+        courierService: 'REG',
+        trackingNumber: null,
+        estimatedDelivery: null,
+        customerNotes: null,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        paymentTransactions: [
+          {
+            id: 'trx-1',
+            status: 'failed',
+            paymentUrl: null,
+            vaNumber: null,
+            paidAt: null,
+            expiredAt: new Date('2025-03-14T00:30:00.000Z'),
+            createdAt: new Date('2025-03-14T00:00:00.000Z'),
+          },
+        ],
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+        },
+        shippingAddress: {
+          recipientName: 'User',
+          phone: '0812',
+          province: 'Jawa Tengah',
+          city: 'Solo',
+          district: 'Laweyan',
+          subdistrict: null,
+          postalCode: '57147',
+          fullAddress: 'Jl. Mawar No. 1',
+        },
+      } as never);
+
+      const result = await orderService.cancelUserOrder('user-1', 'ORD-1');
+
+      expect(result.orderStatus).toBe('Dibatalkan');
+      expect(result.paymentStatus).toBe('failed');
+    });
+
+    it('should reject cancelling non-cancellable order', async () => {
+      mockRepo.findOrderForUserByIdentifier.mockResolvedValue({
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'confirmed',
+        paymentStatus: 'paid',
+        paymentTransactions: [
+          {
+            id: 'trx-1',
+            status: 'success',
+            expiredAt: null,
+            paidAt: new Date('2025-03-14T00:10:00.000Z'),
+            createdAt: new Date('2025-03-14T00:00:00.000Z'),
+          },
+        ],
+      } as never);
+
+      await expect(
+        orderService.cancelUserOrder('user-1', 'ORD-1'),
+      ).rejects.toThrow(
+        'Pesanan ini tidak dapat dibatalkan karena pembayaran sudah diproses atau masa bayar telah habis',
+      );
+    });
+  });
+
+  describe('cancelOrderBySystemId', () => {
+    it('should cancel pending unpaid order with expired reason', async () => {
+      mockRepo.findOrderForCancellationById.mockResolvedValue({
+        id: 'order-id-1',
+        productId: 'prod-1',
+        variantId: 'var-1',
+        quantity: 2,
+        customerNotes: null,
+        orderStatus: 'pending',
+        paymentStatus: 'unpaid',
+        paymentTransactions: [
+          {
+            status: 'pending',
+            expiredAt: new Date('2025-03-14T00:30:00.000Z'),
+          },
+        ],
+      } as never);
+
+      await orderService.cancelOrderBySystemId('order-id-1', 'expired');
+
+      expect(mockRepo.findOrderForCancellationById).toHaveBeenCalledWith(
+        'order-id-1',
+      );
+      expect(mockRepo.cancelOrderAndRestoreStock).toHaveBeenCalledWith(
+        'order-id-1',
+        [{ variantId: 'var-1', quantity: 2 }],
+        'expired',
+        expect.any(Date),
+      );
+    });
+
+    it('should throw ApiError when order is not found', async () => {
+      mockRepo.findOrderForCancellationById.mockResolvedValue(null);
+
+      await expect(
+        orderService.cancelOrderBySystemId('order-404', 'failed'),
+      ).rejects.toThrow(ApiError);
+
+      expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
     });
   });
 

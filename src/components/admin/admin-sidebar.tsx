@@ -24,6 +24,7 @@ import {
   Package2,
   ShoppingBag,
   TriangleAlert,
+  UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -46,7 +47,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
   const buttonClassName = cn(
     'h-10 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-    'data-[active=true]:bg-[#4b6f5f] data-[active=true]:text-white',
+    'data-[active=true]:bg-[#4b6f5f] data-[active=true]:text-[#C0653B]',
   );
 
   return (
@@ -119,7 +120,7 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
 
       <SidebarContent className="px-3">
         <SidebarGroup className="gap-2 py-0">
-          <SidebarMenu>
+          <SidebarMenu className="space-y-2">
             {ADMIN_NAVIGATION.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -150,6 +151,17 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
       <SidebarFooter className="px-3 pb-4">
         <SidebarGroup className="gap-3 py-0">
           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link
+                  href="/"
+                  className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                >
+                  <UserRound className="size-4" />
+                  <span>Halaman Pengguna</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Button

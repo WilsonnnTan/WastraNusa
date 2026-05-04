@@ -306,7 +306,7 @@ export function AdminOrderContent() {
 
           <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1280px] text-left">
+              <table className="w-full text-left">
                 <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] uppercase">
                   <tr>
                     <th className="px-4 py-3">Pesanan</th>
@@ -349,7 +349,7 @@ export function AdminOrderContent() {
                         >
                           <td className="px-4 py-3 text-[#2b2b2b]">
                             <div className="flex flex-col gap-0.5">
-                              <p className="text-base font-semibold">
+                              <p className="text-small font-semibold">
                                 {order.orderNumber}
                               </p>
                               <p className="text-xs text-muted-foreground/80">
@@ -476,7 +476,7 @@ export function AdminOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) => Math.max(1, currentPage - 1))
                   }
@@ -484,10 +484,59 @@ export function AdminOrderContent() {
                 >
                   <ChevronLeft className="size-4" />
                 </Button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from(
+                    { length: orderData.meta.totalPages },
+                    (_, index) => index + 1,
+                  )
+                    .filter((pageNumber) => {
+                      if (orderData.meta.totalPages <= 5) return true;
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === orderData.meta.totalPages
+                      ) {
+                        return true;
+                      }
+                      if (Math.abs(pageNumber - page) <= 1) return true;
+                      return false;
+                    })
+                    .map((pageNumber, index, pages) => {
+                      const showEllipsis =
+                        index > 0 && pageNumber - pages[index - 1] > 1;
+
+                      return (
+                        <div
+                          key={pageNumber}
+                          className="flex items-center gap-1"
+                        >
+                          {showEllipsis ? (
+                            <span className="px-1 text-[#8f8377]">...</span>
+                          ) : null}
+                          <Button
+                            variant={
+                              page === pageNumber ? 'default' : 'outline'
+                            }
+                            size="icon"
+                            className={`size-8 rounded-lg ${
+                              page === pageNumber
+                                ? 'bg-[#3d3a34] text-white hover:bg-[#3d3a34]/90'
+                                : 'border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]'
+                            }`}
+                            onClick={() => setPage(pageNumber)}
+                            disabled={isLoading}
+                          >
+                            {pageNumber}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) =>
                       Math.min(orderData.meta.totalPages, currentPage + 1),
