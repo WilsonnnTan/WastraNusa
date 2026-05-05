@@ -12,6 +12,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -22,6 +23,7 @@ type HeroSlide = {
   subtitle: string;
   description: string;
   backgroundClassName: string;
+  imageURL?: string | null;
   slug: string;
   isSkeleton?: boolean;
 };
@@ -49,6 +51,7 @@ export function HeroSection() {
           description: 'Sedang mengambil data artikel terbaru...',
           backgroundClassName:
             HERO_BACKGROUNDS[index % HERO_BACKGROUNDS.length],
+          imageURL: undefined,
           slug: '',
           isSkeleton: true,
         }))
@@ -60,6 +63,7 @@ export function HeroSection() {
           description: article.excerpt || article.title,
           backgroundClassName:
             HERO_BACKGROUNDS[index % HERO_BACKGROUNDS.length],
+          imageURL: article.imageURL,
           slug: article.slug,
         }));
 
@@ -109,8 +113,21 @@ export function HeroSection() {
                   className={`absolute inset-0 ${slide.backgroundClassName}`}
                   aria-hidden="true"
                 />
+                {slide.imageURL ? (
+                  <Image
+                    src={slide.imageURL}
+                    alt={slide.title}
+                    fill
+                    className="object-cover opacity-45 mix-blend-screen"
+                    priority={!slide.isSkeleton}
+                  />
+                ) : null}
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-black/25"
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_72%_35%,rgba(250,227,195,0.24)_0%,rgba(0,0,0,0)_38%)]"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/42 to-black/30"
                   aria-hidden="true"
                 />
 

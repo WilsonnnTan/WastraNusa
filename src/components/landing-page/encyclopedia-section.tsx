@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useArticles } from '@/hooks/use-article';
 import { ChevronRight, Search } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export interface HomepageArticlePreview {
@@ -13,6 +14,7 @@ export interface HomepageArticlePreview {
   category: string;
   title: string;
   meta: string;
+  imageURL?: string | null;
 }
 
 export function EncyclopediaSection() {
@@ -27,6 +29,7 @@ export function EncyclopediaSection() {
       category: article.motifLabel,
       title: article.title,
       meta: `${article.region} - ${article.readMinutes ?? 0} mnt`,
+      imageURL: article.imageURL,
     })) ?? [];
 
   return (
@@ -138,8 +141,19 @@ export function EncyclopediaSection() {
                       className="block"
                     >
                       <Card className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5 transition hover:bg-white/11">
-                        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
-                          <span className="h-4 w-4 rotate-45 border border-white/55" />
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
+                          {article.imageURL ? (
+                            <Image
+                              src={article.imageURL}
+                              alt={article.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center">
+                              <span className="h-4 w-4 rotate-45 border border-white/55" />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-semibold leading-snug text-[#e9f2e5]">
