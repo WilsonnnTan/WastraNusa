@@ -28,7 +28,10 @@ export const createArticleSchema = z.object({
         content: z.string().min(1, 'Konten section wajib diisi'),
         imageLabel: z.string().nullish(),
         imageCaption: z.string().nullish(),
-        imageURL: z.string().url().nullish(),
+        imageURL: z.preprocess(
+          (val) => (val === '' ? undefined : val),
+          z.string().url().optional(),
+        ),
         order: z.number().int(),
       }),
     )

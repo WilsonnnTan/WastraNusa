@@ -162,9 +162,9 @@ export function AdminArticleContent() {
                         key={article.slug}
                         className="border-t border-[#ece7de]"
                       >
-                        <td className="px-4 py-3 text-[#2b2b2b]">
+                        <td className="px-3 py-3 text-[#2b2b2b]">
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-base font-semibold">
+                            <p className="text-sm font-semibold">
                               {article.title}
                             </p>
                             <p className="text-xs text-muted-foreground/80 line-clamp-1">
@@ -186,10 +186,10 @@ export function AdminArticleContent() {
                             {article.region}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-[#3d3a34]">
                           {article.views}
                         </td>
-                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-[#3d3a34]">
                           {article.readMinutes}
                         </td>
                         <td className="px-4 py-3">

@@ -322,7 +322,7 @@ export default function AddUpdateArticleModal({
                     }}
                     value={field.value || undefined}
                   >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                    <SelectTrigger className="w-full h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]">
                       <SelectValue placeholder="Pilih Pulau" />
                     </SelectTrigger>
                     <SelectContent>
@@ -359,7 +359,7 @@ export default function AddUpdateArticleModal({
                     value={field.value || undefined}
                     disabled={!watchedIsland}
                   >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                    <SelectTrigger className="w-full h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]">
                       <SelectValue
                         placeholder={
                           watchedIsland
@@ -399,7 +399,7 @@ export default function AddUpdateArticleModal({
                     value={field.value || undefined}
                     disabled={!watchedProvince}
                   >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                    <SelectTrigger className="w-full h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]">
                       <SelectValue
                         placeholder={
                           watchedProvince
@@ -459,7 +459,7 @@ export default function AddUpdateArticleModal({
                       onValueChange={field.onChange}
                       value={field.value ?? undefined}
                     >
-                      <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                      <SelectTrigger className="w-full h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]">
                         <SelectValue placeholder="Pilih Gender" />
                       </SelectTrigger>
                       <SelectContent>
@@ -590,7 +590,7 @@ export default function AddUpdateArticleModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1.5">
-                URL Gambar Utama (Opsional)
+                URL Gambar Utama
               </label>
               <Input
                 {...register('imageURL')}
