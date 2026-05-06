@@ -185,7 +185,7 @@ export function AdminProductInventoryContent() {
                       >
                         <td className="px-4 py-3 text-[#2b2b2b]">
                           <div className="flex flex-col gap-0.5">
-                            <p className="text-base font-semibold">
+                            <p className="text-sm font-semibold">
                               {product.name}
                             </p>
                             <p className="line-clamp-1 text-xs text-muted-foreground/80">
@@ -205,13 +205,13 @@ export function AdminProductInventoryContent() {
                             {getStatusLabel(product.status)}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-right text-sm font-medium text-[#3d3a34]">
                           {formatPrice(product.price)}
                         </td>
-                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-[#3d3a34]">
                           {product.stock}
                         </td>
-                        <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-[#3d3a34]">
                           {product.variantCount}
                         </td>
                         <td className="px-4 py-3">
