@@ -1,6 +1,8 @@
 'use client';
 
 import type { CheckoutSelectedItem } from '@/types/checkout';
+import { Package } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 interface CheckoutSummaryProps {
@@ -53,8 +55,18 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
       <div className="space-y-4 mb-6 max-h-[240px] overflow-y-auto pr-2">
         {items.map((item) => (
           <div key={item.cartItemId} className="flex gap-4 items-center">
-            <div className="w-11 h-11 bg-[#eadecb] rounded-lg shrink-0 flex justify-center relative overflow-hidden">
-              <div className="absolute top-0 w-6 h-5 border-b border-l border-r border-[#d4c5b0] rounded-b-md"></div>
+            <div className="w-11 h-11 bg-[#eadecb] rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
+              {item.imageURL ? (
+                <Image
+                  src={item.imageURL}
+                  alt={item.name}
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Package className="w-5 h-5 text-[#8e8476]" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-[#3d5446] truncate">

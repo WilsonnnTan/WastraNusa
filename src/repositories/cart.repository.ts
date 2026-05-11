@@ -14,7 +14,14 @@ export const cartRepository = {
         items: {
           include: {
             product: {
-              include: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                slug: true,
+                clothingType: true,
+                province: true,
+                imageURL: true,
                 variants: {
                   select: {
                     stock: true,
@@ -22,7 +29,16 @@ export const cartRepository = {
                 },
               },
             },
-            variant: true,
+            variant: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                price: true,
+                stock: true,
+                imageURL: true,
+              },
+            },
           },
         },
       },
@@ -39,7 +55,14 @@ export const cartRepository = {
         items: {
           include: {
             product: {
-              include: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                slug: true,
+                clothingType: true,
+                province: true,
+                imageURL: true,
                 variants: {
                   select: {
                     stock: true,
@@ -47,7 +70,16 @@ export const cartRepository = {
                 },
               },
             },
-            variant: true,
+            variant: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                price: true,
+                stock: true,
+                imageURL: true,
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
         },
@@ -91,7 +123,14 @@ export const cartRepository = {
         data: { quantity: existingItem.quantity + quantity },
         include: {
           product: {
-            include: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              slug: true,
+              clothingType: true,
+              province: true,
+              imageURL: true,
               variants: {
                 select: {
                   stock: true,
@@ -99,7 +138,16 @@ export const cartRepository = {
               },
             },
           },
-          variant: true,
+          variant: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              price: true,
+              stock: true,
+              imageURL: true,
+            },
+          },
         },
       });
     }
@@ -114,7 +162,14 @@ export const cartRepository = {
       },
       include: {
         product: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            slug: true,
+            clothingType: true,
+            province: true,
+            imageURL: true,
             variants: {
               select: {
                 stock: true,
@@ -122,7 +177,16 @@ export const cartRepository = {
             },
           },
         },
-        variant: true,
+        variant: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            price: true,
+            stock: true,
+            imageURL: true,
+          },
+        },
       },
     });
   },
@@ -141,7 +205,14 @@ export const cartRepository = {
         data: { quantity },
         include: {
           product: {
-            include: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              slug: true,
+              clothingType: true,
+              province: true,
+              imageURL: true,
               variants: {
                 select: {
                   stock: true,
@@ -149,7 +220,16 @@ export const cartRepository = {
               },
             },
           },
-          variant: true,
+          variant: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              price: true,
+              stock: true,
+              imageURL: true,
+            },
+          },
         },
       });
     }
@@ -163,7 +243,14 @@ export const cartRepository = {
       where: { id: cartItemId, cart: { userId } },
       include: {
         product: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            slug: true,
+            clothingType: true,
+            province: true,
+            imageURL: true,
             variants: {
               select: {
                 stock: true,
@@ -171,7 +258,16 @@ export const cartRepository = {
             },
           },
         },
-        variant: true,
+        variant: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            price: true,
+            stock: true,
+            imageURL: true,
+          },
+        },
       },
     });
   },

@@ -125,6 +125,8 @@ export function CartMain() {
         quantity: localQuantities[cartItem.id] ?? cartItem.quantity,
         clothingType: cartItem.product.clothingType,
         province: cartItem.product.province,
+        imageURL:
+          cartItem.variant?.imageURL ?? cartItem.product.imageURL ?? null,
       };
     });
   }, [cart, localQuantities]);
@@ -187,6 +189,7 @@ export function CartMain() {
       variant: item.size,
       price: item.price,
       quantity: item.quantity,
+      imageURL: item.imageURL,
     }));
 
     return {
