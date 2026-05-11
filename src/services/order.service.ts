@@ -266,7 +266,13 @@ function mapAdminOrder(order: {
   trackingNumber: string | null;
   createdAt: Date;
   user: { id: string; name: string; email: string };
-  product: { id: string; name: string; province: string; clothingType: string };
+  product: {
+    id: string;
+    name: string;
+    province: string;
+    clothingType: string;
+    imageURL: string | null;
+  };
 }) {
   const effectiveOrderStatus =
     order.paymentStatus === PaymentStatus.failed ||
@@ -293,6 +299,7 @@ function mapAdminOrder(order: {
       location: order.product.province,
       category: order.product.clothingType,
       quantity: order.quantity,
+      imageURL: order.product.imageURL,
     },
     totalAmount,
     totalAmountLabel: formatOrderCurrency(totalAmount),
@@ -375,6 +382,7 @@ export const orderService = {
           name: order.product.name,
           location: order.product.province,
           quantity: order.quantity,
+          imageURL: order.product.imageURL,
         },
         actions: [
           'Detail',
@@ -435,6 +443,7 @@ export const orderService = {
         location: order.product.province,
         quantity: order.quantity,
         unitPrice: formatOrderCurrency(Number(order.productPrice)),
+        imageURL: order.product.imageURL,
       },
       shipping: {
         courier: order.courier,

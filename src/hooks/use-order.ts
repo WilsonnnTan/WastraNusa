@@ -24,6 +24,7 @@ export interface OrderItem {
     name: string;
     location: string;
     quantity: number;
+    imageURL: string | null;
   };
   actions: ('Lacak Pesanan' | 'Detail')[];
 }
@@ -56,6 +57,7 @@ export interface OrderDetail {
     location: string;
     quantity: number;
     unitPrice: string;
+    imageURL: string | null;
   };
   shipping: {
     courier: string;

@@ -111,7 +111,12 @@ describe('orderRepository', { tags: ['db'] }, () => {
         take: 5,
         include: {
           product: {
-            select: { name: true, province: true, clothingType: true },
+            select: {
+              name: true,
+              province: true,
+              clothingType: true,
+              imageURL: true,
+            },
           },
           paymentTransactions: {
             orderBy: {
@@ -150,6 +155,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {
@@ -203,6 +209,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {
@@ -462,6 +469,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
         },
@@ -513,6 +521,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {
@@ -579,6 +588,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {
