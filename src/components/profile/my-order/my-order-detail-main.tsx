@@ -7,10 +7,12 @@ import {
   ArrowLeft,
   Box,
   CreditCard,
+  Hexagon,
   MapPin,
   Package,
   XCircle,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -145,15 +147,40 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
             <Box className="h-4 w-4" />
             <p className="text-sm font-semibold">Produk</p>
           </div>
-          <p className="text-sm font-semibold text-[#4d6356]">
-            {order.product.name}
-          </p>
-          <p className="mt-1 text-xs text-[#8f9b94]">
-            {order.product.category} - {order.product.location}
-          </p>
-          <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-[#726759] md:grid-cols-2">
-            <p>Jumlah: {order.product.quantity}</p>
-            <p>Harga Satuan: {order.product.unitPrice}</p>
+          <div className="flex gap-4">
+            <div className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
+              {order.product.imageURL ? (
+                <Image
+                  src={order.product.imageURL}
+                  alt={order.product.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <>
+                  <Hexagon
+                    size={24}
+                    strokeWidth={1.5}
+                    className="text-[#c4b9a3]"
+                  />
+                  <span className="mt-1 absolute bottom-1.5 text-[8px] font-semibold tracking-wide text-[#a39882] uppercase">
+                    {order.product.category.substring(0, 4)}
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="flex flex-1 flex-col">
+              <p className="text-sm font-semibold text-[#4d6356]">
+                {order.product.name}
+              </p>
+              <p className="mt-1 text-xs text-[#8f9b94]">
+                {order.product.category} - {order.product.location}
+              </p>
+              <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-[#726759] md:grid-cols-2">
+                <p>Jumlah: {order.product.quantity}</p>
+                <p>Harga Satuan: {order.product.unitPrice}</p>
+              </div>
+            </div>
           </div>
         </div>
 

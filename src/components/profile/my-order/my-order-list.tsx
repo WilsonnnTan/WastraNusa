@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { OrderItem, useCancelOrder, useOrders } from '@/hooks/use-order';
 import { Eye, Hexagon, XCircle } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -122,10 +123,25 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
 
           <div className="group flex items-center gap-4 rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4 transition-all">
             <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
-              <Hexagon size={24} strokeWidth={1.5} className="text-[#c4b9a3]" />
-              <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
-                {order.product.category.substring(0, 4)}
-              </span>
+              {order.product.imageURL ? (
+                <Image
+                  src={order.product.imageURL}
+                  alt={order.product.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <>
+                  <Hexagon
+                    size={24}
+                    strokeWidth={1.5}
+                    className="text-[#c4b9a3]"
+                  />
+                  <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
+                    {order.product.category.substring(0, 4)}
+                  </span>
+                </>
+              )}
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col items-start gap-1">

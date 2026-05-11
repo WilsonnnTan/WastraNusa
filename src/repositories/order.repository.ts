@@ -8,6 +8,7 @@ const userOrderRelations = {
       name: true,
       province: true,
       clothingType: true,
+      imageURL: true,
     },
   },
   shippingAddress: {
@@ -123,6 +124,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
         paymentTransactions: {
@@ -258,6 +260,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
       },
@@ -292,6 +295,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
         shippingAddress: {
@@ -342,6 +346,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
         shippingAddress: {

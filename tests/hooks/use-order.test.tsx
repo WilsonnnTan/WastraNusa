@@ -61,6 +61,7 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
           name: 'Kemeja Batik',
           location: 'Solo',
           quantity: 1,
+          imageURL: null,
         },
         actions: ['Detail'],
       },
@@ -95,6 +96,7 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
       location: 'Solo',
       quantity: 1,
       unitPrice: 'Rp 120.000',
+      imageURL: null,
     },
     shipping: {
       courier: 'JNE',
