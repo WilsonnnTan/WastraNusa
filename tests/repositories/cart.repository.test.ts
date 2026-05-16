@@ -114,7 +114,7 @@ describe('cartRepository', { tags: ['db'] }, () => {
       createdCartItemIds.push(item.id);
 
       const updatedItem = await cartRepository.updateItemQuantity(item.id, 5);
-      expect(updatedItem.quantity).toBe(5);
+      expect(updatedItem?.quantity).toBe(5);
     });
   });
 

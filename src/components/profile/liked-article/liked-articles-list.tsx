@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import type { LikedArticle } from '@/types/profile';
 import { BookmarkX, ChevronRight, Eye, Heart, Hexagon } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface LikedArticlesListProps {
@@ -30,11 +31,26 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
           href={`/encyclopedia/${article.slug}`}
           className="group flex items-center gap-4 rounded-xl border border-[#ece7dd] bg-white p-3.5 transition-all hover:border-[#dcd5c7] hover:bg-[#fcfbf9]"
         >
-          <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591]">
-            <Hexagon size={24} strokeWidth={1.5} className="text-[#c4b9a3]" />
-            <span className="mt-1 text-[10px] font-semibold tracking-wide text-[#a39882]">
-              {article.motifLabel}
-            </span>
+          <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
+            {article.imageUrl ? (
+              <Image
+                src={article.imageUrl}
+                alt={article.title}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <>
+                <Hexagon
+                  size={24}
+                  strokeWidth={1.5}
+                  className="text-[#c4b9a3]"
+                />
+                <span className="mt-1 absolute bottom-1 text-[8px] font-semibold tracking-wide text-[#a39882] uppercase">
+                  {article.motifLabel.substring(0, 5)}
+                </span>
+              </>
+            )}
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">

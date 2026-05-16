@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
 
   const authRoutes = ['/login', '/register'];
   // TODO: add path on protected route for user's page when we have it
-  const protectedRoutes = ['/admin'];
+  const protectedRoutes = ['/admin', '/profile', '/cart'];
 
   const isAuthRoute = authRoutes.some((route) => pathName.startsWith(route));
 
@@ -60,5 +60,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/login', '/register'],
+  matcher: [
+    '/admin/:path*',
+    '/login',
+    '/register',
+    '/profile/:path*',
+    '/cart/:path*',
+  ],
 };
