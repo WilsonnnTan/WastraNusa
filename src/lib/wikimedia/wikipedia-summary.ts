@@ -231,15 +231,7 @@ type MobileSectionsResponse = {
 function replaceUntilStable(input: string, pattern: RegExp, replacement: string): string {
   let previous: string;
   let current = input;
-  do {
-    previous = current;
-    current = current.replace(pattern, replacement);
-  } while (current !== previous);
-  return current;
-}
-
-function stripHtml(html?: string): string {
-  if (!html) return '';
+  const withoutTags = html.replace(/<[^>]*>/g, ' ');
   // Basic tag stripper — sufficient for short previews
   const withoutScripts = replaceUntilStable(
     html,
