@@ -81,7 +81,7 @@ export async function GET(req: Request) {
 
     // helper to strip HTML
     const stripHtml = (html?: string) => {
-      const text = convert(html, {
+      const text = convert(html ?? '', {
         wordwrap: false,
         selectors: [{ selector: 'a', options: { ignoreHref: true } }],
       });
