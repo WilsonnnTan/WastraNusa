@@ -117,6 +117,24 @@ function truncateForExcerpt(text: string, maxLen: number): string {
   return `${base.trim()}…`;
 }
 
+/**
+ * Returns the first complete sentence (ends at . ! or ?) from text.
+ * Falls back to truncateForExcerpt when no sentence boundary is found.
+ */
+function extractFirstSentence(text: string, maxLen: number = 220): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  // Find the first sentence-ending punctuation followed by a space or end-of-string
+  const match = normalized.match(/^.+?[.!?](?=\s|$)/);
+  if (match) {
+    const sentence = match[0].trim();
+    // Only use it if it's meaningfully shorter than the full text
+    if (sentence.length < normalized.length && sentence.length <= maxLen) {
+      return sentence;
+    }
+  }
+  return truncateForExcerpt(normalized, maxLen);
+}
+
 export function mapWikipediaSummaryToArticleFields(
   data: WikipediaSummarySuccess,
 ): MappedArticleFieldsFromWikipedia {
@@ -125,7 +143,7 @@ export function mapWikipediaSummaryToArticleFields(
   const extractRaw = stripHtml(data.extract_html ?? data.extract ?? '');
 
   const excerpt =
-    extractRaw.length > 0 ? truncateForExcerpt(extractRaw, 260) : title;
+    extractRaw.length > 0 ? extractFirstSentence(extractRaw) : title;
 
   const summary = extractRaw.length > 0 ? extractRaw : title;
 
@@ -228,6 +246,21 @@ type MobileSectionsResponse = {
   sections?: MobileSection[];
 };
 
+/** Shape returned by fetchWikipediaPageMobileSections after stripping/normalizing */
+export type NormalizedMobileSectionsResponse = Omit<
+  MobileSectionsResponse,
+  'sections'
+> & {
+  sections: Array<{ title: string; content: string }>;
+};
+
+/**
+ * Extract plain text from an HTML string without using regex to match tags.
+ * A character-by-character state machine is used so that CodeQL rules
+ * js/bad-tag-filter and js/incomplete-multi-character-sanitization are not
+ * triggered. Script and style block *content* is suppressed as well as the
+ * tags themselves.
+ */
 function stripHtml(html?: string): string {
   if (!html) return '';
 
@@ -241,7 +274,7 @@ export async function fetchWikipediaPageMobileSections(
   apiOrigin: string,
   pageTitle: string,
   signal?: AbortSignal,
-): Promise<MobileSectionsResponse> {
+): Promise<NormalizedMobileSectionsResponse> {
   const enc = encodeURIComponent(pageTitle);
   const res = await fetch(`${apiOrigin}${MOBILE_SECTIONS_PATH}/${enc}`, {
     method: 'GET',
@@ -269,12 +302,11 @@ export async function fetchWikipediaPageMobileSections(
 
   const data = json as MobileSectionsResponse;
   // Normalize sections: map headings + text
-  const sections: MobileSection[] = (data.sections ?? []).map((s) => ({
-    id: s.id,
-    line: stripHtml(s.line),
-    anchor: s.anchor,
-    level: s.level,
-    text: stripHtml(s.text),
+  const sections: Array<{ title: string; content: string }> = (
+    data.sections ?? []
+  ).map((s) => ({
+    title: stripHtml(s.line),
+    content: stripHtml(s.text),
   }));
 
   return { ...data, sections };

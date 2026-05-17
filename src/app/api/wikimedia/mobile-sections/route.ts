@@ -1,6 +1,22 @@
 import { convert } from 'html-to-text';
 import { NextResponse } from 'next/server';
 
+const BOILERPLATE_SECTION_TITLES = new Set([
+  'references',
+  'see also',
+  'external links',
+  'further reading',
+  'notes',
+  'footnotes',
+  'citations',
+  'sources',
+  'bibliography',
+  'weblinks',
+  'links',
+  'references and sources',
+  'external references',
+]);
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -116,8 +132,25 @@ export async function GET(req: Request) {
         const j = t ? JSON.parse(t) : {};
         const rawHtml = j.parse?.text?.['*'] ?? '';
         const titleClean = stripHtml(s.line);
-        const contentClean = stripHtml(rawHtml);
-        // try to extract first image src from HTML
+
+        // Skip boilerplate sections (References, See Also, External Links, etc.)
+        if (BOILERPLATE_SECTION_TITLES.has(titleClean.toLowerCase())) continue;
+
+        let contentClean = stripHtml(rawHtml);
+
+        // MediaWiki embeds the section heading inside the HTML, so after
+        // tag-stripping the title appears verbatim at the start of the content.
+        // Remove it to avoid duplication.
+        if (
+          titleClean &&
+          contentClean.toLowerCase().startsWith(titleClean.toLowerCase())
+        ) {
+          contentClean = contentClean.slice(titleClean.length).trimStart();
+        }
+
+        // Skip sections whose content is empty after cleaning
+        if (!contentClean) continue;
+
         let imageURL: string | undefined;
         const imgMatch = /<img[^>]+src\s*=\s*"([^"]+)"/i.exec(rawHtml);
         if (imgMatch && imgMatch[1]) {
