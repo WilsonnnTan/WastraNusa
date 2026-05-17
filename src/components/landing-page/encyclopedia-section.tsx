@@ -148,6 +148,7 @@ export function EncyclopediaSection() {
                               alt={article.title}
                               fill
                               className="object-cover"
+                              sizes="56px"
                             />
                           ) : (
                             <div className="grid h-full w-full place-items-center">
