@@ -228,14 +228,26 @@ type MobileSectionsResponse = {
   sections?: MobileSection[];
 };
 
+function replaceUntilStable(input: string, pattern: RegExp, replacement: string): string {
+  let previous: string;
+  let current = input;
+  do {
+    previous = current;
+    current = current.replace(pattern, replacement);
+  } while (current !== previous);
+  return current;
+}
+
 function stripHtml(html?: string): string {
   if (!html) return '';
   // Basic tag stripper — sufficient for short previews
-  const withoutScripts = html.replace(
+  const withoutScripts = replaceUntilStable(
+    html,
     /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
     '',
   );
-  const withoutStyles = withoutScripts.replace(
+  const withoutStyles = replaceUntilStable(
+    withoutScripts,
     /<style[\s\S]*?>[\s\S]*?<\/style>/gi,
     '',
   );
