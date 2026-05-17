@@ -256,26 +256,32 @@ export type NormalizedMobileSectionsResponse = Omit<
 
 function stripHtml(html?: string): string {
   if (!html) return '';
-  // Remove script and style blocks
-  const withoutScripts = html.replace(
-    /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
-    '',
-  );
-  const withoutStyles = withoutScripts.replace(
-    /<style[\s\S]*?>[\s\S]*?<\/style>/gi,
-    '',
-  );
-  const withoutTags = withoutStyles.replace(/<[^>]+>/g, '');
 
-  // Decode numeric and named HTML entities (including &#91; → [ and &#93; → ])
+  // Remove script and style blocks — loop until no more matches to prevent
+  // bypass via nested or malformed tags (fixes CodeQL incomplete-sanitization).
+  const SCRIPT_RE = /<script[\s\S]*?>[\s\S]*?<\/script>/gi;
+  const STYLE_RE = /<style[\s\S]*?>[\s\S]*?<\/style>/gi;
+  let sanitized = html;
+  let prev: string;
+  do {
+    prev = sanitized;
+    sanitized = sanitized.replace(SCRIPT_RE, '').replace(STYLE_RE, '');
+  } while (sanitized !== prev);
+
+  const withoutTags = sanitized.replace(/<[^>]+>/g, '');
+
+  // Decode named/numeric HTML entities.
+  // &amp; is decoded LAST so that encoded sequences like &amp;lt; are never
+  // converted into raw '<', which would re-introduce injection vectors
+  // (fixes CodeQL double-escaping/unescaping).
   const decoded = withoutTags
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
 
   // Strip Wikipedia-specific artifacts from the decoded plain text
   return (

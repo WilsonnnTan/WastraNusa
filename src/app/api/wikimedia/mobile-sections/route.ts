@@ -82,20 +82,32 @@ export async function GET(req: Request) {
     // helper to strip HTML and remove Wikipedia-specific artifacts
     const stripHtml = (html?: string) => {
       if (!html) return '';
-      const withoutTags = html
-        .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, '')
-        .replace(/<[^>]+>/g, '');
 
-      // Decode numeric and named HTML entities
+      // Remove script and style blocks — loop until no more matches to prevent
+      // bypass via nested or malformed tags (fixes CodeQL incomplete-sanitization).
+      const SCRIPT_RE = /<script[\s\S]*?>[\s\S]*?<\/script>/gi;
+      const STYLE_RE = /<style[\s\S]*?>[\s\S]*?<\/style>/gi;
+      let sanitized = html;
+      let prev: string;
+      do {
+        prev = sanitized;
+        sanitized = sanitized.replace(SCRIPT_RE, '').replace(STYLE_RE, '');
+      } while (sanitized !== prev);
+
+      const withoutTags = sanitized.replace(/<[^>]+>/g, '');
+
+      // Decode named/numeric HTML entities.
+      // &amp; is decoded LAST so that encoded sequences like &amp;lt; are never
+      // converted into raw '<', which would re-introduce injection vectors
+      // (fixes CodeQL double-escaping/unescaping).
       const decoded = withoutTags
         .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
         .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, '&');
 
       // Strip Wikipedia-specific artifacts
       return decoded
