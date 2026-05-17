@@ -228,37 +228,13 @@ type MobileSectionsResponse = {
   sections?: MobileSection[];
 };
 
-function replaceUntilStable(input: string, pattern: RegExp, replacement: string): string {
-  let previous: string;
-  let current = input;
-  const withoutTags = html.replace(/<[^>]*>/g, ' ');
-  // Basic tag stripper — sufficient for short previews
-  const withoutScripts = replaceUntilStable(
-    html,
-    /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
-    '',
-  );
-  const withoutStyles = replaceUntilStable(
-    withoutScripts,
-    /<style[\s\S]*?>[\s\S]*?<\/style>/gi,
-    '',
-  );
-  let withoutTags = withoutStyles;
-  let previous: string;
-  do {
-    previous = withoutTags;
-    withoutTags = withoutTags.replace(/<[^>]+>/g, '');
-  } while (withoutTags !== previous);
-  const collapsed = withoutTags.replace(/\s+/g, ' ').trim();
-  // Decode a few common HTML entities
-  return collapsed
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-    .trim();
+function stripHtml(html?: string): string {
+  if (!html) return '';
+
+  // Parse as HTML and extract text content to avoid fragile regex-based filtering.
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const text = doc.body?.textContent ?? '';
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 export async function fetchWikipediaPageMobileSections(
