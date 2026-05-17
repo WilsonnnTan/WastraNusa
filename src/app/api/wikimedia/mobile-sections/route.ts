@@ -1,6 +1,22 @@
 import { convert } from 'html-to-text';
 import { NextResponse } from 'next/server';
 
+const BOILERPLATE_SECTION_TITLES = new Set([
+  'references',
+  'see also',
+  'external links',
+  'further reading',
+  'notes',
+  'footnotes',
+  'citations',
+  'sources',
+  'bibliography',
+  'weblinks',
+  'links',
+  'references and sources',
+  'external references',
+]);
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
