@@ -77,6 +77,7 @@ export default function AddUpdateArticleModal({
   initialData,
 }: AddUpdateArticleModalProps) {
   const [showModal, setShowModal] = useState(isOpen);
+  const [showWikiReminder, setShowWikiReminder] = useState(false);
   const { mutate: createArticle, isPending: isCreating } = useCreateArticle();
   const { mutate: updateArticle, isPending: isUpdating } = useUpdateArticle();
 
@@ -164,17 +165,12 @@ export default function AddUpdateArticleModal({
         order: i,
       }));
       setValue('sections', mappedSections, { shouldDirty: true });
-      // debug: print section titles and whether imageURL exists
-
-      console.debug(
-        'Applied Wikimedia sections',
-        mappedSections.map((s) => ({ title: s.title, hasImage: !!s.imageURL })),
-      );
       toast.success('Data Wikipedia dan section diterapkan ke form.');
     } else {
       toast.success('Data Wikipedia diterapkan ke form.');
     }
     wiki.discardPreview();
+    setShowWikiReminder(true);
   };
 
   const onSubmit = (data: CreateArticleInput) => {
@@ -421,6 +417,45 @@ export default function AddUpdateArticleModal({
               </div>
             )}
           </div>
+
+          {/* Reminder: required fields not populated by Wikipedia */}
+          {showWikiReminder && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <svg
+                className="mt-0.5 size-4 shrink-0 text-amber-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z"
+                />
+              </svg>
+              <div className="flex-1">
+                <p className="font-semibold">
+                  Lengkapi field berikut secara manual
+                </p>
+                <p className="mt-0.5 text-amber-700">
+                  Wikipedia tidak dapat mengisi:{' '}
+                  <span className="font-medium">
+                    Label Motif, Topik, Pulau, Provinsi, Daerah
+                  </span>
+                  . Field-field ini wajib diisi sebelum menyimpan artikel.
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Tutup peringatan"
+                onClick={() => setShowWikiReminder(false)}
+                className="ml-1 rounded-lg p-0.5 text-amber-500 hover:bg-amber-100 transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          )}
 
           {/* Judul Artikel */}
           <div>

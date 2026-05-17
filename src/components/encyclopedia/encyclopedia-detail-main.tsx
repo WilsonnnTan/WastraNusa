@@ -305,53 +305,38 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
           )}
 
           {article.sections.map((section, index) => {
-            const showVisual = Boolean(section.imageCaption);
-
             return (
               <section key={section.title} className="mt-9">
                 <h2 className="text-4xl font-bold tracking-tight text-[#2f5b49]">
                   {section.title}
                 </h2>
 
-                <div
-                  className={
-                    showVisual
-                      ? 'mt-3 grid gap-5 md:grid-cols-[minmax(0,1fr)_260px]'
-                      : 'mt-3'
-                  }
-                >
+                <div className="mt-4">
+                  {section.imageURL && (
+                    <div className="float-right ml-5 mb-3 w-[200px] sm:w-[220px] overflow-hidden rounded-xl border border-[#dfd4c2] bg-[#ece1d0]">
+                      <div className="relative aspect-square w-full">
+                        <Image
+                          src={section.imageURL}
+                          alt={section.imageCaption || section.title}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      </div>
+                      {section.imageCaption && (
+                        <p className="px-3 py-2 text-[11px] italic leading-snug text-[#5b5f59]">
+                          {section.imageCaption}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <p className="text-[15px] leading-8 text-[#465d51]">
                     {section.content}
                   </p>
 
-                  {showVisual ? (
-                    <Card className="overflow-hidden rounded-xl border border-[#dfd4c2] bg-[#f5f1e8]">
-                      <div className="relative min-h-[200px] border-b border-dashed border-[#d9cebc] bg-[#ece1d0]">
-                        {section.imageURL ? (
-                          <Image
-                            src={section.imageURL}
-                            alt={section.imageCaption || ''}
-                            fill
-                            unoptimized
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 grid place-items-center">
-                            <div className="flex flex-col items-center gap-2 text-[#6f604e]">
-                              <span className="h-4 w-4 rotate-45 border border-[#ccbda4]" />
-                              <span className="text-sm font-medium">
-                                {section.imageLabel ?? article.motifLabel}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="px-3 py-2 text-xs text-[#5b5f59]">
-                        {section.imageCaption}
-                      </p>
-                    </Card>
-                  ) : null}
+                  {/* Contain the float so it doesn't bleed into the next section */}
+                  <div className="clear-both" />
                 </div>
 
                 {index < article.sections.length - 1 ? (
