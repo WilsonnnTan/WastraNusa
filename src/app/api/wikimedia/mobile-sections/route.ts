@@ -102,13 +102,13 @@ export async function GET(req: Request) {
     for (const s of sections) {
       const idx = s.index;
       if (typeof idx === 'undefined') continue;
-      const secHtmlUrl = `${origin}/w/api.php?action=parse&page=${enc}&section=${idx}&prop=text&format=json`;
+      const secHtmlUrl = `${safeOrigin}/w/api.php?action=parse&page=${enc}&section=${idx}&prop=text&format=json`;
       try {
         const r = await fetch(secHtmlUrl, {
           headers: {
             Accept: 'application/json',
             'User-Agent': ua,
-            Referer: origin,
+            Referer: safeOrigin,
           },
         });
         if (!r.ok) continue;
@@ -123,7 +123,7 @@ export async function GET(req: Request) {
         if (imgMatch && imgMatch[1]) {
           let src = imgMatch[1];
           if (src.startsWith('//')) src = 'https:' + src;
-          else if (src.startsWith('/')) src = origin + src;
+          else if (src.startsWith('/')) src = safeOrigin + src;
           imageURL = src;
         }
         outSections.push({
