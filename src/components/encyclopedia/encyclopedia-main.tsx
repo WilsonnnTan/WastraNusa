@@ -148,6 +148,10 @@ export function EncyclopediaMain({
       label: 'Pulau Tercakup',
     },
     {
+      value: String(data?.meta.stats?.totalProvinces ?? 0),
+      label: 'Provinsi Tercakup',
+    },
+    {
       value: String(data?.meta.stats?.totalWastraTypes ?? 0),
       label: 'Jenis Wastra',
     },
