@@ -19,7 +19,7 @@ export const createArticleSchema = z.object({
   readMinutes: z.number().int().min(1).optional(),
   featured: z.boolean().optional(),
 
-  imageURL: z.string().url().nullish(),
+  imageURL: z.union([z.string().url(), z.literal('')]).nullish(),
 
   sections: z
     .array(
@@ -28,7 +28,7 @@ export const createArticleSchema = z.object({
         content: z.string().min(1, 'Konten section wajib diisi'),
         imageLabel: z.string().nullish(),
         imageCaption: z.string().nullish(),
-        imageURL: z.string().url().nullish(),
+        imageURL: z.union([z.string().url(), z.literal('')]).nullish(),
         order: z.number().int(),
       }),
     )

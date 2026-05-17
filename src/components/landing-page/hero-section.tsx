@@ -120,6 +120,7 @@ export function HeroSection() {
                     fill
                     className="object-cover opacity-45 mix-blend-screen"
                     priority={!slide.isSkeleton}
+                    sizes="100vw"
                   />
                 ) : null}
                 <div

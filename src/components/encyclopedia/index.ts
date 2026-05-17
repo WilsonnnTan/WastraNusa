@@ -3,6 +3,7 @@
  */
 
 export { EncyclopediaSearch } from './encyclopedia-search';
+export { EncyclopediaSearchResults } from './encyclopedia-search-results';
 export { EncyclopediaStats } from './encyclopedia-stats';
 export { EncyclopediaSidebar } from './encyclopedia-sidebar';
 export { EncyclopediaFeaturedCard } from './encyclopedia-featured-card';

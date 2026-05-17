@@ -15,12 +15,18 @@ export function CatalogDetailGallery({
 }: CatalogDetailGalleryProps) {
   return (
     <div className="flex flex-col gap-3">
-      <Card className="relative h-[430px] rounded-2xl border border-[#ddd4c5] bg-[#ebe2d4] p-0 overflow-hidden">
+      <Card className="relative h-64 sm:h-80 md:h-[430px] rounded-2xl border border-[#ddd4c5] bg-[#ebe2d4] p-0 overflow-hidden">
         <Badge className="absolute left-3 top-3 z-10 bg-[#2f5f49] text-[#edf4ec]">
           {category}
         </Badge>
         {imageURL ? (
-          <Image src={imageURL} alt={category} fill className="object-cover" />
+          <Image
+            src={imageURL}
+            alt={category}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1280px) 90vw, 800px"
+          />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
             <div className="flex flex-col items-center gap-2 text-[#7f715c]">
