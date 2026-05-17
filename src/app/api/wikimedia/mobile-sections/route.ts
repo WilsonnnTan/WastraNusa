@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { convert } from 'html-to-text';
 import sanitizeHtml from 'sanitize-html';
 
 export async function GET(req: Request) {
@@ -86,10 +87,11 @@ export async function GET(req: Request) {
 
     // helper to strip HTML
     const stripHtml = (html?: string) => {
-      if (!html) return '';
-      const sanitized = sanitizeHtml(html, {
-        allowedTags: [],
-        allowedAttributes: {},
+      const text = convert(html, {
+        wordwrap: false,
+        selectors: [{ selector: 'a', options: { ignoreHref: true } }],
+      });
+      return text
       });
       return sanitized
         .replace(/\s+/g, ' ')
