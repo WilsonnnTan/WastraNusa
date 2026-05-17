@@ -6,6 +6,7 @@ import type {
   CheckoutShippingSelection,
 } from '@/types/checkout';
 import { Hexagon } from 'lucide-react';
+import Image from 'next/image';
 
 interface ReviewItemsProps {
   items: CheckoutSelectedItem[];
@@ -26,9 +27,23 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
             key={item.cartItemId}
             className="bg-[#fbf8f2] rounded-xl p-5 flex items-center gap-5"
           >
-            <div className="w-16 h-16 shrink-0 border border-[#e8e2d5] rounded-xl flex flex-col items-center justify-center text-[#8e8476] bg-[#f4efe6]">
-              <Hexagon className="w-6 h-6 stroke-[1.5]" />
-              <span className="text-[8px] font-bold mt-1 uppercase">Item</span>
+            <div className="w-16 h-16 shrink-0 border border-[#e8e2d5] rounded-xl overflow-hidden flex flex-col items-center justify-center text-[#8e8476] bg-[#f4efe6]">
+              {item.imageURL ? (
+                <Image
+                  src={item.imageURL}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <>
+                  <Hexagon className="w-6 h-6 stroke-[1.5]" />
+                  <span className="text-[8px] font-bold mt-1 uppercase">
+                    Item
+                  </span>
+                </>
+              )}
             </div>
 
             <div className="flex-1">

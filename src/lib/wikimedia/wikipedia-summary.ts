@@ -264,95 +264,10 @@ export type NormalizedMobileSectionsResponse = Omit<
 function stripHtml(html?: string): string {
   if (!html) return '';
 
-  // --- Phase 1: extract plain text via a hand-written state machine ---
-  let text = '';
-  let inTag = false; // currently inside a < ... > sequence
-  let tagBuf = ''; // accumulates characters inside a tag
-  let skipContent = false; // suppress text content (inside script/style)
-  let closingTag = ''; // the tag name we are waiting to close
-
-  for (let i = 0; i < html.length; i += 1) {
-    const ch = html[i];
-
-    if (ch === '<') {
-      inTag = true;
-      tagBuf = '';
-    } else if (ch === '>' && inTag) {
-      inTag = false;
-      const tag = tagBuf.trim().toLowerCase();
-      // Detect opening block tags whose *content* must be suppressed
-      if (!skipContent) {
-        if (
-          tag === 'script' ||
-          tag.startsWith('script ') ||
-          tag.startsWith('script\t')
-        ) {
-          skipContent = true;
-          closingTag = 'script';
-        } else if (
-          tag === 'style' ||
-          tag.startsWith('style ') ||
-          tag.startsWith('style\t')
-        ) {
-          skipContent = true;
-          closingTag = 'style';
-        }
-      } else {
-        // Detect the matching closing tag to resume text output
-        const normalized = tag.replace(/^\//, '').trim();
-        if (normalized === closingTag) {
-          skipContent = false;
-          closingTag = '';
-        }
-      }
-      tagBuf = '';
-    } else if (inTag) {
-      tagBuf += ch;
-    } else if (!skipContent) {
-      text += ch;
-    }
-  }
-
-  // --- Phase 2: decode named/numeric HTML entities ---
-  // &amp; is decoded LAST so that encoded sequences like &amp;lt; are never
-  // converted into raw '<', preventing double-unescaping (CodeQL js/double-escaping).
-  const decoded = text
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&');
-
-  // Strip Wikipedia-specific artifacts from the decoded plain text
-  return (
-    decoded
-      // Edit section links e.g. "[sunting | sunting sumber]" or "[edit | edit source]"
-      .replace(/\[sunting\s*\|\s*sunting sumber\]/gi, '')
-      .replace(/\[edit\s*\|\s*edit source\]/gi, '')
-      // Citation/footnote markers like [1], [12], [a], [b], [lower-alpha], [note 1]
-      .replace(/\[\d+\]/g, '')
-      .replace(/\[[a-z]\]/gi, '')
-      .replace(/\[lower-alpha\]/gi, '')
-      .replace(/\[upper-alpha\]/gi, '')
-      .replace(/\[note\s*\d*\]/gi, '')
-      // Wiki template artifacts like "code: jv is deprecated"
-      .replace(/code:\s*\S+\s+is\s+deprecated/gi, '')
-      // Reference list entries that start with "^" (footnote back-links)
-      .replace(/\^[^\n]*/g, '')
-      // Parser error messages injected by MediaWiki
-      .replace(/Kesalahan pengutipan:[^\n]*/g, '')
-      // Broken-ref error fragments that appear without the prefix above,
-      // e.g. "tidak ditemukan teks untuk ref bernama :2"
-      .replace(/tidak ditemukan teks untuk ref bernama\s*:\S*/gi, '')
-      .replace(/ref name not found\s*:\S*/gi, '')
-      // Inline page citations like ", hlm. 496" or "hlm. 16–17"
-      .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
-      // Collapse whitespace and trim
-      .replace(/\s+/g, ' ')
-      .trim()
-  );
+  // Parse as HTML and extract text content to avoid fragile regex-based filtering.
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const text = doc.body?.textContent ?? '';
+  return text.replace(/\s+/g, ' ').trim();
 }
 
 export async function fetchWikipediaPageMobileSections(
@@ -387,9 +302,12 @@ export async function fetchWikipediaPageMobileSections(
 
   const data = json as MobileSectionsResponse;
   // Normalize sections: map headings + text
-  const sections = (data.sections ?? []).map((s) => ({
-    title: stripHtml(s.line),
-    content: stripHtml(s.text),
+  const sections: MobileSection[] = (data.sections ?? []).map((s) => ({
+    id: s.id,
+    line: stripHtml(s.line),
+    anchor: s.anchor,
+    level: s.level,
+    text: stripHtml(s.text),
   }));
 
   return { ...data, sections };

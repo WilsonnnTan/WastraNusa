@@ -305,38 +305,73 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
           )}
 
           {article.sections.map((section, index) => {
+            const showVisual = Boolean(
+              section.imageURL || section.imageCaption || section.imageLabel,
+            );
+            const visualLabel = section.imageLabel ?? article.motifLabel;
+            const visualCaption =
+              section.imageCaption ?? `Visual ${visualLabel} dari artikel.`;
+
             return (
               <section key={section.title} className="mt-9">
                 <h2 className="text-4xl font-bold tracking-tight text-[#2f5b49]">
                   {section.title}
                 </h2>
 
-                <div className="mt-4">
-                  {section.imageURL && (
-                    <div className="float-right ml-5 mb-3 w-[200px] sm:w-[220px] overflow-hidden rounded-xl border border-[#dfd4c2] bg-[#ece1d0]">
-                      <div className="relative aspect-square w-full">
-                        <Image
-                          src={section.imageURL}
-                          alt={section.imageCaption || section.title}
-                          fill
-                          unoptimized
-                          className="object-cover"
-                        />
-                      </div>
-                      {section.imageCaption && (
-                        <p className="px-3 py-2 text-[11px] italic leading-snug text-[#5b5f59]">
-                          {section.imageCaption}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
+                <div
+                  className={
+                    showVisual
+                      ? 'mt-3 grid gap-5 grid-cols-1 md:grid-cols-[minmax(0,1fr)_240px] lg:grid-cols-[minmax(0,1fr)_280px]'
+                      : 'mt-3'
+                  }
+                >
                   <p className="text-[15px] leading-8 text-[#465d51]">
                     {section.content}
                   </p>
 
-                  {/* Contain the float so it doesn't bleed into the next section */}
-                  <div className="clear-both" />
+                  {showVisual ? (
+                    <Card className="overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)] h-fit">
+                      <div className="relative w-full bg-[#ece1d0] aspect-video sm:aspect-square md:aspect-[3/4]">
+                        {section.imageURL ? (
+                          <Image
+                            src={section.imageURL}
+                            alt={visualCaption}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 280px, 280px"
+                            priority={false}
+                          />
+                        ) : (
+                          <div className="absolute inset-0 grid place-items-center">
+                            <div className="flex flex-col items-center gap-2 text-[#6f604e]">
+                              <span className="h-4 w-4 rotate-45 border border-[#ccbda4]" />
+                              <span className="text-sm font-medium">
+                                {section.imageLabel ?? article.motifLabel}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
+                          <span className="rounded-full border border-white/40 bg-[#f6efe3]/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6b5a49] backdrop-blur-sm">
+                            {visualLabel}
+                          </span>
+                        </div>
+
+                        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#433528]/85 via-[#433528]/20 to-transparent" />
+                      </div>
+
+                      <div className="space-y-1 px-3 py-2.5">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b775e]">
+                          Visual Section
+                        </p>
+                        <p className="text-xs leading-5 text-[#5b5f59]">
+                          {visualCaption}
+                        </p>
+                      </div>
+                    </Card>
+                  ) : null}
                 </div>
 
                 {index < article.sections.length - 1 ? (

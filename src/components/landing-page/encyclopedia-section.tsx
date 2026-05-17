@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useArticles } from '@/hooks/use-article';
 import { ChevronRight, Search } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export interface HomepageArticlePreview {
@@ -13,10 +14,11 @@ export interface HomepageArticlePreview {
   category: string;
   title: string;
   meta: string;
+  imageURL?: string | null;
 }
 
 export function EncyclopediaSection() {
-  const { data, error, isPending } = useArticles(1, 3);
+  const { data, error, isPending } = useArticles(1, 2);
   const islandFilters =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
   const popularTags = islandFilters.slice(0, 5);
@@ -27,6 +29,7 @@ export function EncyclopediaSection() {
       category: article.motifLabel,
       title: article.title,
       meta: `${article.region} - ${article.readMinutes ?? 0} mnt`,
+      imageURL: article.imageURL,
     })) ?? [];
 
   return (
@@ -102,14 +105,14 @@ export function EncyclopediaSection() {
             </div>
           </div>
 
-          <aside className="border-t border-white/12 bg-[#2a5541] p-6 md:p-8 lg:border-l lg:border-t-0">
+          <aside className="border-t border-white/12 bg-[#2a5541] p-5 md:p-6 lg:border-l lg:border-t-0">
             <h4 className="text-2xl font-bold tracking-tight text-[#f0f7eb]">
               Artikel Terkini
             </h4>
 
             <div className="mt-6 space-y-3">
               {isPending
-                ? Array.from({ length: 3 }).map((_, index) => (
+                ? Array.from({ length: 2 }).map((_, index) => (
                     <Card
                       key={index}
                       className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5"
@@ -131,15 +134,27 @@ export function EncyclopediaSection() {
               ) : null}
 
               {!isPending && !error && latestArticles.length > 0
-                ? latestArticles.map((article) => (
+                ? latestArticles.slice(0, 2).map((article) => (
                     <Link
                       key={article.slug}
                       href={`/encyclopedia/${article.slug}`}
                       className="block"
                     >
                       <Card className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5 transition hover:bg-white/11">
-                        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
-                          <span className="h-4 w-4 rotate-45 border border-white/55" />
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
+                          {article.imageURL ? (
+                            <Image
+                              src={article.imageURL}
+                              alt={article.title}
+                              fill
+                              className="object-cover"
+                              sizes="56px"
+                            />
+                          ) : (
+                            <div className="grid h-full w-full place-items-center">
+                              <span className="h-4 w-4 rotate-45 border border-white/55" />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-semibold leading-snug text-[#e9f2e5]">

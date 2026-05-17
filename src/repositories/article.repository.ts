@@ -1,4 +1,4 @@
-import { Prisma } from '@/generated/prisma/client';
+import { ArticleStatus, Prisma } from '@/generated/prisma/client';
 import prisma from '@/lib/prisma';
 
 const getUniqueWhere = (idOrSlug: string) => {
@@ -43,10 +43,12 @@ export const articleRepository = {
   countAll: async ({
     island,
     topic,
-  }: { island?: string; topic?: string } = {}) => {
+    status,
+  }: { island?: string; topic?: string; status?: ArticleStatus } = {}) => {
     const where: Prisma.ArticleWhereInput = {
       ...(island ? { island } : {}),
       ...(topic ? { topic } : {}),
+      ...(status ? { status } : {}),
     };
 
     return prisma.article.count({ where });
@@ -55,11 +57,10 @@ export const articleRepository = {
   countByIsland: async ({ topic }: { topic?: string } = {}) => {
     return prisma.article.groupBy({
       by: ['island'],
-      where: topic
-        ? {
-            topic,
-          }
-        : undefined,
+      where: {
+        status: 'published',
+        ...(topic ? { topic } : {}),
+      },
       _count: {
         island: true,
       },
@@ -72,11 +73,10 @@ export const articleRepository = {
   countByTopic: async ({ island }: { island?: string } = {}) => {
     return prisma.article.groupBy({
       by: ['topic'],
-      where: island
-        ? {
-            island,
-          }
-        : undefined,
+      where: {
+        status: 'published',
+        ...(island ? { island } : {}),
+      },
       _count: {
         topic: true,
       },
@@ -89,6 +89,9 @@ export const articleRepository = {
   countDistinctMotifLabel: async () => {
     const motifGroups = await prisma.article.groupBy({
       by: ['motifLabel'],
+      where: {
+        status: 'published',
+      },
       _count: {
         motifLabel: true,
       },
@@ -96,6 +99,25 @@ export const articleRepository = {
 
     return motifGroups.filter((item) => item.motifLabel.trim().length > 0)
       .length;
+  },
+
+  countDistinctProvince: async () => {
+    const provinceGroups = await prisma.article.groupBy({
+      by: ['province'],
+      where: {
+        status: 'published',
+        province: {
+          not: null,
+        },
+      },
+      _count: {
+        province: true,
+      },
+    });
+
+    return provinceGroups.filter(
+      (item) => item.province && item.province.trim().length > 0,
+    ).length;
   },
 
   findMostPopular: async (limit: number = 6) => {

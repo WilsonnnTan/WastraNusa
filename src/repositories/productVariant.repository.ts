@@ -13,4 +13,11 @@ export const productVariantRepository = {
       data: { stock: { decrement: quantity } },
     });
   },
+
+  incrementVariantStock: async (variantId: string, quantity: number) => {
+    return prisma.productVariant.update({
+      where: { id: variantId },
+      data: { stock: { increment: quantity } },
+    });
+  },
 };

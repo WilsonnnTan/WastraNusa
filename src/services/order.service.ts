@@ -1,5 +1,9 @@
 import type { Prisma } from '@/generated/prisma/client';
-import { OrderStatus, PaymentStatus } from '@/generated/prisma/enums';
+import {
+  OrderStatus,
+  PaymentStatus,
+  PaymentTransactionStatus,
+} from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { orderRepository } from '@/repositories/order.repository';
 
@@ -16,6 +20,22 @@ const ADMIN_EDITABLE_ORDER_STATUSES = new Set<OrderStatus>([
   OrderStatus.shipped,
   OrderStatus.delivered,
 ]);
+
+const DEFAULT_PAYMENT_TIMEOUT_MINUTES = 60;
+
+function getPaymentTimeoutMinutes() {
+  const rawValue = Number(process.env.ORDER_PAYMENT_TIMEOUT_MINUTES ?? '30');
+
+  if (!Number.isFinite(rawValue) || rawValue <= 0) {
+    return DEFAULT_PAYMENT_TIMEOUT_MINUTES;
+  }
+
+  return Math.floor(rawValue);
+}
+
+export function getOrderPaymentExpiryDate(createdAt: Date) {
+  return new Date(createdAt.getTime() + getPaymentTimeoutMinutes() * 60 * 1000);
+}
 
 function mapToUiOrderStatus(order: {
   orderStatus: string;
@@ -62,6 +82,180 @@ function mapToPaymentStatusLabel(paymentStatus: string) {
   return 'Belum Bayar';
 }
 
+function parseJsonTag(customerNotes: string | null | undefined, tag: string) {
+  if (!customerNotes) return null;
+
+  const marker = `${tag}=`;
+  const start = customerNotes.indexOf(marker);
+  if (start < 0) return null;
+
+  const jsonStart = start + marker.length;
+  const jsonEnd = customerNotes.indexOf(' | ', jsonStart);
+  const jsonRaw =
+    jsonEnd >= 0
+      ? customerNotes.slice(jsonStart, jsonEnd)
+      : customerNotes.slice(jsonStart);
+
+  try {
+    return JSON.parse(jsonRaw);
+  } catch {
+    return null;
+  }
+}
+
+function extractReservedItemsFromOrder(order: {
+  productId: string;
+  variantId: string | null;
+  quantity: number;
+  customerNotes: string | null;
+}) {
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{
+    productId?: string;
+    variantId?: string | null;
+    quantity?: number;
+  }> | null;
+
+  if (checkoutItems && checkoutItems.length > 0) {
+    return checkoutItems
+      .filter(
+        (item) =>
+          typeof item.productId === 'string' &&
+          item.productId &&
+          typeof item.quantity === 'number' &&
+          item.quantity > 0,
+      )
+      .map((item) => ({
+        productId: item.productId as string,
+        variantId: item.variantId ?? null,
+        quantity: item.quantity as number,
+      }));
+  }
+
+  return [
+    {
+      productId: order.productId,
+      variantId: order.variantId,
+      quantity: order.quantity,
+    },
+  ];
+}
+
+type PaymentTransactionSummary = {
+  status?: string;
+  expiredAt?: Date | null;
+  paymentUrl?: string | null;
+  vaNumber?: string | null;
+  paidAt?: Date | null;
+  createdAt?: Date;
+  id?: string;
+};
+
+function getLatestPaymentTransaction(order: {
+  paymentTransactions: PaymentTransactionSummary[];
+}) {
+  return order.paymentTransactions[0] || null;
+}
+
+function getPaymentDeadlineAt(order: {
+  createdAt: Date;
+  paymentTransactions: PaymentTransactionSummary[];
+}) {
+  return (
+    getLatestPaymentTransaction(order)?.expiredAt ??
+    getOrderPaymentExpiryDate(order.createdAt)
+  );
+}
+
+function canCancelPendingOrder(order: {
+  orderStatus: string;
+  paymentStatus: string;
+  paymentTransactions: PaymentTransactionSummary[];
+}) {
+  if (
+    order.orderStatus !== OrderStatus.pending ||
+    order.paymentStatus !== PaymentStatus.unpaid
+  ) {
+    return false;
+  }
+
+  const latestPayment = getLatestPaymentTransaction(order);
+  if (!latestPayment) {
+    return true;
+  }
+
+  if (latestPayment.status !== PaymentTransactionStatus.pending) {
+    return false;
+  }
+
+  return !latestPayment.expiredAt || latestPayment.expiredAt > new Date();
+}
+
+async function cancelOrderAndRestoreStock(
+  order: {
+    id: string;
+    productId: string;
+    variantId: string | null;
+    quantity: number;
+    customerNotes: string | null;
+    orderStatus: string;
+    paymentStatus: string;
+    paymentTransactions: Array<{
+      status: string;
+      expiredAt?: Date | null;
+    }>;
+  },
+  reason: 'user_cancelled' | 'expired' | 'failed',
+) {
+  if (
+    order.orderStatus === OrderStatus.cancelled ||
+    order.paymentStatus === PaymentStatus.paid
+  ) {
+    return false;
+  }
+
+  if (
+    order.orderStatus !== OrderStatus.pending ||
+    order.paymentStatus !== PaymentStatus.unpaid
+  ) {
+    return false;
+  }
+
+  const restoredItems = extractReservedItemsFromOrder(order).filter(
+    (item) => item.variantId && item.quantity > 0,
+  );
+  const paymentTransactionStatus =
+    reason === 'expired'
+      ? PaymentTransactionStatus.expired
+      : PaymentTransactionStatus.failed;
+  const now = new Date();
+
+  await orderRepository.cancelOrderAndRestoreStock(
+    order.id,
+    restoredItems.map((item) => ({
+      variantId: item.variantId!,
+      quantity: item.quantity,
+    })),
+    paymentTransactionStatus,
+    reason === 'expired' ? now : undefined,
+  );
+
+  return true;
+}
+
+async function reconcileExpiredOrders(userId?: string) {
+  const expiredOrders = await orderRepository.findExpiredPendingOrders(
+    new Date(),
+    userId,
+  );
+
+  for (const order of expiredOrders) {
+    await cancelOrderAndRestoreStock(order, 'expired');
+  }
+}
+
 function mapAdminOrder(order: {
   id: string;
   orderNumber: string;
@@ -72,7 +266,13 @@ function mapAdminOrder(order: {
   trackingNumber: string | null;
   createdAt: Date;
   user: { id: string; name: string; email: string };
-  product: { id: string; name: string; province: string; clothingType: string };
+  product: {
+    id: string;
+    name: string;
+    province: string;
+    clothingType: string;
+    imageURL: string | null;
+  };
 }) {
   const effectiveOrderStatus =
     order.paymentStatus === PaymentStatus.failed ||
@@ -99,6 +299,7 @@ function mapAdminOrder(order: {
       location: order.product.province,
       category: order.product.clothingType,
       quantity: order.quantity,
+      imageURL: order.product.imageURL,
     },
     totalAmount,
     totalAmountLabel: formatOrderCurrency(totalAmount),
@@ -119,6 +320,8 @@ export const orderService = {
     page: number = 1,
     limit: number = 10,
   ) => {
+    await reconcileExpiredOrders(userId);
+
     let filters: Prisma.OrderWhereInput = {};
 
     if (status && status !== 'Semua') {
@@ -161,6 +364,8 @@ export const orderService = {
 
     const formattedOrders = orders.map((order) => {
       const uiStatus = mapToUiOrderStatus(order);
+      const paymentDeadlineAt =
+        uiStatus === 'Menunggu Bayar' ? getPaymentDeadlineAt(order) : null;
 
       return {
         orderId: order.id,
@@ -168,11 +373,16 @@ export const orderService = {
         date: formatOrderDate(order.createdAt),
         totalPrice: formatOrderCurrency(Number(order.totalAmount)),
         status: uiStatus,
+        paymentStatus: order.paymentStatus,
+        paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
+        paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
+        canCancel: canCancelPendingOrder(order),
         product: {
           category: order.product.clothingType,
           name: order.product.name,
           location: order.product.province,
           quantity: order.quantity,
+          imageURL: order.product.imageURL,
         },
         actions: [
           'Detail',
@@ -193,6 +403,8 @@ export const orderService = {
   },
 
   getUserOrderDetail: async (userId: string, identifier: string) => {
+    await reconcileExpiredOrders(userId);
+
     const order = await orderRepository.findOrderDetailByIdentifier(
       userId,
       identifier,
@@ -202,7 +414,12 @@ export const orderService = {
       throw new ApiError('Pesanan tidak ditemukan', 404);
     }
 
-    const latestPayment = order.paymentTransactions[0] || null;
+    const latestPayment = getLatestPaymentTransaction(order);
+    const paymentDeadlineAt =
+      order.orderStatus === OrderStatus.pending &&
+      order.paymentStatus === PaymentStatus.unpaid
+        ? getPaymentDeadlineAt(order)
+        : null;
 
     return {
       orderId: order.id,
@@ -210,7 +427,10 @@ export const orderService = {
       orderDate: formatOrderDate(order.createdAt),
       orderStatus: mapToUiOrderStatus(order),
       paymentStatus: order.paymentStatus,
+      paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
       paymentMethod: order.paymentMethod,
+      paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
+      canCancel: canCancelPendingOrder(order),
       totals: {
         subtotal: formatOrderCurrency(Number(order.subtotal)),
         shippingCost: formatOrderCurrency(Number(order.shippingCost)),
@@ -223,6 +443,7 @@ export const orderService = {
         location: order.product.province,
         quantity: order.quantity,
         unitPrice: formatOrderCurrency(Number(order.productPrice)),
+        imageURL: order.product.imageURL,
       },
       shipping: {
         courier: order.courier,
@@ -245,11 +466,49 @@ export const orderService = {
             paymentUrl: latestPayment.paymentUrl,
             vaNumber: latestPayment.vaNumber,
             paidAt: latestPayment.paidAt,
+            expiredAt: latestPayment.expiredAt,
             createdAt: latestPayment.createdAt,
           }
         : null,
       customerNotes: order.customerNotes,
     };
+  },
+
+  cancelUserOrder: async (userId: string, identifier: string) => {
+    await reconcileExpiredOrders(userId);
+
+    const order = await orderRepository.findOrderForUserByIdentifier(
+      userId,
+      identifier,
+    );
+
+    if (!order) {
+      throw new ApiError('Pesanan tidak ditemukan', 404);
+    }
+
+    if (!canCancelPendingOrder(order)) {
+      throw new ApiError(
+        'Pesanan ini tidak dapat dibatalkan karena pembayaran sudah diproses atau masa bayar telah habis',
+        400,
+      );
+    }
+
+    await cancelOrderAndRestoreStock(order, 'user_cancelled');
+
+    return orderService.getUserOrderDetail(userId, identifier);
+  },
+
+  cancelOrderBySystemId: async (
+    orderId: string,
+    reason: 'expired' | 'failed',
+  ) => {
+    const order = await orderRepository.findOrderForCancellationById(orderId);
+
+    if (!order) {
+      throw new ApiError('Pesanan tidak ditemukan', 404);
+    }
+
+    await cancelOrderAndRestoreStock(order, reason);
   },
 
   getAdminOrders: async (

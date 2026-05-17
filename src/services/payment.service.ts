@@ -12,6 +12,10 @@ import type {
   CheckoutInput,
   MidtransNotificationInput,
 } from '@/schemas/payment.schema';
+import {
+  getOrderPaymentExpiryDate,
+  orderService,
+} from '@/services/order.service';
 
 interface CheckoutResolvedItem {
   cartItemIds: string[];
@@ -296,6 +300,7 @@ export const paymentService = {
     const orderId = crypto.randomUUID();
     const orderNumber = generateOrderNumber();
     const paymentTransactionId = crypto.randomUUID();
+    const paymentExpiredAt = getOrderPaymentExpiryDate(new Date());
 
     const itemSnapshot = resolvedItems.map((item) => ({
       cartItemIds: item.cartItemIds,
@@ -360,6 +365,14 @@ export const paymentService = {
         orderId,
         error,
       });
+      await orderService
+        .cancelOrderBySystemId(orderId, 'failed')
+        .catch((cancelError) => {
+          logger.error('Failed to rollback order after Midtrans error', {
+            orderId,
+            cancelError,
+          });
+        });
       throw new ApiError('Failed to create payment transaction', 502);
     }
 
@@ -370,6 +383,7 @@ export const paymentService = {
       amount: totalAmount,
       status: 'pending',
       paymentUrl: midtransResponse.redirect_url,
+      expiredAt: paymentExpiredAt,
       createdAt: new Date(),
     });
 
@@ -438,9 +452,7 @@ export const paymentService = {
       await paymentTransactionRepository.updatePaymentStatus(order_id, {
         status: 'failed',
       });
-      await orderRepository.updateOrderPaymentStatus(order_id, {
-        paymentStatus: 'failed',
-      });
+      await orderService.cancelOrderBySystemId(order_id, 'failed');
       return;
     }
 
@@ -455,12 +467,25 @@ export const paymentService = {
       paidAt,
     });
 
-    await orderRepository.updateOrderPaymentStatus(order_id, {
-      paymentStatus,
-      paymentMethod: payment_type,
-      paidAt,
-      ...(isPaid ? { orderStatus: 'confirmed' as const } : {}),
-    });
+    if (isPaid) {
+      await orderRepository.updateOrderPaymentStatus(order_id, {
+        paymentStatus,
+        paymentMethod: payment_type,
+        paidAt,
+        orderStatus: 'confirmed' as const,
+      });
+    } else {
+      await orderService.cancelOrderBySystemId(
+        order_id,
+        transaction_status === 'expire' ? 'expired' : 'failed',
+      );
+
+      await orderRepository.updateOrderPaymentStatus(order_id, {
+        paymentStatus,
+        paymentMethod: payment_type,
+        paidAt,
+      });
+    }
 
     if (isPaid) {
       const order = await orderRepository.findOrderById(order_id);

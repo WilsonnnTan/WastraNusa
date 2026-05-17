@@ -16,6 +16,7 @@ export const paymentTransactionRepository = {
     data: {
       status: PaymentTransactionStatus;
       paidAt?: Date | null;
+      expiredAt?: Date | null;
     },
   ) => {
     return prisma.paymentTransaction.update({

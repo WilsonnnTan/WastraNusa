@@ -8,6 +8,7 @@ export interface CheckoutSelectedItem {
   variant: string;
   price: number;
   quantity: number;
+  imageURL?: string | null;
 }
 
 export interface CheckoutShippingSelection {

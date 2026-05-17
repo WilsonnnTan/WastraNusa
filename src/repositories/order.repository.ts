@@ -1,6 +1,44 @@
 import type { PaymentStatus, Prisma } from '@/generated/prisma/client';
 import prisma from '@/lib/prisma';
 
+const userOrderRelations = {
+  product: {
+    select: {
+      id: true,
+      name: true,
+      province: true,
+      clothingType: true,
+      imageURL: true,
+    },
+  },
+  shippingAddress: {
+    select: {
+      recipientName: true,
+      phone: true,
+      province: true,
+      city: true,
+      district: true,
+      subdistrict: true,
+      postalCode: true,
+      fullAddress: true,
+    },
+  },
+  paymentTransactions: {
+    orderBy: {
+      createdAt: 'desc',
+    },
+    select: {
+      id: true,
+      status: true,
+      paymentUrl: true,
+      vaNumber: true,
+      paidAt: true,
+      expiredAt: true,
+      createdAt: true,
+    },
+  },
+} satisfies Prisma.OrderInclude;
+
 export const orderRepository = {
   createOrder: async (data: Prisma.OrderUncheckedCreateInput) => {
     return prisma.order.create({ data });
@@ -21,27 +59,24 @@ export const orderRepository = {
         userId,
         OR: [{ id: identifier }, { orderNumber: identifier }],
       },
+      include: userOrderRelations,
+    });
+  },
+
+  findOrderForUserByIdentifier: async (userId: string, identifier: string) => {
+    return prisma.order.findFirst({
+      where: {
+        userId,
+        OR: [{ id: identifier }, { orderNumber: identifier }],
+      },
+      include: userOrderRelations,
+    });
+  },
+
+  findOrderForCancellationById: async (orderId: string) => {
+    return prisma.order.findUnique({
+      where: { id: orderId },
       include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            province: true,
-            clothingType: true,
-          },
-        },
-        shippingAddress: {
-          select: {
-            recipientName: true,
-            phone: true,
-            province: true,
-            city: true,
-            district: true,
-            subdistrict: true,
-            postalCode: true,
-            fullAddress: true,
-          },
-        },
         paymentTransactions: {
           orderBy: {
             createdAt: 'desc',
@@ -49,8 +84,7 @@ export const orderRepository = {
           select: {
             id: true,
             status: true,
-            paymentUrl: true,
-            vaNumber: true,
+            expiredAt: true,
             paidAt: true,
             createdAt: true,
           },
@@ -90,6 +124,18 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
+          },
+        },
+        paymentTransactions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            id: true,
+            status: true,
+            expiredAt: true,
+            createdAt: true,
           },
         },
       },
@@ -105,6 +151,89 @@ export const orderRepository = {
   ) => {
     return prisma.order.count({
       where: { userId, ...filters },
+    });
+  },
+
+  findExpiredPendingOrders: async (now: Date, userId?: string) => {
+    return prisma.order.findMany({
+      where: {
+        ...(userId ? { userId } : {}),
+        orderStatus: 'pending',
+        paymentStatus: 'unpaid',
+        paymentTransactions: {
+          some: {
+            status: 'pending',
+            expiredAt: {
+              lte: now,
+            },
+          },
+        },
+      },
+      include: {
+        paymentTransactions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            id: true,
+            status: true,
+            expiredAt: true,
+            paidAt: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  },
+
+  cancelOrder: async (orderId: string, data?: Prisma.OrderUpdateInput) => {
+    return prisma.order.update({
+      where: { id: orderId },
+      data: {
+        orderStatus: 'cancelled',
+        paymentStatus: 'failed',
+        ...data,
+      },
+    });
+  },
+
+  cancelOrderAndRestoreStock: async (
+    orderId: string,
+    restoredVariantItems: Array<{
+      variantId: string;
+      quantity: number;
+    }>,
+    paymentTransactionStatus: 'failed' | 'expired',
+    expiredAt?: Date,
+  ) => {
+    return prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          orderStatus: 'cancelled',
+          paymentStatus: 'failed',
+        },
+      });
+
+      await tx.paymentTransaction.updateMany({
+        where: {
+          orderId,
+          status: 'pending',
+        },
+        data: {
+          status: paymentTransactionStatus,
+          expiredAt,
+        },
+      });
+
+      for (const item of restoredVariantItems) {
+        await tx.productVariant.update({
+          where: { id: item.variantId },
+          data: {
+            stock: { increment: item.quantity },
+          },
+        });
+      }
     });
   },
 
@@ -131,6 +260,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
       },
@@ -165,6 +295,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
         shippingAddress: {
@@ -215,6 +346,7 @@ export const orderRepository = {
             name: true,
             province: true,
             clothingType: true,
+            imageURL: true,
           },
         },
         shippingAddress: {

@@ -92,6 +92,7 @@ export interface EncyclopediaArticleListMeta {
     totalArticles: number;
     totalIslands: number;
     totalWastraTypes: number;
+    totalProvinces: number;
   };
 }
 

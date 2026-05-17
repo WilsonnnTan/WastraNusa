@@ -66,6 +66,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(1);
+      mockRepo.countDistinctProvince.mockResolvedValue(1);
 
       const result = await articleService.getArticles(2, 5);
 
@@ -84,6 +85,7 @@ describe('articleService', { tags: ['backend'] }, () => {
       mockRepo.countByIsland.mockResolvedValue([]);
       mockRepo.countByTopic.mockResolvedValue([]);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
+      mockRepo.countDistinctProvince.mockResolvedValue(0);
 
       await articleService.getArticles(1, 100);
 
@@ -104,6 +106,7 @@ describe('articleService', { tags: ['backend'] }, () => {
       mockRepo.countByIsland.mockResolvedValue([]);
       mockRepo.countByTopic.mockResolvedValue([]);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
+      mockRepo.countDistinctProvince.mockResolvedValue(0);
 
       await articleService.getArticles();
 
@@ -138,6 +141,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(3);
+      mockRepo.countDistinctProvince.mockResolvedValue(2);
 
       const result = await articleService.getArticles(1, 5, { island: 'Jawa' });
 
@@ -151,8 +155,13 @@ describe('articleService', { tags: ['backend'] }, () => {
         island: 'Jawa',
         topic: undefined,
       });
-      expect(mockRepo.countAll).toHaveBeenCalledWith();
-      expect(mockRepo.countAll).toHaveBeenCalledWith({ topic: undefined });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+        topic: undefined,
+      });
       expect(result.meta.totalItems).toBe(12);
       expect(result.meta.totalPages).toBe(3);
       expect(result.meta.hasNextPage).toBe(true);
@@ -187,6 +196,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(4);
+      mockRepo.countDistinctProvince.mockResolvedValue(5);
 
       const result = await articleService.getArticles(1, 5, {
         topic: 'Teknik Pembuatan',
@@ -200,6 +210,13 @@ describe('articleService', { tags: ['backend'] }, () => {
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
         island: undefined,
+        topic: 'Teknik Pembuatan',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
         topic: 'Teknik Pembuatan',
       });
       expect(mockRepo.countByIsland).toHaveBeenCalledWith({
@@ -256,7 +273,9 @@ describe('articleService', { tags: ['backend'] }, () => {
 
       const result = await articleService.getDashboardOverview();
 
-      expect(mockRepo.countAll).toHaveBeenCalledWith();
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+      });
       expect(mockRepo.countCreatedSince).toHaveBeenCalledTimes(2);
       expect(mockRepo.findMostPopular).toHaveBeenCalledWith(6);
       expect(result).toEqual({
