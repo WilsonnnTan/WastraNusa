@@ -239,7 +239,12 @@ function stripHtml(html?: string): string {
     /<style[\s\S]*?>[\s\S]*?<\/style>/gi,
     '',
   );
-  const withoutTags = withoutStyles.replace(/<[^>]+>/g, '');
+  let withoutTags = withoutStyles;
+  let previous: string;
+  do {
+    previous = withoutTags;
+    withoutTags = withoutTags.replace(/<[^>]+>/g, '');
+  } while (withoutTags !== previous);
   const collapsed = withoutTags.replace(/\s+/g, ' ').trim();
   // Decode a few common HTML entities
   return collapsed
