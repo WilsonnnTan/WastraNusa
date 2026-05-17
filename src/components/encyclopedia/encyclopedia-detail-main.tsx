@@ -202,6 +202,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               src={article.imageURL}
               alt={article.title}
               fill
+              unoptimized
               className="object-cover mix-blend-overlay"
             />
           ) : (
@@ -336,6 +337,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                             src={section.imageURL}
                             alt={visualCaption}
                             fill
+                            unoptimized
                             className="object-cover"
                             sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 280px, 280px"
                             priority={false}

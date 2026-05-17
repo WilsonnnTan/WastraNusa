@@ -66,6 +66,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(1);
+      mockRepo.countDistinctProvince.mockResolvedValue(1);
 
       const result = await articleService.getArticles(2, 5);
 
@@ -84,6 +85,7 @@ describe('articleService', { tags: ['backend'] }, () => {
       mockRepo.countByIsland.mockResolvedValue([]);
       mockRepo.countByTopic.mockResolvedValue([]);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
+      mockRepo.countDistinctProvince.mockResolvedValue(0);
 
       await articleService.getArticles(1, 100);
 
@@ -104,6 +106,7 @@ describe('articleService', { tags: ['backend'] }, () => {
       mockRepo.countByIsland.mockResolvedValue([]);
       mockRepo.countByTopic.mockResolvedValue([]);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
+      mockRepo.countDistinctProvince.mockResolvedValue(0);
 
       await articleService.getArticles();
 
@@ -138,6 +141,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(3);
+      mockRepo.countDistinctProvince.mockResolvedValue(2);
 
       const result = await articleService.getArticles(1, 5, { island: 'Jawa' });
 
@@ -187,6 +191,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countDistinctMotifLabel.mockResolvedValue(4);
+      mockRepo.countDistinctProvince.mockResolvedValue(5);
 
       const result = await articleService.getArticles(1, 5, {
         topic: 'Teknik Pembuatan',
