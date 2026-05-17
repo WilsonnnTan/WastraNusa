@@ -79,28 +79,61 @@ export async function GET(req: Request) {
       'bibliografi',
     ]);
 
-    // helper to strip HTML and remove Wikipedia-specific artifacts
-    const stripHtml = (html?: string) => {
+    // helper to strip HTML and remove Wikipedia-specific artifacts.
+    // Uses a character-by-character state machine instead of regex to parse tags,
+    // which satisfies CodeQL rules js/bad-tag-filter and
+    // js/incomplete-multi-character-sanitization.
+    const stripHtml = (html?: string): string => {
       if (!html) return '';
 
-      // Remove script and style blocks — loop until no more matches to prevent
-      // bypass via nested or malformed tags (fixes CodeQL incomplete-sanitization).
-      const SCRIPT_RE = /<script[\s\S]*?>[\s\S]*?<\/script>/gi;
-      const STYLE_RE = /<style[\s\S]*?>[\s\S]*?<\/style>/gi;
-      let sanitized = html;
-      let prev: string;
-      do {
-        prev = sanitized;
-        sanitized = sanitized.replace(SCRIPT_RE, '').replace(STYLE_RE, '');
-      } while (sanitized !== prev);
+      // --- Phase 1: extract plain text via a hand-written state machine ---
+      let textOut = '';
+      let inTag = false;
+      let tagBuf = '';
+      let skipContent = false;
+      let closingTag = '';
 
-      const withoutTags = sanitized.replace(/<[^>]+>/g, '');
+      for (let i = 0; i < html.length; i += 1) {
+        const ch = html[i];
+        if (ch === '<') {
+          inTag = true;
+          tagBuf = '';
+        } else if (ch === '>' && inTag) {
+          inTag = false;
+          const tag = tagBuf.trim().toLowerCase();
+          if (!skipContent) {
+            if (
+              tag === 'script' ||
+              tag.startsWith('script ') ||
+              tag.startsWith('script\t')
+            ) {
+              skipContent = true;
+              closingTag = 'script';
+            } else if (
+              tag === 'style' ||
+              tag.startsWith('style ') ||
+              tag.startsWith('style\t')
+            ) {
+              skipContent = true;
+              closingTag = 'style';
+            }
+          } else {
+            const normalized = tag.replace(/^\//, '').trim();
+            if (normalized === closingTag) {
+              skipContent = false;
+              closingTag = '';
+            }
+          }
+          tagBuf = '';
+        } else if (inTag) {
+          tagBuf += ch;
+        } else if (!skipContent) {
+          textOut += ch;
+        }
+      }
 
-      // Decode named/numeric HTML entities.
-      // &amp; is decoded LAST so that encoded sequences like &amp;lt; are never
-      // converted into raw '<', which would re-introduce injection vectors
-      // (fixes CodeQL double-escaping/unescaping).
-      const decoded = withoutTags
+      // --- Phase 2: decode HTML entities (&amp; last to avoid double-unescaping) ---
+      const decoded = textOut
         .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
         .replace(/&nbsp;/g, ' ')
         .replace(/&lt;/g, '<')
@@ -110,20 +143,26 @@ export async function GET(req: Request) {
         .replace(/&amp;/g, '&');
 
       // Strip Wikipedia-specific artifacts
-      return decoded
-        .replace(/\[sunting\s*\|\s*sunting sumber\]/gi, '')
-        .replace(/\[edit\s*\|\s*edit source\]/gi, '')
-        .replace(/\[\d+\]/g, '')
-        .replace(/\[[a-z]\]/gi, '')
-        .replace(/\[lower-alpha\]/gi, '')
-        .replace(/\[upper-alpha\]/gi, '')
-        .replace(/\[note\s*\d*\]/gi, '')
-        .replace(/code:\s*\S+\s+is\s+deprecated/gi, '')
-        .replace(/\^[^\n]*/g, '')
-        .replace(/Kesalahan pengutipan:[^\n]*/g, '')
-        .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
+      return (
+        decoded
+          .replace(/\[sunting\s*\|\s*sunting sumber\]/gi, '')
+          .replace(/\[edit\s*\|\s*edit source\]/gi, '')
+          .replace(/\[\d+\]/g, '')
+          .replace(/\[[a-z]\]/gi, '')
+          .replace(/\[lower-alpha\]/gi, '')
+          .replace(/\[upper-alpha\]/gi, '')
+          .replace(/\[note\s*\d*\]/gi, '')
+          .replace(/code:\s*\S+\s+is\s+deprecated/gi, '')
+          .replace(/\^[^\n]*/g, '')
+          .replace(/Kesalahan pengutipan:[^\n]*/g, '')
+          // Broken-ref error fragments that appear without the prefix above,
+          // e.g. "tidak ditemukan teks untuk ref bernama :2"
+          .replace(/tidak ditemukan teks untuk ref bernama\s*:\S*/gi, '')
+          .replace(/ref name not found\s*:\S*/gi, '')
+          .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+      );
     };
 
     // For each section, fetch its HTML via action=parse&section=index&prop=text
@@ -149,12 +188,21 @@ export async function GET(req: Request) {
         // Skip boilerplate sections (References, See Also, External Links, etc.)
         if (BOILERPLATE_SECTION_TITLES.has(titleClean.toLowerCase())) continue;
 
-        const contentClean = stripHtml(rawHtml);
+        let contentClean = stripHtml(rawHtml);
+
+        // MediaWiki embeds the section heading inside the HTML, so after
+        // tag-stripping the title appears verbatim at the start of the content.
+        // Remove it to avoid duplication.
+        if (
+          titleClean &&
+          contentClean.toLowerCase().startsWith(titleClean.toLowerCase())
+        ) {
+          contentClean = contentClean.slice(titleClean.length).trimStart();
+        }
 
         // Skip sections whose content is empty after cleaning
         if (!contentClean) continue;
 
-        // try to extract first image src from HTML
         let imageURL: string | undefined;
         const imgMatch = /<img[^>]+src\s*=\s*"([^"]+)"/i.exec(rawHtml);
         if (imgMatch && imgMatch[1]) {

@@ -254,27 +254,69 @@ export type NormalizedMobileSectionsResponse = Omit<
   sections: Array<{ title: string; content: string }>;
 };
 
+/**
+ * Extract plain text from an HTML string without using regex to match tags.
+ * A character-by-character state machine is used so that CodeQL rules
+ * js/bad-tag-filter and js/incomplete-multi-character-sanitization are not
+ * triggered. Script and style block *content* is suppressed as well as the
+ * tags themselves.
+ */
 function stripHtml(html?: string): string {
   if (!html) return '';
 
-  // Remove script and style blocks — loop until no more matches to prevent
-  // bypass via nested or malformed tags (fixes CodeQL incomplete-sanitization).
-  const SCRIPT_RE = /<script[\s\S]*?>[\s\S]*?<\/script>/gi;
-  const STYLE_RE = /<style[\s\S]*?>[\s\S]*?<\/style>/gi;
-  let sanitized = html;
-  let prev: string;
-  do {
-    prev = sanitized;
-    sanitized = sanitized.replace(SCRIPT_RE, '').replace(STYLE_RE, '');
-  } while (sanitized !== prev);
+  // --- Phase 1: extract plain text via a hand-written state machine ---
+  let text = '';
+  let inTag = false; // currently inside a < ... > sequence
+  let tagBuf = ''; // accumulates characters inside a tag
+  let skipContent = false; // suppress text content (inside script/style)
+  let closingTag = ''; // the tag name we are waiting to close
 
-  const withoutTags = sanitized.replace(/<[^>]+>/g, '');
+  for (let i = 0; i < html.length; i += 1) {
+    const ch = html[i];
 
-  // Decode named/numeric HTML entities.
+    if (ch === '<') {
+      inTag = true;
+      tagBuf = '';
+    } else if (ch === '>' && inTag) {
+      inTag = false;
+      const tag = tagBuf.trim().toLowerCase();
+      // Detect opening block tags whose *content* must be suppressed
+      if (!skipContent) {
+        if (
+          tag === 'script' ||
+          tag.startsWith('script ') ||
+          tag.startsWith('script\t')
+        ) {
+          skipContent = true;
+          closingTag = 'script';
+        } else if (
+          tag === 'style' ||
+          tag.startsWith('style ') ||
+          tag.startsWith('style\t')
+        ) {
+          skipContent = true;
+          closingTag = 'style';
+        }
+      } else {
+        // Detect the matching closing tag to resume text output
+        const normalized = tag.replace(/^\//, '').trim();
+        if (normalized === closingTag) {
+          skipContent = false;
+          closingTag = '';
+        }
+      }
+      tagBuf = '';
+    } else if (inTag) {
+      tagBuf += ch;
+    } else if (!skipContent) {
+      text += ch;
+    }
+  }
+
+  // --- Phase 2: decode named/numeric HTML entities ---
   // &amp; is decoded LAST so that encoded sequences like &amp;lt; are never
-  // converted into raw '<', which would re-introduce injection vectors
-  // (fixes CodeQL double-escaping/unescaping).
-  const decoded = withoutTags
+  // converted into raw '<', preventing double-unescaping (CodeQL js/double-escaping).
+  const decoded = text
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
@@ -301,6 +343,10 @@ function stripHtml(html?: string): string {
       .replace(/\^[^\n]*/g, '')
       // Parser error messages injected by MediaWiki
       .replace(/Kesalahan pengutipan:[^\n]*/g, '')
+      // Broken-ref error fragments that appear without the prefix above,
+      // e.g. "tidak ditemukan teks untuk ref bernama :2"
+      .replace(/tidak ditemukan teks untuk ref bernama\s*:\S*/gi, '')
+      .replace(/ref name not found\s*:\S*/gi, '')
       // Inline page citations like ", hlm. 496" or "hlm. 16–17"
       .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
       // Collapse whitespace and trim
