@@ -155,8 +155,13 @@ describe('articleService', { tags: ['backend'] }, () => {
         island: 'Jawa',
         topic: undefined,
       });
-      expect(mockRepo.countAll).toHaveBeenCalledWith();
-      expect(mockRepo.countAll).toHaveBeenCalledWith({ topic: undefined });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+        topic: undefined,
+      });
       expect(result.meta.totalItems).toBe(12);
       expect(result.meta.totalPages).toBe(3);
       expect(result.meta.hasNextPage).toBe(true);
@@ -205,6 +210,13 @@ describe('articleService', { tags: ['backend'] }, () => {
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
         island: undefined,
+        topic: 'Teknik Pembuatan',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+      });
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
         topic: 'Teknik Pembuatan',
       });
       expect(mockRepo.countByIsland).toHaveBeenCalledWith({
@@ -261,7 +273,9 @@ describe('articleService', { tags: ['backend'] }, () => {
 
       const result = await articleService.getDashboardOverview();
 
-      expect(mockRepo.countAll).toHaveBeenCalledWith();
+      expect(mockRepo.countAll).toHaveBeenCalledWith({
+        status: 'published',
+      });
       expect(mockRepo.countCreatedSince).toHaveBeenCalledTimes(2);
       expect(mockRepo.findMostPopular).toHaveBeenCalledWith(6);
       expect(result).toEqual({
