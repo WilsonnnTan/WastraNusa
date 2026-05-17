@@ -11,18 +11,45 @@ export async function GET(req: Request) {
         { status: 400 },
       );
     }
+
+    const ALLOWED_ORIGINS = new Set([
+      'https://en.wikipedia.org',
+      'https://id.wikipedia.org',
+      'https://commons.wikimedia.org',
+    ]);
+
+    let safeOrigin: string;
+    try {
+      const parsedOrigin = new URL(origin);
+      if (
+        (parsedOrigin.protocol !== 'https:' && parsedOrigin.protocol !== 'http:') ||
+        !ALLOWED_ORIGINS.has(parsedOrigin.origin)
+      ) {
+        return NextResponse.json(
+          { error: 'Invalid origin' },
+          { status: 400 },
+        );
+      }
+      safeOrigin = parsedOrigin.origin;
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid origin' },
+        { status: 400 },
+      );
+    }
+
     const enc = encodeURIComponent(title);
     const ua =
       'WastraNusa/1.0 (wastranusa.example; contact: dev@wastranusa.example)';
 
     // 1) get section list via action=parse&prop=sections
-    const sectionsUrl = `${origin}/w/api.php?action=parse&page=${enc}&prop=sections&format=json`;
+    const sectionsUrl = `${safeOrigin}/w/api.php?action=parse&page=${enc}&prop=sections&format=json`;
     const secRes = await fetch(sectionsUrl, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
         'User-Agent': ua,
-        Referer: origin,
+        Referer: safeOrigin,
       },
     });
 
