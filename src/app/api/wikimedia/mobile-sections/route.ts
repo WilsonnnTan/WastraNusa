@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
 import { convert } from 'html-to-text';
-import sanitizeHtml from 'sanitize-html';
+import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
   try {
@@ -24,20 +23,15 @@ export async function GET(req: Request) {
     try {
       const parsedOrigin = new URL(origin);
       if (
-        (parsedOrigin.protocol !== 'https:' && parsedOrigin.protocol !== 'http:') ||
+        (parsedOrigin.protocol !== 'https:' &&
+          parsedOrigin.protocol !== 'http:') ||
         !ALLOWED_ORIGINS.has(parsedOrigin.origin)
       ) {
-        return NextResponse.json(
-          { error: 'Invalid origin' },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: 'Invalid origin' }, { status: 400 });
       }
       safeOrigin = parsedOrigin.origin;
     } catch {
-      return NextResponse.json(
-        { error: 'Invalid origin' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Invalid origin' }, { status: 400 });
     }
 
     const enc = encodeURIComponent(title);
@@ -92,8 +86,6 @@ export async function GET(req: Request) {
         selectors: [{ selector: 'a', options: { ignoreHref: true } }],
       });
       return text
-      });
-      return sanitized
         .replace(/\s+/g, ' ')
         .trim()
         .replace(/&nbsp;/g, ' ')
