@@ -56,21 +56,61 @@ export async function GET(req: Request) {
 
     const sections = secJson.parse?.sections ?? [];
 
-    // helper to strip HTML
+    // Section titles that are pure boilerplate — skip them entirely
+    const BOILERPLATE_SECTION_TITLES = new Set([
+      'referensi',
+      'references',
+      'reference',
+      'catatan',
+      'catatan kaki',
+      'notes',
+      'footnotes',
+      'lihat pula',
+      'see also',
+      'pranala luar',
+      'external links',
+      'external link',
+      'daftar pustaka',
+      'bibliography',
+      'bacaan lebih lanjut',
+      'further reading',
+      'sumber',
+      'sources',
+      'bibliografi',
+    ]);
+
+    // helper to strip HTML and remove Wikipedia-specific artifacts
     const stripHtml = (html?: string) => {
       if (!html) return '';
-      return html
+      const withoutTags = html
         .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
         .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, '')
-        .replace(/<[^>]+>/g, '')
-        .replace(/\s+/g, ' ')
-        .trim()
+        .replace(/<[^>]+>/g, '');
+
+      // Decode numeric and named HTML entities
+      const decoded = withoutTags
+        .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
+        .replace(/&#39;/g, "'");
+
+      // Strip Wikipedia-specific artifacts
+      return decoded
+        .replace(/\[sunting\s*\|\s*sunting sumber\]/gi, '')
+        .replace(/\[edit\s*\|\s*edit source\]/gi, '')
+        .replace(/\[\d+\]/g, '')
+        .replace(/\[[a-z]\]/gi, '')
+        .replace(/\[lower-alpha\]/gi, '')
+        .replace(/\[upper-alpha\]/gi, '')
+        .replace(/\[note\s*\d*\]/gi, '')
+        .replace(/code:\s*\S+\s+is\s+deprecated/gi, '')
+        .replace(/\^[^\n]*/g, '')
+        .replace(/Kesalahan pengutipan:[^\n]*/g, '')
+        .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
+        .replace(/\s+/g, ' ')
         .trim();
     };
 
@@ -93,7 +133,15 @@ export async function GET(req: Request) {
         const j = t ? JSON.parse(t) : {};
         const rawHtml = j.parse?.text?.['*'] ?? '';
         const titleClean = stripHtml(s.line);
+
+        // Skip boilerplate sections (References, See Also, External Links, etc.)
+        if (BOILERPLATE_SECTION_TITLES.has(titleClean.toLowerCase())) continue;
+
         const contentClean = stripHtml(rawHtml);
+
+        // Skip sections whose content is empty after cleaning
+        if (!contentClean) continue;
+
         // try to extract first image src from HTML
         let imageURL: string | undefined;
         const imgMatch = /<img[^>]+src\s*=\s*"([^"]+)"/i.exec(rawHtml);

@@ -117,6 +117,24 @@ function truncateForExcerpt(text: string, maxLen: number): string {
   return `${base.trim()}…`;
 }
 
+/**
+ * Returns the first complete sentence (ends at . ! or ?) from text.
+ * Falls back to truncateForExcerpt when no sentence boundary is found.
+ */
+function extractFirstSentence(text: string, maxLen: number = 220): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  // Find the first sentence-ending punctuation followed by a space or end-of-string
+  const match = normalized.match(/^.+?[.!?](?=\s|$)/);
+  if (match) {
+    const sentence = match[0].trim();
+    // Only use it if it's meaningfully shorter than the full text
+    if (sentence.length < normalized.length && sentence.length <= maxLen) {
+      return sentence;
+    }
+  }
+  return truncateForExcerpt(normalized, maxLen);
+}
+
 export function mapWikipediaSummaryToArticleFields(
   data: WikipediaSummarySuccess,
 ): MappedArticleFieldsFromWikipedia {
@@ -125,7 +143,7 @@ export function mapWikipediaSummaryToArticleFields(
   const extractRaw = stripHtml(data.extract_html ?? data.extract ?? '');
 
   const excerpt =
-    extractRaw.length > 0 ? truncateForExcerpt(extractRaw, 260) : title;
+    extractRaw.length > 0 ? extractFirstSentence(extractRaw) : title;
 
   const summary = extractRaw.length > 0 ? extractRaw : title;
 
@@ -228,9 +246,17 @@ type MobileSectionsResponse = {
   sections?: MobileSection[];
 };
 
+/** Shape returned by fetchWikipediaPageMobileSections after stripping/normalizing */
+export type NormalizedMobileSectionsResponse = Omit<
+  MobileSectionsResponse,
+  'sections'
+> & {
+  sections: Array<{ title: string; content: string }>;
+};
+
 function stripHtml(html?: string): string {
   if (!html) return '';
-  // Basic tag stripper — sufficient for short previews
+  // Remove script and style blocks
   const withoutScripts = html.replace(
     /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
     '',
@@ -240,23 +266,48 @@ function stripHtml(html?: string): string {
     '',
   );
   const withoutTags = withoutStyles.replace(/<[^>]+>/g, '');
-  const collapsed = withoutTags.replace(/\s+/g, ' ').trim();
-  // Decode a few common HTML entities
-  return collapsed
+
+  // Decode numeric and named HTML entities (including &#91; → [ and &#93; → ])
+  const decoded = withoutTags
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .trim();
+    .replace(/&#39;/g, "'");
+
+  // Strip Wikipedia-specific artifacts from the decoded plain text
+  return (
+    decoded
+      // Edit section links e.g. "[sunting | sunting sumber]" or "[edit | edit source]"
+      .replace(/\[sunting\s*\|\s*sunting sumber\]/gi, '')
+      .replace(/\[edit\s*\|\s*edit source\]/gi, '')
+      // Citation/footnote markers like [1], [12], [a], [b], [lower-alpha], [note 1]
+      .replace(/\[\d+\]/g, '')
+      .replace(/\[[a-z]\]/gi, '')
+      .replace(/\[lower-alpha\]/gi, '')
+      .replace(/\[upper-alpha\]/gi, '')
+      .replace(/\[note\s*\d*\]/gi, '')
+      // Wiki template artifacts like "code: jv is deprecated"
+      .replace(/code:\s*\S+\s+is\s+deprecated/gi, '')
+      // Reference list entries that start with "^" (footnote back-links)
+      .replace(/\^[^\n]*/g, '')
+      // Parser error messages injected by MediaWiki
+      .replace(/Kesalahan pengutipan:[^\n]*/g, '')
+      // Inline page citations like ", hlm. 496" or "hlm. 16–17"
+      .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
+      // Collapse whitespace and trim
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
 export async function fetchWikipediaPageMobileSections(
   apiOrigin: string,
   pageTitle: string,
   signal?: AbortSignal,
-): Promise<MobileSectionsResponse> {
+): Promise<NormalizedMobileSectionsResponse> {
   const enc = encodeURIComponent(pageTitle);
   const res = await fetch(`${apiOrigin}${MOBILE_SECTIONS_PATH}/${enc}`, {
     method: 'GET',
