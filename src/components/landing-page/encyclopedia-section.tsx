@@ -18,7 +18,7 @@ export interface HomepageArticlePreview {
 }
 
 export function EncyclopediaSection() {
-  const { data, error, isPending } = useArticles(1, 3);
+  const { data, error, isPending } = useArticles(1, 2);
   const islandFilters =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
   const popularTags = islandFilters.slice(0, 5);
@@ -105,14 +105,14 @@ export function EncyclopediaSection() {
             </div>
           </div>
 
-          <aside className="border-t border-white/12 bg-[#2a5541] p-6 md:p-8 lg:border-l lg:border-t-0">
+          <aside className="border-t border-white/12 bg-[#2a5541] p-5 md:p-6 lg:border-l lg:border-t-0">
             <h4 className="text-2xl font-bold tracking-tight text-[#f0f7eb]">
               Artikel Terkini
             </h4>
 
             <div className="mt-6 space-y-3">
               {isPending
-                ? Array.from({ length: 3 }).map((_, index) => (
+                ? Array.from({ length: 2 }).map((_, index) => (
                     <Card
                       key={index}
                       className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/7 p-3.5"
@@ -134,7 +134,7 @@ export function EncyclopediaSection() {
               ) : null}
 
               {!isPending && !error && latestArticles.length > 0
-                ? latestArticles.map((article) => (
+                ? latestArticles.slice(0, 2).map((article) => (
                     <Link
                       key={article.slug}
                       href={`/encyclopedia/${article.slug}`}
