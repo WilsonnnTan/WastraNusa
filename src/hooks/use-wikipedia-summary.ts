@@ -14,6 +14,8 @@ export type WikipediaSummaryPreview = {
   mapped: MappedArticleFieldsFromWikipedia;
   pageUrl: string;
   wikiType?: string;
+  sectionsFetchError?: string | null;
+  sectionsFetched?: boolean;
 };
 
 /**
@@ -85,11 +87,44 @@ export function useWikipediaSummaryImport(isActive: boolean) {
         ac.signal,
       );
       const mapped = mapWikipediaSummaryToArticleFields(summary);
-      setPreview({
-        mapped,
-        pageUrl: trimmed,
-        wikiType: summary.type,
-      });
+      // Attempt to fetch sections (mobile-sections) to populate form sections
+      try {
+        // dynamic import to avoid increasing initial bundle for clients that don't use this
+        let sectionsError: string | null = null;
+        let sectionsFetched = false;
+        try {
+          // Use server-side proxy to avoid CORS / 403 issues from client
+          const proxyUrl = `/api/wikimedia/mobile-sections?origin=${encodeURIComponent(
+            parsed.apiOrigin,
+          )}&title=${encodeURIComponent(parsed.pageTitle)}`;
+          const resp = await fetch(proxyUrl, { signal: ac.signal });
+          const sectionsResp = resp.ok ? await resp.json() : null;
+          if (sectionsResp?.sections && sectionsResp.sections.length > 0) {
+            mapped.sections = sectionsResp.sections
+              .filter((s) => s.title && s.content)
+              .map((s) => ({
+                title: s.title,
+                content: s.content,
+                imageURL: s.imageURL,
+              }));
+          }
+          sectionsFetched = true;
+        } catch (e: unknown) {
+          sectionsError = e instanceof Error ? e.message : String(e);
+
+          console.debug('Could not fetch mobile sections for preview', e);
+        }
+
+        setPreview({
+          mapped,
+          pageUrl: trimmed,
+          wikiType: summary.type,
+          sectionsFetchError: sectionsError,
+          sectionsFetched,
+        });
+      } catch (err) {
+        throw err;
+      }
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
       const message =

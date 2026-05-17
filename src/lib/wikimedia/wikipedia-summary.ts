@@ -38,6 +38,7 @@ export type MappedArticleFieldsFromWikipedia = {
   summary: string;
   description: string;
   imageURL?: string;
+  sections?: Array<{ title: string; content: string; imageURL?: string }>;
 };
 
 function isWikipediaHost(hostname: string): boolean {
@@ -119,8 +120,9 @@ function truncateForExcerpt(text: string, maxLen: number): string {
 export function mapWikipediaSummaryToArticleFields(
   data: WikipediaSummarySuccess,
 ): MappedArticleFieldsFromWikipedia {
-  const title = (data.displaytitle ?? data.title ?? '').replace(/[<>]/g, '');
-  const extractRaw = (data.extract ?? '').trim();
+  const rawTitle = data.displaytitle ?? data.title ?? '';
+  const title = stripHtml(rawTitle);
+  const extractRaw = stripHtml(data.extract_html ?? data.extract ?? '');
 
   const excerpt =
     extractRaw.length > 0 ? truncateForExcerpt(extractRaw, 260) : title;
@@ -208,4 +210,84 @@ export async function fetchWikipediaPageSummary(
   }
 
   return data;
+}
+
+const MOBILE_SECTIONS_PATH = '/api/rest_v1/page/mobile-sections';
+
+type MobileSection = {
+  id?: string;
+  line?: string; // heading text
+  anchor?: string;
+  level?: number;
+  text?: string; // HTML content
+};
+
+type MobileSectionsResponse = {
+  lead?: unknown;
+  remaining?: unknown;
+  sections?: MobileSection[];
+};
+
+function stripHtml(html?: string): string {
+  if (!html) return '';
+  // Basic tag stripper — sufficient for short previews
+  const withoutScripts = html.replace(
+    /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
+    '',
+  );
+  const withoutStyles = withoutScripts.replace(
+    /<style[\s\S]*?>[\s\S]*?<\/style>/gi,
+    '',
+  );
+  const withoutTags = withoutStyles.replace(/<[^>]+>/g, '');
+  const collapsed = withoutTags.replace(/\s+/g, ' ').trim();
+  // Decode a few common HTML entities
+  return collapsed
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+}
+
+export async function fetchWikipediaPageMobileSections(
+  apiOrigin: string,
+  pageTitle: string,
+  signal?: AbortSignal,
+): Promise<MobileSectionsResponse> {
+  const enc = encodeURIComponent(pageTitle);
+  const res = await fetch(`${apiOrigin}${MOBILE_SECTIONS_PATH}/${enc}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    signal,
+  });
+
+  const text = await res.text();
+  let json: unknown;
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    throw new WikipediaSummaryFetchError(
+      'Respons Wikipedia (mobile sections) tidak dapat dibaca (bukan JSON).',
+      res.status,
+    );
+  }
+
+  if (!res.ok) {
+    const errBody = json as WikipediaSummaryErrorBody;
+    const detail =
+      errBody.detail?.trim() || res.statusText || 'Permintaan gagal';
+    throw new WikipediaSummaryFetchError(detail, res.status, errBody);
+  }
+
+  const data = json as MobileSectionsResponse;
+  // Normalize sections: map headings + text
+  const sections = (data.sections ?? []).map((s) => ({
+    title: stripHtml(s.line),
+    content: stripHtml(s.text),
+  }));
+
+  return { ...data, sections };
 }

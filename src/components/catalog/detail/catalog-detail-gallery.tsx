@@ -20,7 +20,13 @@ export function CatalogDetailGallery({
           {category}
         </Badge>
         {imageURL ? (
-          <Image src={imageURL} alt={category} fill className="object-cover" />
+          <Image
+            src={imageURL}
+            alt={category}
+            fill
+            unoptimized
+            className="object-cover"
+          />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
             <div className="flex flex-col items-center gap-2 text-[#7f715c]">

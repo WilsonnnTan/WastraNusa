@@ -155,14 +155,45 @@ export default function AddUpdateArticleModal({
     if (mapped.imageURL) {
       setValue('imageURL', mapped.imageURL, { shouldDirty: true });
     }
-    toast.success('Data Wikipedia diterapkan ke form.');
+    // If Wikipedia returned section headings, map them to form sections
+    if (mapped.sections && mapped.sections.length > 0) {
+      const mappedSections = mapped.sections.map((s, i) => ({
+        title: s.title || '',
+        content: s.content || '',
+        imageURL: s.imageURL ?? '',
+        order: i,
+      }));
+      setValue('sections', mappedSections, { shouldDirty: true });
+      // debug: print section titles and whether imageURL exists
+
+      console.debug(
+        'Applied Wikimedia sections',
+        mappedSections.map((s) => ({ title: s.title, hasImage: !!s.imageURL })),
+      );
+      toast.success('Data Wikipedia dan section diterapkan ke form.');
+    } else {
+      toast.success('Data Wikipedia diterapkan ke form.');
+    }
     wiki.discardPreview();
   };
 
   const onSubmit = (data: CreateArticleInput) => {
+    // Normalize empty imageURL strings to undefined so backend treats them as missing
+    const normalize = (d: CreateArticleInput) => {
+      const copy: Record<string, unknown> = { ...d };
+      if (copy.imageURL === '') copy.imageURL = undefined;
+      if (Array.isArray(copy.sections)) {
+        copy.sections = copy.sections.map((s: Record<string, unknown>) => ({
+          ...s,
+          imageURL: s.imageURL === '' ? undefined : s.imageURL,
+        }));
+      }
+      return copy as CreateArticleInput;
+    };
+    const payload = normalize(data);
     if (isEdit && initialData) {
       updateArticle(
-        { slug: initialData.slug, data },
+        { slug: initialData.slug, data: payload },
         {
           onSuccess: () => {
             toast.success('Artikel berhasil diperbarui');
@@ -178,7 +209,7 @@ export default function AddUpdateArticleModal({
         },
       );
     } else {
-      createArticle(data, {
+      createArticle(payload, {
         onSuccess: () => {
           toast.success('Artikel berhasil ditambahkan');
           reset();
@@ -821,11 +852,35 @@ export default function AddUpdateArticleModal({
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                     URL Gambar Section (Opsional)
                   </label>
-                  <Input
-                    {...register(`sections.${index}.imageURL` as const)}
-                    placeholder="https://example.com/section-image.jpg"
-                    className="h-10 bg-white"
-                  />
+                  <div className="flex items-start gap-3">
+                    <Input
+                      {...register(`sections.${index}.imageURL` as const)}
+                      placeholder="https://example.com/section-image.jpg"
+                      className="h-10 bg-white flex-1"
+                    />
+                    {/** preview if imageURL exists */}
+                    {/** Use value from field so it updates immediately */}
+                    <div className="w-20 h-12 bg-[#faf8f5] rounded-md flex items-center justify-center border border-dashed border-[#e5ded5]">
+                      {(() => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const formValues = (control as any)._formValues;
+                        const imageUrl =
+                          formValues?.sections?.[index]?.imageURL;
+                        return imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={imageUrl as string}
+                            alt=""
+                            className="w-20 h-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <span className="text-[11px] text-gray-400 text-center">
+                            No image
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  </div>
                   {errors.sections?.[index]?.imageURL && (
                     <p className="text-xs text-red-500 mt-1 italic">
                       {errors.sections[index]?.imageURL?.message}
