@@ -4,6 +4,7 @@ import {
   EncyclopediaArticleCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
+  EncyclopediaSearchResults,
   EncyclopediaSidebar,
   EncyclopediaStats,
 } from '@/components/encyclopedia';
@@ -129,7 +130,12 @@ export function EncyclopediaMain({
       topic: selectedTopic,
     },
   );
+
+  // Fetch all articles for search (large limit)
+  const { data: searchData } = useArticles(1, 500);
+
   const articles = data?.items ?? [];
+  const searchArticles = searchData?.items ?? [];
   const islands = data?.meta.islands ?? [];
   const topics = data?.meta.topics ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
@@ -236,6 +242,14 @@ export function EncyclopediaMain({
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex items-start">
+            <EncyclopediaSearchResults
+              articles={searchArticles}
+              onArticleClick={handleArticleClick}
+            />
           </div>
         </div>
 
