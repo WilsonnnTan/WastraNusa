@@ -246,7 +246,21 @@ export const orderRepository = {
       where: filters,
       skip,
       take,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        quantity: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        trackingNumber: true,
+        createdAt: true,
+        customerNotes: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
+        productName: true,
+        variantName: true,
         user: {
           select: {
             id: true,
@@ -332,7 +346,18 @@ export const orderRepository = {
         id: order?.id ?? identifier,
       },
       data,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        quantity: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        trackingNumber: true,
+        createdAt: true,
+        customerNotes: true,
+        productId: true,
+        variantId: true,
         user: {
           select: {
             id: true,
@@ -349,18 +374,18 @@ export const orderRepository = {
             imageURL: true,
           },
         },
-        shippingAddress: {
-          select: {
-            recipientName: true,
-            phone: true,
-            province: true,
-            city: true,
-            district: true,
-            subdistrict: true,
-            postalCode: true,
-            fullAddress: true,
-          },
-        },
+      },
+    });
+  },
+
+  findProductDetailsForOrder: async (productId: string) => {
+    return prisma.product.findFirst({
+      where: { id: productId },
+      select: {
+        id: true,
+        name: true,
+        province: true,
+        clothingType: true,
       },
     });
   },

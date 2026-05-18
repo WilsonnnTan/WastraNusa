@@ -11,13 +11,13 @@ export type AdminOrderItem = {
     name: string;
     email: string;
   };
-  product: {
+  products: Array<{
     id: string;
     name: string;
     location: string;
     category: string;
     quantity: number;
-  };
+  }>;
   totalAmount: number;
   totalAmountLabel: string;
   orderStatus: OrderStatus;

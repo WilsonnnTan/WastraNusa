@@ -369,14 +369,17 @@ export function AdminOrderContent() {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-sm text-[#6d6a64]">
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-[#3d3a34]">
-                                {order.product.name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {order.product.location} · Qty{' '}
-                                {order.product.quantity}
-                              </span>
+                            <div className="flex flex-col gap-2">
+                              {order.products.map((product, index) => (
+                                <div key={index} className="flex flex-col">
+                                  <span className="font-semibold text-[#3d3a34]">
+                                    {product.name}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {product.location} · Qty {product.quantity}
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           </td>
                           <td className="px-4 py-3">

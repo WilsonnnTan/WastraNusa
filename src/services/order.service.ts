@@ -256,7 +256,7 @@ async function reconcileExpiredOrders(userId?: string) {
   }
 }
 
-function mapAdminOrder(order: {
+async function mapAdminOrder(order: {
   id: string;
   orderNumber: string;
   quantity: number;
@@ -265,6 +265,9 @@ function mapAdminOrder(order: {
   paymentStatus: string;
   trackingNumber: string | null;
   createdAt: Date;
+  customerNotes: string | null;
+  productId: string;
+  variantId: string | null;
   user: { id: string; name: string; email: string };
   product: {
     id: string;
@@ -285,6 +288,78 @@ function mapAdminOrder(order: {
       ? order.totalAmount
       : order.totalAmount.toNumber();
 
+  // Extract checkout items from customerNotes if available
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{
+    productId?: string;
+    quantity?: number;
+    productName?: string;
+    province?: string;
+    clothingType?: string;
+  }> | null;
+
+  // Build products array from checkout items or fallback to single product
+  let products: Array<{
+    id: string;
+    name: string;
+    location: string;
+    category: string;
+    quantity: number;
+  }>;
+
+  if (checkoutItems && checkoutItems.length > 0) {
+    const validCheckoutItems = checkoutItems.filter(
+      (item) =>
+        typeof item.productId === 'string' &&
+        item.productId &&
+        typeof item.quantity === 'number' &&
+        item.quantity > 0,
+    );
+
+    // Map each item, filling in missing data from database if needed
+    products = await Promise.all(
+      validCheckoutItems.map(async (item) => {
+        // If we have complete data from checkout_items, use it
+        if (item.productName && item.province && item.clothingType) {
+          return {
+            id: item.productId as string,
+            name: item.productName,
+            location: item.province,
+            category: item.clothingType,
+            quantity: item.quantity as number,
+          };
+        }
+
+        // Otherwise, query database to fill in missing data
+        const dbProduct = await orderRepository.findProductDetailsForOrder(
+          item.productId as string,
+        );
+
+        return {
+          id: item.productId as string,
+          name: dbProduct?.name || item.productName || 'Unknown Product',
+          location: dbProduct?.province || item.province || 'Unknown Location',
+          category:
+            dbProduct?.clothingType || item.clothingType || 'Unknown Category',
+          quantity: item.quantity as number,
+        };
+      }),
+    );
+  } else {
+    // Fallback to single product from order table
+    products = [
+      {
+        id: order.product.id,
+        name: order.product.name,
+        location: order.product.province,
+        category: order.product.clothingType,
+        quantity: order.quantity,
+      },
+    ];
+  }
+
   return {
     orderId: order.id,
     orderNumber: order.orderNumber,
@@ -293,14 +368,7 @@ function mapAdminOrder(order: {
       name: order.user.name,
       email: order.user.email,
     },
-    product: {
-      id: order.product.id,
-      name: order.product.name,
-      location: order.product.province,
-      category: order.product.clothingType,
-      quantity: order.quantity,
-      imageURL: order.product.imageURL,
-    },
+    products,
     totalAmount,
     totalAmountLabel: formatOrderCurrency(totalAmount),
     orderStatus: effectiveOrderStatus,
@@ -538,8 +606,10 @@ export const orderService = {
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
 
+    const mappedItems = await Promise.all(orders.map(mapAdminOrder));
+
     return {
-      items: orders.map(mapAdminOrder),
+      items: mappedItems,
       meta: {
         page: safePage,
         limit: safeLimit,
@@ -613,6 +683,6 @@ export const orderService = {
       nextData,
     );
 
-    return mapAdminOrder(updated);
+    return await mapAdminOrder(updated);
   },
 };
