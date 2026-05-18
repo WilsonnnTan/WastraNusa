@@ -345,6 +345,9 @@ describe('orderService', { tags: ['backend'] }, () => {
           quantity: 1,
           totalAmount: 150000,
           createdAt: new Date('2025-03-14T00:00:00.000Z'),
+          customerNotes: null,
+          productId: 'prod-1',
+          variantId: null,
           user: {
             id: 'user-1',
             name: 'User',
@@ -359,6 +362,7 @@ describe('orderService', { tags: ['backend'] }, () => {
         },
       ] as never);
       mockRepo.countOrdersForAdmin.mockResolvedValue(1);
+      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
 
       const result = await orderService.getAdminOrders(1, 10, {
         orderStatus: 'processing',
@@ -371,6 +375,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       );
       expect(result.items).toHaveLength(1);
       expect(result.items[0].orderNumber).toBe('ORD-1');
+      expect(result.items[0].products).toHaveLength(1);
+      expect(result.items[0].products[0].name).toBe('Batik');
       expect(result.meta.totalItems).toBe(1);
     });
   });
@@ -386,6 +392,9 @@ describe('orderService', { tags: ['backend'] }, () => {
         quantity: 1,
         totalAmount: 150000,
         createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        customerNotes: null,
+        productId: 'prod-1',
+        variantId: null,
         user: {
           id: 'user-1',
           name: 'User',
@@ -397,16 +406,6 @@ describe('orderService', { tags: ['backend'] }, () => {
           province: 'Solo',
           clothingType: 'batik',
         },
-        shippingAddress: {
-          recipientName: 'User',
-          phone: '0812',
-          province: 'Jawa Tengah',
-          city: 'Solo',
-          district: 'Laweyan',
-          subdistrict: null,
-          postalCode: '57147',
-          fullAddress: 'Jl. Mawar No. 1',
-        },
       };
 
       mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(order as never);
@@ -416,6 +415,7 @@ describe('orderService', { tags: ['backend'] }, () => {
         paymentStatus: 'paid',
         trackingNumber: 'RESI-123',
       } as never);
+      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
 
       const result = await orderService.updateOrderForAdmin('ORD-1', {
         orderStatus: 'shipped',
@@ -432,6 +432,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.orderStatus).toBe('shipped');
       expect(result.paymentStatus).toBe('paid');
       expect(result.trackingNumber).toBe('RESI-123');
+      expect(result.products).toHaveLength(1);
+      expect(result.products[0].name).toBe('Batik');
     });
 
     it('should throw when payment is not successful', async () => {
@@ -444,6 +446,9 @@ describe('orderService', { tags: ['backend'] }, () => {
         quantity: 1,
         totalAmount: 150000,
         createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        customerNotes: null,
+        productId: 'prod-1',
+        variantId: null,
         user: {
           id: 'user-1',
           name: 'User',
@@ -454,16 +459,6 @@ describe('orderService', { tags: ['backend'] }, () => {
           name: 'Batik',
           province: 'Solo',
           clothingType: 'batik',
-        },
-        shippingAddress: {
-          recipientName: 'User',
-          phone: '0812',
-          province: 'Jawa Tengah',
-          city: 'Solo',
-          district: 'Laweyan',
-          subdistrict: null,
-          postalCode: '57147',
-          fullAddress: 'Jl. Mawar No. 1',
         },
       } as never);
 
