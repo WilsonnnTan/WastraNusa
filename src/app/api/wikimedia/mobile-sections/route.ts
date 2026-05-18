@@ -159,7 +159,11 @@ export async function GET(req: Request) {
           // e.g. "tidak ditemukan teks untuk ref bernama :2"
           .replace(/tidak ditemukan teks untuk ref bernama\s*:\S*/gi, '')
           .replace(/ref name not found\s*:\S*/gi, '')
-          .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
+          .replace(/,?\s*hlm\.\s*[\d\u00a0\s\u2013\-]+/g, '')
+          // Hatnote cross-references injected by MediaWiki (e.g. "Lihat pula: Sejarah batik di Indonesia")
+          .replace(/^Lihat pula:\s*[^.!?]*[.!?]?\s*/i, '')
+          .replace(/^See also:\s*[^.!?]*[.!?]?\s*/i, '')
+          .replace(/^Untuk.*?lihat\s+[^.]+\.\s*/i, '')
           .replace(/\s+/g, ' ')
           .trim()
       );

@@ -348,7 +348,11 @@ function stripHtml(html?: string): string {
       .replace(/tidak ditemukan teks untuk ref bernama\s*:\S*/gi, '')
       .replace(/ref name not found\s*:\S*/gi, '')
       // Inline page citations like ", hlm. 496" or "hlm. 16–17"
-      .replace(/,?\s*hlm\.\s*[\d\u00a0\s–\-]+/g, '')
+      .replace(/,?\s*hlm\.\s*[\d\u00a0\s\u2013\-]+/g, '')
+      // Hatnote cross-references injected by MediaWiki (e.g. "Lihat pula: Sejarah batik di Indonesia")
+      .replace(/^Lihat pula:\s*[^.!?]*[.!?]?\s*/i, '')
+      .replace(/^See also:\s*[^.!?]*[.!?]?\s*/i, '')
+      .replace(/^Untuk.*?lihat\s+[^.]+\.\s*/i, '')
       // Collapse whitespace and trim
       .replace(/\s+/g, ' ')
       .trim()
