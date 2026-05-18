@@ -7,8 +7,6 @@ type CatalogDetailGalleryProps = {
   imageURL?: string | null;
 };
 
-const THUMBNAILS = ['Batik', 'Ikat', 'Ikat', 'Ulos', 'Ulos'];
-
 export function CatalogDetailGallery({
   category,
   imageURL,
@@ -36,18 +34,6 @@ export function CatalogDetailGallery({
           </div>
         )}
       </Card>
-
-      <div className="grid grid-cols-5 gap-2">
-        {THUMBNAILS.map((item, index) => (
-          <Card
-            key={`${item}-${index}`}
-            className="h-16 items-center justify-center gap-1 rounded-xl border border-[#ddd4c5] bg-[#efe7da] p-0"
-          >
-            <span className="size-3 rotate-45 border border-[#cebda2]" />
-            <span className="text-xs text-[#6e6458]">{item}</span>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }

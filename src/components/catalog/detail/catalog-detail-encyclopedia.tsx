@@ -1,7 +1,8 @@
-﻿import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { BookOpenText } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 type CatalogDetailEncyclopediaProps = {
@@ -37,10 +38,24 @@ export function CatalogDetailEncyclopedia({
         </div>
         <div className="flex flex-col gap-3 p-3">
           <p className="text-sm text-[#9b9386]">Terkait Produk Ini</p>
-          <Card className="items-center rounded-xl border border-[#ddd4c5] bg-[#ece3d5] py-5">
-            <span className="size-4 rotate-45 border border-[#cebda2]" />
-            <p className="text-sm font-semibold text-[#6d665c]">{category}</p>
-          </Card>
+          {linkedArticle?.imageURL ? (
+            <Card className="overflow-hidden rounded-xl border border-[#ddd4c5] bg-transparent p-0">
+              <div className="relative aspect-[234/133] w-full">
+                <Image
+                  src={linkedArticle.imageURL}
+                  alt={articleTitle}
+                  fill
+                  className="block object-cover"
+                  sizes="(max-width: 1279px) 100vw, 320px"
+                />
+              </div>
+            </Card>
+          ) : (
+            <Card className="aspect-[234/133] w-full flex flex-col items-center justify-center gap-2 rounded-xl border border-[#ddd4c5] bg-[#ece3d5]">
+              <span className="size-4 rotate-45 border border-[#cebda2]" />
+              <p className="text-sm font-semibold text-[#6d665c]">{category}</p>
+            </Card>
+          )}
           <h4 className="text-2xl font-bold leading-tight text-[#2f5b49]">
             {isLinkedArticlePending ? 'Memuat artikel...' : articleTitle}
           </h4>
