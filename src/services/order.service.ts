@@ -268,6 +268,7 @@ async function mapAdminOrder(order: {
   customerNotes: string | null;
   productId: string;
   variantId: string | null;
+  productPrice: { toNumber(): number } | number | null;
   user: { id: string; name: string; email: string };
   product: {
     id: string;
@@ -295,6 +296,7 @@ async function mapAdminOrder(order: {
   ) as Array<{
     productId?: string;
     quantity?: number;
+    unitPrice?: number;
     productName?: string;
     province?: string;
     clothingType?: string;
@@ -307,6 +309,7 @@ async function mapAdminOrder(order: {
     location: string;
     category: string;
     quantity: number;
+    unitPrice: string;
   }>;
 
   if (checkoutItems && checkoutItems.length > 0) {
@@ -321,6 +324,14 @@ async function mapAdminOrder(order: {
     // Map each item, filling in missing data from database if needed
     products = await Promise.all(
       validCheckoutItems.map(async (item) => {
+        // Use item's unitPrice if available, otherwise use order's productPrice
+        const itemUnitPrice =
+          typeof item.unitPrice === 'number'
+            ? item.unitPrice
+            : typeof order.productPrice === 'number'
+              ? order.productPrice
+              : (order.productPrice?.toNumber() ?? 0);
+
         // If we have complete data from checkout_items, use it
         if (item.productName && item.province && item.clothingType) {
           return {
@@ -329,6 +340,7 @@ async function mapAdminOrder(order: {
             location: item.province,
             category: item.clothingType,
             quantity: item.quantity as number,
+            unitPrice: formatOrderCurrency(itemUnitPrice),
           };
         }
 
@@ -344,11 +356,17 @@ async function mapAdminOrder(order: {
           category:
             dbProduct?.clothingType || item.clothingType || 'Unknown Category',
           quantity: item.quantity as number,
+          unitPrice: formatOrderCurrency(itemUnitPrice),
         };
       }),
     );
   } else {
     // Fallback to single product from order table
+    const singleProductPrice =
+      typeof order.productPrice === 'number'
+        ? order.productPrice
+        : (order.productPrice?.toNumber() ?? 0);
+
     products = [
       {
         id: order.product.id,
@@ -356,6 +374,7 @@ async function mapAdminOrder(order: {
         location: order.product.province,
         category: order.product.clothingType,
         quantity: order.quantity,
+        unitPrice: formatOrderCurrency(singleProductPrice),
       },
     ];
   }

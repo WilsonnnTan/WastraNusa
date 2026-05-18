@@ -376,7 +376,8 @@ export function AdminOrderContent() {
                                     {product.name}
                                   </span>
                                   <span className="text-xs text-muted-foreground">
-                                    {product.location} · Qty {product.quantity}
+                                    {product.location} · Qty {product.quantity}{' '}
+                                    · {product.unitPrice}
                                   </span>
                                 </div>
                               ))}

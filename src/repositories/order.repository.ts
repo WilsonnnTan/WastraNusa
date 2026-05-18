@@ -325,7 +325,21 @@ export const orderRepository = {
       where: {
         OR: [{ id: identifier }, { orderNumber: identifier }],
       },
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        quantity: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        trackingNumber: true,
+        createdAt: true,
+        customerNotes: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
+        productName: true,
+        variantName: true,
         user: {
           select: {
             id: true,
@@ -388,6 +402,7 @@ export const orderRepository = {
         customerNotes: true,
         productId: true,
         variantId: true,
+        productPrice: true,
         user: {
           select: {
             id: true,
