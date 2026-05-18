@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { BookOpenText } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 type CatalogDetailEncyclopediaProps = {
@@ -38,12 +39,16 @@ export function CatalogDetailEncyclopedia({
         <div className="flex flex-col gap-3 p-3">
           <p className="text-sm text-[#9b9386]">Terkait Produk Ini</p>
           {linkedArticle?.imageURL ? (
-            <Card className="overflow-hidden rounded-xl border border-[#ddd4c5] p-0 bg-transparent">
-              <img
-                src={linkedArticle.imageURL}
-                alt={articleTitle}
-                className="aspect-[234/133] w-full object-cover block"
-              />
+            <Card className="overflow-hidden rounded-xl border border-[#ddd4c5] bg-transparent p-0">
+              <div className="relative aspect-[234/133] w-full">
+                <Image
+                  src={linkedArticle.imageURL}
+                  alt={articleTitle}
+                  fill
+                  className="block object-cover"
+                  sizes="(max-width: 1279px) 100vw, 320px"
+                />
+              </div>
             </Card>
           ) : (
             <Card className="aspect-[234/133] w-full flex flex-col items-center justify-center gap-2 rounded-xl border border-[#ddd4c5] bg-[#ece3d5]">
