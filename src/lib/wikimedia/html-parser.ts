@@ -101,6 +101,13 @@ export class HTMLStateMachineParser {
   }
 
   /**
+   * Escape a string for safe use in RegExp constructors
+   */
+  private static escapeRegExp(literal: string): string {
+    return literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
    * Decode all HTML entities in a string
    */
   private static decodeAllEntities(text: string): string {
@@ -109,7 +116,7 @@ export class HTMLStateMachineParser {
     // First decode named entities
     for (const [entity, char] of Object.entries(this.ENTITIES)) {
       result = result.replace(
-        new RegExp(entity.replace(/&/g, '\\&'), 'g'),
+        new RegExp(this.escapeRegExp(entity), 'g'),
         char,
       );
     }
