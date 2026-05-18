@@ -102,9 +102,10 @@ export function useWikipediaSummaryImport(isActive: boolean) {
           if (sectionsResp?.sections && sectionsResp.sections.length > 0) {
             mapped.sections = sectionsResp.sections
               .filter((s: { line?: string; text?: string }) => s.line && s.text)
-              .map((s: { line: string; text: string }) => ({
+              .map((s: { line: string; text: string; imageURL?: string }) => ({
                 title: s.line,
                 content: s.text,
+                ...(s.imageURL ? { imageURL: s.imageURL } : {}),
               }));
           }
           sectionsFetched = true;
