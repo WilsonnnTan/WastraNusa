@@ -12,6 +12,7 @@ vi.unmock('@/repositories/order.repository');
 describe('orderRepository', { tags: ['db'] }, () => {
   let userId: string;
   const orderIds: string[] = [];
+  const variantIds: string[] = [];
 
   beforeAll(async () => {
     const user = await prisma.user.findFirst({
@@ -28,6 +29,9 @@ describe('orderRepository', { tags: ['db'] }, () => {
   afterAll(async () => {
     for (const id of orderIds) {
       await prisma.order.delete({ where: { id } }).catch(() => {});
+    }
+    for (const id of variantIds) {
+      await prisma.productVariant.delete({ where: { id } }).catch(() => {});
     }
   });
 
@@ -107,7 +111,23 @@ describe('orderRepository', { tags: ['db'] }, () => {
         take: 5,
         include: {
           product: {
-            select: { name: true, province: true, clothingType: true },
+            select: {
+              name: true,
+              province: true,
+              clothingType: true,
+              imageURL: true,
+            },
+          },
+          paymentTransactions: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              status: true,
+              expiredAt: true,
+              createdAt: true,
+            },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -135,6 +155,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {
@@ -159,6 +180,89 @@ describe('orderRepository', { tags: ['db'] }, () => {
               paymentUrl: true,
               vaNumber: true,
               paidAt: true,
+              expiredAt: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('findOrderForUserByIdentifier', () => {
+    it('should query by user and identifier with user relations', async () => {
+      const spy = vi.spyOn(prisma.order, 'findFirst').mockResolvedValue(null);
+
+      await orderRepository.findOrderForUserByIdentifier(userId, 'ORD-1');
+
+      expect(spy).toHaveBeenCalledWith({
+        where: {
+          userId,
+          OR: [{ id: 'ORD-1' }, { orderNumber: 'ORD-1' }],
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              province: true,
+              clothingType: true,
+              imageURL: true,
+            },
+          },
+          shippingAddress: {
+            select: {
+              recipientName: true,
+              phone: true,
+              province: true,
+              city: true,
+              district: true,
+              subdistrict: true,
+              postalCode: true,
+              fullAddress: true,
+            },
+          },
+          paymentTransactions: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              status: true,
+              paymentUrl: true,
+              vaNumber: true,
+              paidAt: true,
+              expiredAt: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('findOrderForCancellationById', () => {
+    it('should query order by id with payment transactions for cancellation flow', async () => {
+      const spy = vi.spyOn(prisma.order, 'findUnique').mockResolvedValue(null);
+
+      await orderRepository.findOrderForCancellationById('order-id-1');
+
+      expect(spy).toHaveBeenCalledWith({
+        where: { id: 'order-id-1' },
+        include: {
+          paymentTransactions: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              status: true,
+              expiredAt: true,
+              paidAt: true,
               createdAt: true,
             },
           },
@@ -182,6 +286,161 @@ describe('orderRepository', { tags: ['db'] }, () => {
       expect(count).toBe(42);
 
       spy.mockRestore();
+    });
+  });
+
+  describe('findExpiredPendingOrders', () => {
+    it('should query expired unpaid pending orders with optional user filter', async () => {
+      const spy = vi.spyOn(prisma.order, 'findMany').mockResolvedValue([]);
+      const now = new Date('2026-05-02T00:00:00.000Z');
+
+      await orderRepository.findExpiredPendingOrders(now, userId);
+
+      expect(spy).toHaveBeenCalledWith({
+        where: {
+          userId,
+          orderStatus: 'pending',
+          paymentStatus: 'unpaid',
+          paymentTransactions: {
+            some: {
+              status: 'pending',
+              expiredAt: {
+                lte: now,
+              },
+            },
+          },
+        },
+        include: {
+          paymentTransactions: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              status: true,
+              expiredAt: true,
+              paidAt: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('cancelOrder', () => {
+    it('should mark order as cancelled and payment as failed', async () => {
+      const id = crypto.randomUUID();
+      orderIds.push(id);
+
+      await orderRepository.createOrder({
+        id,
+        orderNumber: `TEST-CANCEL-${id.slice(0, 8)}`,
+        userId,
+        productId: SEED_PRODUCT_1.id,
+        productName: SEED_PRODUCT_1.name,
+        quantity: 1,
+        productPrice: Number(SEED_PRODUCT_1.price),
+        shippingAddressId: SEED_ADDRESS_USER.id,
+        courier: 'JNE',
+        courierService: 'REG',
+        subtotal: Number(SEED_PRODUCT_1.price),
+        shippingCost: 15000,
+        totalAmount: Number(SEED_PRODUCT_1.price) + 15000,
+      });
+
+      const updated = await orderRepository.cancelOrder(id);
+
+      expect(updated.orderStatus).toBe('cancelled');
+      expect(updated.paymentStatus).toBe('failed');
+    });
+  });
+
+  describe('cancelOrderAndRestoreStock', () => {
+    it('should cancel order, expire pending payment transaction, and restore stock', async () => {
+      const id = crypto.randomUUID();
+      orderIds.push(id);
+      const variantId = crypto.randomUUID();
+      variantIds.push(variantId);
+      const externalId = `EXT-CANCEL-${id.slice(0, 8)}`;
+      const expiredAt = new Date('2026-05-02T00:00:00.000Z');
+
+      await prisma.productVariant.create({
+        data: {
+          id: variantId,
+          productId: SEED_PRODUCT_1.id,
+          name: `Restore Variant ${variantId.slice(0, 8)}`,
+          type: 'size',
+          price: Number(SEED_PRODUCT_1.price),
+          stock: 20,
+          sku: `TEST-RESTORE-VAR-${variantId.slice(0, 8)}`,
+        },
+      });
+
+      await orderRepository.createOrder({
+        id,
+        orderNumber: `TEST-RESTORE-${id.slice(0, 8)}`,
+        userId,
+        productId: SEED_PRODUCT_1.id,
+        variantId,
+        productName: SEED_PRODUCT_1.name,
+        variantName: `Restore Variant ${variantId.slice(0, 8)}`,
+        quantity: 2,
+        productPrice: Number(SEED_PRODUCT_1.price),
+        shippingAddressId: SEED_ADDRESS_USER.id,
+        courier: 'JNE',
+        courierService: 'REG',
+        subtotal: Number(SEED_PRODUCT_1.price) * 2,
+        shippingCost: 15000,
+        totalAmount: Number(SEED_PRODUCT_1.price) * 2 + 15000,
+      });
+
+      await prisma.paymentTransaction.create({
+        data: {
+          id: crypto.randomUUID(),
+          orderId: id,
+          externalId,
+          amount: Number(SEED_PRODUCT_1.price) * 2 + 15000,
+          status: 'pending',
+          createdAt: new Date('2026-05-01T23:30:00.000Z'),
+        },
+      });
+
+      const stockBefore = await prisma.productVariant.findUnique({
+        where: { id: variantId },
+      });
+
+      await prisma.productVariant.update({
+        where: { id: variantId },
+        data: { stock: { decrement: 2 } },
+      });
+
+      await orderRepository.cancelOrderAndRestoreStock(
+        id,
+        [{ variantId, quantity: 2 }],
+        'expired',
+        expiredAt,
+      );
+
+      const orderAfter = await prisma.order.findUnique({
+        where: { id },
+      });
+      const transactionAfter = await prisma.paymentTransaction.findUnique({
+        where: { externalId },
+      });
+      const stockAfter = await prisma.productVariant.findUnique({
+        where: { id: variantId },
+      });
+
+      expect(orderAfter?.orderStatus).toBe('cancelled');
+      expect(orderAfter?.paymentStatus).toBe('failed');
+      expect(transactionAfter?.status).toBe('expired');
+      expect(transactionAfter?.expiredAt?.toISOString()).toBe(
+        expiredAt.toISOString(),
+      );
+      expect(stockAfter?.stock).toBe(stockBefore?.stock);
     });
   });
 
@@ -210,6 +469,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
         },
@@ -261,6 +521,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {
@@ -327,6 +588,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
               name: true,
               province: true,
               clothingType: true,
+              imageURL: true,
             },
           },
           shippingAddress: {

@@ -18,6 +18,7 @@ export interface CartProduct {
   quantity: number;
   clothingType: string;
   province: string;
+  imageURL?: string | null;
 }
 
 // 2. Definisi Tipe Data untuk Props Komponen

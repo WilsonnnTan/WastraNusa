@@ -1,4 +1,21 @@
+import { convert } from 'html-to-text';
 import { NextResponse } from 'next/server';
+
+const BOILERPLATE_SECTION_TITLES = new Set([
+  'references',
+  'see also',
+  'external links',
+  'further reading',
+  'notes',
+  'footnotes',
+  'citations',
+  'sources',
+  'bibliography',
+  'weblinks',
+  'links',
+  'references and sources',
+  'external references',
+]);
 
 export async function GET(req: Request) {
   try {
@@ -11,18 +28,40 @@ export async function GET(req: Request) {
         { status: 400 },
       );
     }
+
+    const ALLOWED_ORIGINS = new Set([
+      'https://en.wikipedia.org',
+      'https://id.wikipedia.org',
+      'https://commons.wikimedia.org',
+    ]);
+
+    let safeOrigin: string;
+    try {
+      const parsedOrigin = new URL(origin);
+      if (
+        (parsedOrigin.protocol !== 'https:' &&
+          parsedOrigin.protocol !== 'http:') ||
+        !ALLOWED_ORIGINS.has(parsedOrigin.origin)
+      ) {
+        return NextResponse.json({ error: 'Invalid origin' }, { status: 400 });
+      }
+      safeOrigin = parsedOrigin.origin;
+    } catch {
+      return NextResponse.json({ error: 'Invalid origin' }, { status: 400 });
+    }
+
     const enc = encodeURIComponent(title);
     const ua =
       'WastraNusa/1.0 (wastranusa.example; contact: dev@wastranusa.example)';
 
     // 1) get section list via action=parse&prop=sections
-    const sectionsUrl = `${origin}/w/api.php?action=parse&page=${enc}&prop=sections&format=json`;
+    const sectionsUrl = `${safeOrigin}/w/api.php?action=parse&page=${enc}&prop=sections&format=json`;
     const secRes = await fetch(sectionsUrl, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
         'User-Agent': ua,
-        Referer: origin,
+        Referer: safeOrigin,
       },
     });
 
@@ -56,85 +95,15 @@ export async function GET(req: Request) {
 
     const sections = secJson.parse?.sections ?? [];
 
-    // Section titles that are pure boilerplate — skip them entirely
-    const BOILERPLATE_SECTION_TITLES = new Set([
-      'referensi',
-      'references',
-      'reference',
-      'catatan',
-      'catatan kaki',
-      'notes',
-      'footnotes',
-      'lihat pula',
-      'see also',
-      'pranala luar',
-      'external links',
-      'external link',
-      'daftar pustaka',
-      'bibliography',
-      'bacaan lebih lanjut',
-      'further reading',
-      'sumber',
-      'sources',
-      'bibliografi',
-    ]);
-
-    // helper to strip HTML and remove Wikipedia-specific artifacts.
-    // Uses a character-by-character state machine instead of regex to parse tags,
-    // which satisfies CodeQL rules js/bad-tag-filter and
-    // js/incomplete-multi-character-sanitization.
-    const stripHtml = (html?: string): string => {
-      if (!html) return '';
-
-      // --- Phase 1: extract plain text via a hand-written state machine ---
-      let textOut = '';
-      let inTag = false;
-      let tagBuf = '';
-      let skipContent = false;
-      let closingTag = '';
-
-      for (let i = 0; i < html.length; i += 1) {
-        const ch = html[i];
-        if (ch === '<') {
-          inTag = true;
-          tagBuf = '';
-        } else if (ch === '>' && inTag) {
-          inTag = false;
-          const tag = tagBuf.trim().toLowerCase();
-          if (!skipContent) {
-            if (
-              tag === 'script' ||
-              tag.startsWith('script ') ||
-              tag.startsWith('script\t')
-            ) {
-              skipContent = true;
-              closingTag = 'script';
-            } else if (
-              tag === 'style' ||
-              tag.startsWith('style ') ||
-              tag.startsWith('style\t')
-            ) {
-              skipContent = true;
-              closingTag = 'style';
-            }
-          } else {
-            const normalized = tag.replace(/^\//, '').trim();
-            if (normalized === closingTag) {
-              skipContent = false;
-              closingTag = '';
-            }
-          }
-          tagBuf = '';
-        } else if (inTag) {
-          tagBuf += ch;
-        } else if (!skipContent) {
-          textOut += ch;
-        }
-      }
-
-      // --- Phase 2: decode HTML entities (&amp; last to avoid double-unescaping) ---
-      const decoded = textOut
-        .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    // helper to strip HTML
+    const stripHtml = (html?: string) => {
+      const text = convert(html ?? '', {
+        wordwrap: false,
+        selectors: [{ selector: 'a', options: { ignoreHref: true } }],
+      });
+      return text
+        .replace(/\s+/g, ' ')
+        .trim()
         .replace(/&nbsp;/g, ' ')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
@@ -174,13 +143,13 @@ export async function GET(req: Request) {
     for (const s of sections) {
       const idx = s.index;
       if (typeof idx === 'undefined') continue;
-      const secHtmlUrl = `${origin}/w/api.php?action=parse&page=${enc}&section=${idx}&prop=text&format=json`;
+      const secHtmlUrl = `${safeOrigin}/w/api.php?action=parse&page=${enc}&section=${idx}&prop=text&format=json`;
       try {
         const r = await fetch(secHtmlUrl, {
           headers: {
             Accept: 'application/json',
             'User-Agent': ua,
-            Referer: origin,
+            Referer: safeOrigin,
           },
         });
         if (!r.ok) continue;
@@ -212,7 +181,7 @@ export async function GET(req: Request) {
         if (imgMatch && imgMatch[1]) {
           let src = imgMatch[1];
           if (src.startsWith('//')) src = 'https:' + src;
-          else if (src.startsWith('/')) src = origin + src;
+          else if (src.startsWith('/')) src = safeOrigin + src;
           imageURL = src;
         }
         outSections.push({

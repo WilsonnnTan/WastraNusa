@@ -2,6 +2,7 @@
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Hexagon, Minus, Plus } from 'lucide-react';
+import Image from 'next/image';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
@@ -15,11 +16,23 @@ export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
       </div>
 
       {/* Gambar */}
-      <div className="w-20 h-20 shrink-0 bg-[#f4efe6] border border-[#e8e2d5] rounded-xl flex flex-col items-center justify-center text-[#8e8476]">
-        <Hexagon className="w-7 h-7 stroke-[1.5]" />
-        <span className="text-[9px] font-bold mt-1 uppercase tracking-wider">
-          {item.clothingType}
-        </span>
+      <div className="w-20 h-20 shrink-0 bg-[#f4efe6] border border-[#e8e2d5] rounded-xl overflow-hidden flex flex-col items-center justify-center text-[#8e8476]">
+        {item.imageURL ? (
+          <Image
+            src={item.imageURL}
+            alt={item.name}
+            width={80}
+            height={80}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <>
+            <Hexagon className="w-7 h-7 stroke-[1.5]" />
+            <span className="text-[9px] font-bold mt-1 uppercase tracking-wider">
+              {item.clothingType}
+            </span>
+          </>
+        )}
       </div>
 
       {/* Info Detail */}

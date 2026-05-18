@@ -232,7 +232,20 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
       wrapper: createWrapper(),
     });
 
-    const input = { name: 'Updated Product', slug: 'updated-product' };
+    const input = {
+      name: 'Updated Product',
+      slug: 'updated-product',
+      variants: [
+        {
+          id: 'variant-1',
+          name: 'Size M',
+          type: 'size' as const,
+          price: 100000,
+          stock: 20,
+          sku: 'SKU-1-M',
+        },
+      ],
+    };
 
     act(() => {
       result.current.mutate({ idOrSlug: 'prod-1', data: input });

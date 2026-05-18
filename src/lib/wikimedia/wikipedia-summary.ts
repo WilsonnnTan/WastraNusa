@@ -391,7 +391,9 @@ export async function fetchWikipediaPageMobileSections(
 
   const data = json as MobileSectionsResponse;
   // Normalize sections: map headings + text
-  const sections = (data.sections ?? []).map((s) => ({
+  const sections: Array<{ title: string; content: string }> = (
+    data.sections ?? []
+  ).map((s) => ({
     title: stripHtml(s.line),
     content: stripHtml(s.text),
   }));

@@ -6,6 +6,8 @@ import {
   type CheckoutSelectedItem,
   type CheckoutSessionData,
 } from '@/types/checkout';
+import { Package } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -63,8 +65,18 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
           <div className="space-y-4 mb-6 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
             {selectedItems.map((item, idx) => (
               <div key={idx} className="flex gap-4 items-center">
-                <div className="w-11 h-11 bg-[#eadecb] rounded-lg shrink-0 flex justify-center relative overflow-hidden">
-                  <div className="absolute top-0 w-6 h-5 border-b border-l border-r border-[#d4c5b0] rounded-b-md"></div>
+                <div className="w-11 h-11 bg-[#eadecb] rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
+                  {item.imageURL ? (
+                    <Image
+                      src={item.imageURL}
+                      alt={item.name}
+                      width={44}
+                      height={44}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Package className="w-5 h-5 text-[#8e8476]" />
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0">

@@ -26,6 +26,7 @@ export interface CartItemWithRelations {
     slug: string;
     clothingType: string;
     province: string;
+    imageURL?: string | null;
     variants?: Array<{
       stock: number;
     }>;
@@ -36,6 +37,7 @@ export interface CartItemWithRelations {
     type: string;
     price: number | null;
     stock: number;
+    imageURL?: string | null;
   } | null;
 }
 

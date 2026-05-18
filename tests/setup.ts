@@ -15,7 +15,21 @@ vi.mock('@/lib/auth/auth-api-helper', () => ({
 }));
 
 vi.mock('@/lib/prisma', () => ({
-  default: {},
+  default: {
+    $transaction: vi.fn(async (callback?: unknown) => {
+      if (typeof callback === 'function') {
+        const tx = {
+          order: { update: vi.fn() },
+          paymentTransaction: { updateMany: vi.fn() },
+          productVariant: { update: vi.fn() },
+        };
+
+        return callback(tx);
+      }
+
+      return [];
+    }),
+  },
 }));
 
 vi.mock('@/repositories/article.repository', () => ({
@@ -25,6 +39,7 @@ vi.mock('@/repositories/article.repository', () => ({
     countByIsland: vi.fn(),
     countByTopic: vi.fn(),
     countDistinctMotifLabel: vi.fn(),
+    countDistinctProvince: vi.fn(),
     findMostPopular: vi.fn(),
     findByIdOrSlug: vi.fn(),
     create: vi.fn(),
@@ -57,9 +72,14 @@ vi.mock('@/repositories/order.repository', () => ({
     createOrder: vi.fn(),
     findOrderById: vi.fn(),
     findOrderDetailByIdentifier: vi.fn(),
+    findOrderForUserByIdentifier: vi.fn(),
+    findOrderForCancellationById: vi.fn(),
     updateOrderPaymentStatus: vi.fn(),
     findOrdersByUserId: vi.fn(),
     countOrdersByUserId: vi.fn(),
+    findExpiredPendingOrders: vi.fn(),
+    cancelOrder: vi.fn(),
+    cancelOrderAndRestoreStock: vi.fn(),
     findOrdersForAdmin: vi.fn(),
     countOrdersForAdmin: vi.fn(),
     findOrderForAdminByIdentifier: vi.fn(),
@@ -68,9 +88,14 @@ vi.mock('@/repositories/order.repository', () => ({
 }));
 
 vi.mock('@/services/order.service', () => ({
+  getOrderPaymentExpiryDate: vi.fn(
+    (createdAt: Date) => new Date(createdAt.getTime() + 30 * 60 * 1000),
+  ),
   orderService: {
     getUserOrders: vi.fn(),
     getUserOrderDetail: vi.fn(),
+    cancelUserOrder: vi.fn(),
+    cancelOrderBySystemId: vi.fn(),
     getAdminOrders: vi.fn(),
     updateOrderForAdmin: vi.fn(),
   },
@@ -110,6 +135,7 @@ vi.mock('@/repositories/productVariant.repository', () => ({
   productVariantRepository: {
     findVariantById: vi.fn(),
     decrementVariantStock: vi.fn(),
+    incrementVariantStock: vi.fn(),
   },
 }));
 

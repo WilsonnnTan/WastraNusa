@@ -41,6 +41,7 @@ export default function AuthLayout({ children }: LayoutProps) {
           priority
           style={{ objectPosition: '70% 10%' }}
           className="object-cover"
+          sizes="(max-width: 1024px) 0vw, 40vw"
         />
         {/* Dark green tinted overlay matching the design */}
         <div

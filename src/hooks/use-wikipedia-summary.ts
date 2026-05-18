@@ -101,11 +101,10 @@ export function useWikipediaSummaryImport(isActive: boolean) {
           const sectionsResp = resp.ok ? await resp.json() : null;
           if (sectionsResp?.sections && sectionsResp.sections.length > 0) {
             mapped.sections = sectionsResp.sections
-              .filter((s) => s.title && s.content)
-              .map((s) => ({
-                title: s.title,
-                content: s.content,
-                imageURL: s.imageURL,
+              .filter((s: { line?: string; text?: string }) => s.line && s.text)
+              .map((s: { line: string; text: string }) => ({
+                title: s.line,
+                content: s.text,
               }));
           }
           sectionsFetched = true;
