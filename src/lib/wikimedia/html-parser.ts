@@ -133,11 +133,21 @@ export class HTMLStateMachineParser {
     });
 
     return result;
-  }
+    let cleaned = html;
+    let previous: string;
 
-  /**
-   * Parse HTML and extract clean text content
+    // Repeatedly strip style blocks until no more changes occur
+    do {
+      previous = cleaned;
+      cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    } while (cleaned !== previous);
    */
+    // Repeatedly strip script blocks until no more changes occur
+    do {
+      previous = cleaned;
+      cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    } while (cleaned !== previous);
+
   static extractText(html: string): string {
     // Pre-cleanup: remove style tags and their content before processing
     let cleaned = html.replace(/<style\b[^>]*>[\s\S]*?<\/\s*style(?:\s[^>]*)?>/gi, '');
