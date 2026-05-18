@@ -112,7 +112,11 @@ export class HTMLStateMachineParser {
   }
 
   static extractText(html: string): string {
-    const replaceUntilStable = (input: string, pattern: RegExp, replacement: string): string => {
+    const replaceUntilStable = (
+      input: string,
+      pattern: RegExp,
+      replacement: string,
+    ): string => {
       let previous: string;
       let current = input;
       do {
