@@ -112,14 +112,26 @@ export class HTMLStateMachineParser {
   }
 
   static extractText(html: string): string {
+    const replaceUntilStable = (input: string, pattern: RegExp, replacement: string): string => {
+      let previous: string;
+      let current = input;
+      do {
+        previous = current;
+        current = current.replace(pattern, replacement);
+      } while (current !== previous);
+      return current;
+    };
+
     // Pre-cleanup: remove style tags and their content before processing
-    let cleaned = html.replace(
+    let cleaned = replaceUntilStable(
+      html,
       /<style\b[^>]*>[\s\S]*?<\/\s*style(?:\s[^>]*)?>/gi,
       '',
     );
 
     // Remove script tags
-    cleaned = cleaned.replace(
+    cleaned = replaceUntilStable(
+      cleaned,
       /<script\b[^>]*>[\s\S]*?<\/\s*script(?:\s[^>]*)?>/gi,
       '',
     );
