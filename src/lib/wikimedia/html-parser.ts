@@ -132,12 +132,17 @@ export class HTMLStateMachineParser {
       return num > 0 && num < 1114112 ? String.fromCodePoint(num) : '';
     });
 
-    return result;
+    // Pre-cleanup: remove style/script tags and their content before processing.
+    // Apply repeatedly to avoid incomplete multi-character sanitization where
+    // a new match may appear after a prior replacement.
     let cleaned = html;
     let previous: string;
-
-    // Repeatedly strip style blocks until no more changes occur
     do {
+      previous = cleaned;
+      cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+      cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    } while (cleaned !== previous);
+    let previous: string;
       previous = cleaned;
       cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
     } while (cleaned !== previous);
