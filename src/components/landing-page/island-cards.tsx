@@ -1,19 +1,20 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@/components/ui/carousel';
 import { useArticles } from '@/hooks/use-article';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 function getIslandCardBackground(index: number) {
   const hue = 28 + ((index * 23) % 36);
@@ -25,9 +26,11 @@ function getIslandCardBackground(index: number) {
 }
 
 export function IslandCards() {
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const { data, error, isPending } = useArticles(1, 50);
   const islands =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
+  const shouldLoop = islands.length > 5;
 
   const islandImages = useMemo(() => {
     const imagesByIsland = new Map<string, string>();
@@ -83,14 +86,37 @@ export function IslandCards() {
         ) : null}
 
         {!isPending && !error ? (
-          <Carousel opts={{ align: 'start', loop: true }}>
-            <CarouselPrevious className="left-3 z-10 border-[#ddd4c6] bg-white text-[#2d5f48] hover:bg-[#f3ecdd]" />
-            <CarouselNext className="right-3 z-10 border-[#ddd4c6] bg-white text-[#2d5f48] hover:bg-[#f3ecdd]" />
-            <CarouselContent className="py-0">
+          <Carousel
+            setApi={setCarouselApi}
+            opts={{
+              align: 'start',
+              containScroll: 'trimSnaps',
+              loop: shouldLoop,
+              slidesToScroll: 1,
+            }}
+            className="w-full px-12"
+          >
+            <Button
+              type="button"
+              className="absolute left-0 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-[#ddd4c6] bg-white text-[#2d5f48] transition hover:bg-[#f3ecdd]"
+              disabled={islands.length <= 5}
+              onClick={() => carouselApi?.scrollPrev()}
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              type="button"
+              className="absolute right-0 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-[#ddd4c6] bg-white text-[#2d5f48] transition hover:bg-[#f3ecdd]"
+              disabled={islands.length <= 5}
+              onClick={() => carouselApi?.scrollNext()}
+            >
+              <ChevronRight />
+            </Button>
+            <CarouselContent className="-ml-4 py-0">
               {islands.map((island, index) => (
                 <CarouselItem
                   key={island.name}
-                  className="basis-[85%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/5"
+                  className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5"
                 >
                   <Link
                     href={`/encyclopedia?island=${encodeURIComponent(island.name)}`}
