@@ -151,9 +151,10 @@ export function HeroSection() {
                     </div>
                   ) : (
                     <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
-                      {slide.title}
-                      <br />
-                      {slide.subtitle}
+                      <span className="block line-clamp-2">{slide.title}</span>
+                      <span className="mt-1 block line-clamp-1 text-[0.72em] text-[#e4d5bf] md:text-[0.68em]">
+                        {slide.subtitle}
+                      </span>
                     </h1>
                   )}
 
@@ -163,7 +164,7 @@ export function HeroSection() {
                       <Skeleton className="h-5 w-5/6 bg-white/20" />
                     </div>
                   ) : (
-                    <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
+                    <p className="mt-4 min-h-[3.5rem] text-base leading-relaxed text-[#d5cec0] line-clamp-2">
                       {slide.description}
                     </p>
                   )}
