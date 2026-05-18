@@ -83,17 +83,18 @@ export class HTMLStateMachineParser {
   }
 
   /**
-   * Decode all HTML entities in a string
+   * Escape a string for safe use in RegExp constructors
    */
+  private static escapeRegExp(literal: string): string {
+    return literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   private static decodeAllEntities(text: string): string {
     let result = text;
 
     // First decode named entities
     for (const [entity, char] of Object.entries(this.ENTITIES)) {
-      result = result.replace(
-        new RegExp(entity.replace(/&/g, '\\&'), 'g'),
-        char,
-      );
+      result = result.replace(new RegExp(this.escapeRegExp(entity), 'g'), char);
     }
 
     // Then decode numeric entities: &#123; or &#x1F;
@@ -110,15 +111,18 @@ export class HTMLStateMachineParser {
     return result;
   }
 
-  /**
-   * Parse HTML and extract clean text content
-   */
   static extractText(html: string): string {
     // Pre-cleanup: remove style tags and their content before processing
-    let cleaned = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    let cleaned = html.replace(
+      /<style\b[^>]*>[\s\S]*?<\/\s*style(?:\s[^>]*)?>/gi,
+      '',
+    );
 
     // Remove script tags
-    cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    cleaned = cleaned.replace(
+      /<script\b[^>]*>[\s\S]*?<\/\s*script(?:\s[^>]*)?>/gi,
+      '',
+    );
 
     const text: string[] = [];
 
