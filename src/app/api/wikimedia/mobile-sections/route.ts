@@ -101,7 +101,13 @@ export async function GET(req: Request) {
     };
 
     // For each section, fetch its HTML via action=parse&section=index&prop=text
-    const outSections: Array<{ title: string; content: string }> = [];
+    const outSections: Array<{
+      title: string;
+      content: string;
+      line: string;
+      text: string;
+      imageURL?: string;
+    }> = [];
     for (const s of sections) {
       const idx = s.index;
       if (typeof idx === 'undefined') continue;
