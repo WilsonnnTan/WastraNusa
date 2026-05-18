@@ -19,13 +19,13 @@ export interface OrderItem {
   paymentStatusLabel: string;
   paymentDeadlineAt: string | null;
   canCancel: boolean;
-  product: {
+  products: Array<{
     category: string;
     name: string;
     location: string;
     quantity: number;
     imageURL: string | null;
-  };
+  }>;
   actions: ('Lacak Pesanan' | 'Detail')[];
 }
 
@@ -50,7 +50,7 @@ export interface OrderDetail {
     shippingCost: string;
     totalAmount: string;
   };
-  product: {
+  products: Array<{
     id: string;
     name: string;
     category: string;
@@ -58,7 +58,7 @@ export interface OrderDetail {
     quantity: number;
     unitPrice: string;
     imageURL: string | null;
-  };
+  }>;
   shipping: {
     courier: string;
     courierService: string;

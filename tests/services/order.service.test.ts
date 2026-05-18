@@ -33,6 +33,7 @@ describe('orderService', { tags: ['backend'] }, () => {
             name: 'Batik',
             province: 'Solo',
             clothingType: 'batik',
+            imageURL: null,
           },
         },
       ] as never);
@@ -58,6 +59,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.data[0].orderId).toBe('1');
       expect(result.data[0].status).toBe('Menunggu Bayar');
       expect(result.data[0].canCancel).toBe(true);
+      expect(result.data[0].products).toHaveLength(1);
+      expect(result.data[0].products[0].name).toBe('Batik');
       expect(result.data[0].paymentStatusLabel).toBe('Belum Bayar');
 
       expect(result.meta.page).toBe(2);
@@ -106,6 +109,8 @@ describe('orderService', { tags: ['backend'] }, () => {
         totalAmount: 150000,
         productPrice: 120000,
         quantity: 1,
+        productId: 'prod-1',
+        variantId: null,
         courier: 'JNE',
         courierService: 'REG',
         trackingNumber: 'RESI-1',
@@ -117,6 +122,7 @@ describe('orderService', { tags: ['backend'] }, () => {
           name: 'Batik',
           province: 'Solo',
           clothingType: 'batik',
+          imageURL: null,
         },
         shippingAddress: {
           recipientName: 'User',
@@ -153,6 +159,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.paymentStatus).toBe('paid');
       expect(result.paymentStatusLabel).toBe('Lunas');
       expect(result.totals.totalAmount).toContain('Rp');
+      expect(result.products).toHaveLength(1);
+      expect(result.products[0].name).toBe('Batik');
     });
 
     it('should throw ApiError when order not found', async () => {

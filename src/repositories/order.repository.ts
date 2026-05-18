@@ -59,7 +59,27 @@ export const orderRepository = {
         userId,
         OR: [{ id: identifier }, { orderNumber: identifier }],
       },
-      include: userOrderRelations,
+      select: {
+        ...userOrderRelations,
+        id: true,
+        orderNumber: true,
+        createdAt: true,
+        totalAmount: true,
+        subtotal: true,
+        shippingCost: true,
+        orderStatus: true,
+        paymentStatus: true,
+        paymentMethod: true,
+        quantity: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
+        courier: true,
+        courierService: true,
+        trackingNumber: true,
+        estimatedDelivery: true,
+        customerNotes: true,
+      },
     });
   },
 
@@ -118,7 +138,17 @@ export const orderRepository = {
       where: { userId, ...filters },
       skip,
       take,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        createdAt: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        quantity: true,
+        productId: true,
+        variantId: true,
+        customerNotes: true,
         product: {
           select: {
             name: true,
@@ -386,6 +416,7 @@ export const orderRepository = {
         name: true,
         province: true,
         clothingType: true,
+        imageURL: true,
       },
     });
   },
