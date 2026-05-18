@@ -133,10 +133,10 @@ export class HTMLStateMachineParser {
    */
   static extractText(html: string): string {
     // Pre-cleanup: remove style tags and their content before processing
-    let cleaned = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    let cleaned = html.replace(/<style\b[^>]*>[\s\S]*?<\/\s*style(?:\s[^>]*)?>/gi, '');
 
     // Remove script tags
-    cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    cleaned = cleaned.replace(/<script\b[^>]*>[\s\S]*?<\/\s*script(?:\s[^>]*)?>/gi, '');
 
     const text: string[] = [];
 
