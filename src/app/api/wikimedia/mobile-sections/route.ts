@@ -1,4 +1,4 @@
-import { convert } from 'html-to-text';
+import { HTMLStateMachineParser } from '@/lib/wikimedia/html-parser';
 import { NextResponse } from 'next/server';
 
 const BOILERPLATE_SECTION_TITLES = new Set([
@@ -95,22 +95,9 @@ export async function GET(req: Request) {
 
     const sections = secJson.parse?.sections ?? [];
 
-    // helper to strip HTML
+    // helper to strip HTML using secure state machine parser
     const stripHtml = (html?: string) => {
-      const text = convert(html ?? '', {
-        wordwrap: false,
-        selectors: [{ selector: 'a', options: { ignoreHref: true } }],
-      });
-      return text
-        .replace(/\s+/g, ' ')
-        .trim()
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/&amp;/g, '&')
-        .trim();
+      return HTMLStateMachineParser.extractText(html ?? '');
     };
 
     // For each section, fetch its HTML via action=parse&section=index&prop=text
@@ -152,16 +139,27 @@ export async function GET(req: Request) {
         if (!contentClean) continue;
 
         let imageURL: string | undefined;
-        const imgMatch = /<img[^>]+src\s*=\s*"([^"]+)"/i.exec(rawHtml);
-        if (imgMatch && imgMatch[1]) {
-          let src = imgMatch[1];
-          if (src.startsWith('//')) src = 'https:' + src;
-          else if (src.startsWith('/')) src = safeOrigin + src;
-          imageURL = src;
+        try {
+          const extractedUrl =
+            HTMLStateMachineParser.extractFirstImageUrl(rawHtml);
+          if (extractedUrl) {
+            let src = extractedUrl;
+            // Handle relative URLs
+            if (src.startsWith('/') && !src.startsWith('//')) {
+              src = safeOrigin + src;
+            }
+            imageURL = src;
+          }
+        } catch (imgErr) {
+          // ignore image extraction errors
+          console.debug('image extraction error', imgErr);
         }
+
         outSections.push({
           title: titleClean,
+          line: titleClean,
           content: contentClean,
+          text: contentClean,
           ...(imageURL ? { imageURL } : {}),
         });
       } catch (e) {
