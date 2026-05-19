@@ -306,4 +306,24 @@ export const articleRepository = {
       }
     });
   },
+
+  getDistinctTopics: async () => {
+    const result = await prisma.article.findMany({
+      distinct: ['topic'],
+      select: {
+        topic: true,
+      },
+      where: {
+        status: 'published',
+      },
+      orderBy: {
+        topic: 'asc',
+      },
+      take: 7,
+    });
+
+    return result
+      .map((item) => item.topic)
+      .filter((topic): topic is string => topic !== null && topic.length > 0);
+  },
 };

@@ -1,4 +1,5 @@
 import {
+  CategoryFilter,
   EncyclopediaSection,
   FeaturedCards,
   HeroSection,
@@ -14,6 +15,10 @@ export default function HomePage() {
           <HeroSection />
           <FeaturedCards />
         </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-[1320px] px-4 py-3 md:px-6 lg:px-8">
+        <CategoryFilter />
       </section>
 
       <ProductCatalog />
