@@ -17,6 +17,7 @@ export type AdminOrderItem = {
     location: string;
     category: string;
     quantity: number;
+    unitPrice: string;
   }>;
   totalAmount: number;
   totalAmountLabel: string;
