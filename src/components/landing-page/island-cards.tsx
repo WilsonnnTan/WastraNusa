@@ -141,14 +141,14 @@ export function IslandCards() {
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.78)_45%,rgba(0,0,0,0.35)_75%,rgba(0,0,0,0)_100%)]" />
 
                       <div className="relative flex min-h-[188px] flex-col justify-end p-4 text-[#f6f2e8]">
-                        <span className="mb-2 inline-flex h-4 w-4 rotate-45 border border-[#e9dec8]" />
+                        {/* <span className="mb-2 inline-flex h-4 w-4 rotate-45 border border-[#e9dec8]" />
                         <p className="text-sm text-[#e5dcca]">
                           Eksplorasi Pulau
-                        </p>
-                        <p className="mt-2 text-2xl font-bold leading-tight">
+                        </p> */}
+                        <p className="mt-2 text-lg font-bold leading-tight">
                           {island.name}
                         </p>
-                        <p className="text-sm text-[#d3ccb8]">
+                        <p className="text-xs text-[#d3ccb8]">
                           {island.count} artikel
                         </p>
                       </div>

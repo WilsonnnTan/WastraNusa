@@ -18,7 +18,8 @@ export function CategoryFilter() {
             <Button
               key={category}
               asChild
-              className="rounded-full border border-[#d5ccc0] bg-white px-4 py-1.5 text-sm font-medium text-[#4f6658] transition hover:border-[#a9a390] hover:text-[#ffffff] hover:bg-[#fbf9f6]"
+              variant="outline"
+              className="rounded-full border border-[#4a3a2a]/[14.5%] bg-[#4a3a2a]/[6.3%] px-4 py-1.5 text-sm font-medium text-[#2f4f3f] transition hover:border-[#2f4f3f] hover:text-white hover:bg-[#2f4f3f]"
             >
               <Link href={`/catalog?topic=${encodeURIComponent(category)}`}>
                 {category}

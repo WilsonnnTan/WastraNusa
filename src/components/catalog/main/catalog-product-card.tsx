@@ -92,12 +92,12 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
 
           <div className="mt-auto flex items-end justify-between pt-1">
             <div className="flex flex-col">
-              <p className="text-lg font-bold tracking-tight text-[#2f5f49]">
+              <p className="text-sm font-bold tracking-tight text-[#2f5f49]">
                 {formatVariantPriceRange(product.variants, product.price)}
               </p>
             </div>
             <p className="text-xs font-semibold text-[#4d6858]">
-              {isOutOfStock ? 'Habis' : `Total stok: ${product.stock}`}
+              {isOutOfStock ? 'Habis' : `Tersedia : ${product.stock}`}
             </p>
           </div>
         </div>

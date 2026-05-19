@@ -53,7 +53,8 @@ export function ProductCatalog() {
 
           <Button
             asChild
-            className="inline-flex items-center gap-1 rounded-xl border border-[#dfd8ca] bg-[#f6f3eb] px-4 py-2 text-sm font-semibold text-[#2f5f48] transition hover:border-[#89a38f]"
+            variant="outline"
+            className="flex items-center gap-1 rounded-xl border border-[#2f4f3f] bg-[#f6f3eb] px-4 py-2 text-sm font-semibold text-[#2f4f3f] transition hover:border-[#2f4f3f] hover:bg-[#2d5f48] hover:text-white"
           >
             <Link href="/catalog">
               Lihat Semua
