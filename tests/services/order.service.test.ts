@@ -3,24 +3,12 @@ import { orderRepository } from '@/repositories/order.repository';
 import { orderService } from '@/services/order.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.unmock('@/services/order.service');
+vi.mock('@/repositories/order.repository');
 
 const mockRepo = vi.mocked(orderRepository);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // Initialize all mocks explicitly to ensure spy operations work
-  vi.spyOn(mockRepo, 'findExpiredPendingOrders').mockResolvedValue([] as never);
-  vi.spyOn(mockRepo, 'findOrdersByUserId').mockResolvedValue([] as never);
-  vi.spyOn(mockRepo, 'countOrdersByUserId').mockResolvedValue(0);
-  vi.spyOn(mockRepo, 'findOrderDetailByIdentifier').mockResolvedValue(
-    null as never,
-  );
-  vi.spyOn(mockRepo, 'findOrdersForAdmin').mockResolvedValue([] as never);
-  vi.spyOn(mockRepo, 'countOrdersForAdmin').mockResolvedValue(0);
-  vi.spyOn(mockRepo, 'findProductDetailsForOrder').mockResolvedValue(
-    null as never,
-  );
 });
 
 describe('orderService', { tags: ['backend'] }, () => {
@@ -383,11 +371,13 @@ describe('orderService', { tags: ['backend'] }, () => {
         },
       };
 
-      vi.spyOn(mockRepo, 'findOrdersForAdmin').mockResolvedValue([
+      vi.mocked(orderRepository).findOrdersForAdmin.mockResolvedValue([
         orderData,
       ] as never);
-      vi.spyOn(mockRepo, 'countOrdersForAdmin').mockResolvedValue(1);
-      vi.spyOn(mockRepo, 'findProductDetailsForOrder').mockResolvedValue(null);
+      vi.mocked(orderRepository).countOrdersForAdmin.mockResolvedValue(1);
+      vi.mocked(orderRepository).findProductDetailsForOrder.mockResolvedValue(
+        null,
+      );
 
       const result = await orderService.getAdminOrders(1, 10, {
         orderStatus: 'processing',
