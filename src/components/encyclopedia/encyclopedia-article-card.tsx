@@ -25,6 +25,7 @@ export function EncyclopediaArticleCard({
             src={article.imageURL}
             alt={article.title}
             fill
+            unoptimized
             className="object-cover"
           />
         ) : (

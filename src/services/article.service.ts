@@ -41,6 +41,7 @@ export const articleService = {
       islandCounts,
       topicCounts,
       totalWastraTypes,
+      totalProvinces,
     ] = await Promise.all([
       articleRepository.findAll({
         offset,
@@ -49,11 +50,12 @@ export const articleService = {
         topic,
       }),
       articleRepository.countAll({ island, topic }),
-      articleRepository.countAll(),
-      articleRepository.countAll({ topic }),
+      articleRepository.countAll({ status: 'published' }),
+      articleRepository.countAll({ topic, status: 'published' }),
       articleRepository.countByIsland({ topic }),
       articleRepository.countByTopic({ island }),
       articleRepository.countDistinctMotifLabel(),
+      articleRepository.countDistinctProvince(),
     ]);
 
     const items = articles.map((article) => ({
@@ -98,6 +100,7 @@ export const articleService = {
           totalArticles: globalTotalItems,
           totalIslands: islandCounts.length,
           totalWastraTypes,
+          totalProvinces,
         },
       },
     };
@@ -105,7 +108,7 @@ export const articleService = {
 
   getDashboardOverview: async (): Promise<ArticleDashboardData> => {
     const [totalArticles, mostPopularArticles] = await Promise.all([
-      articleRepository.countAll(),
+      articleRepository.countAll({ status: 'published' }),
       articleRepository.findMostPopular(6),
     ]);
 

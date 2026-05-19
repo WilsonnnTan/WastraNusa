@@ -202,6 +202,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               src={article.imageURL}
               alt={article.title}
               fill
+              unoptimized
               className="object-cover mix-blend-overlay"
             />
           ) : (
@@ -320,7 +321,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                 <div
                   className={
                     showVisual
-                      ? 'mt-3 grid gap-5 md:grid-cols-[minmax(0,1fr)_220px]'
+                      ? 'mt-3 grid gap-5 grid-cols-1 md:grid-cols-[minmax(0,1fr)_240px] lg:grid-cols-[minmax(0,1fr)_280px]'
                       : 'mt-3'
                   }
                 >
@@ -329,14 +330,17 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   </p>
 
                   {showVisual ? (
-                    <Card className="overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)]">
-                      <div className="relative min-h-[168px] bg-[#ece1d0]">
+                    <Card className="overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)] h-fit">
+                      <div className="relative w-full bg-[#ece1d0] aspect-video sm:aspect-square md:aspect-[3/4]">
                         {section.imageURL ? (
                           <Image
                             src={section.imageURL}
                             alt={visualCaption}
                             fill
+                            unoptimized
                             className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 280px, 280px"
+                            priority={false}
                           />
                         ) : (
                           <div className="absolute inset-0 grid place-items-center">

@@ -39,6 +39,7 @@ vi.mock('@/repositories/article.repository', () => ({
     countByIsland: vi.fn(),
     countByTopic: vi.fn(),
     countDistinctMotifLabel: vi.fn(),
+    countDistinctProvince: vi.fn(),
     findMostPopular: vi.fn(),
     findByIdOrSlug: vi.fn(),
     create: vi.fn(),

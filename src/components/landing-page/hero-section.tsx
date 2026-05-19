@@ -14,7 +14,7 @@ import { useArticles } from '@/hooks/use-article';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type HeroSlide = {
   id: string | number;
@@ -34,10 +34,12 @@ const HERO_BACKGROUNDS = [
   'bg-[radial-gradient(circle_at_80%_20%,rgba(224,152,69,0.42),transparent_40%),linear-gradient(120deg,#10141d_0%,#3c2a24_52%,#744924_100%)]',
   'bg-[radial-gradient(circle_at_50%_22%,rgba(207,168,108,0.46),transparent_46%),linear-gradient(132deg,#0a1018_0%,#253040_40%,#5b3c1f_100%)]',
 ];
+const HERO_AUTOPLAY_DELAY = 5000;
 
 export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const autoplayTimerRef = useRef<number | null>(null);
 
   const { data, isPending } = useArticles(1, 4);
 
@@ -67,34 +69,63 @@ export function HeroSection() {
           slug: article.slug,
         }));
 
+  const resetAutoplay = useCallback(() => {
+    if (autoplayTimerRef.current) {
+      window.clearTimeout(autoplayTimerRef.current);
+    }
+
+    if (!carouselApi || slides.length <= 1) return;
+
+    autoplayTimerRef.current = window.setTimeout(() => {
+      carouselApi.scrollNext();
+    }, HERO_AUTOPLAY_DELAY);
+  }, [carouselApi, slides.length]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      carouselApi?.scrollTo(index);
+      resetAutoplay();
+    },
+    [carouselApi, resetAutoplay],
+  );
+
+  const goToPreviousSlide = useCallback(() => {
+    carouselApi?.scrollPrev();
+    resetAutoplay();
+  }, [carouselApi, resetAutoplay]);
+
+  const goToNextSlide = useCallback(() => {
+    carouselApi?.scrollNext();
+    resetAutoplay();
+  }, [carouselApi, resetAutoplay]);
+
   useEffect(() => {
     if (!carouselApi) return;
 
     const onSelect = () => {
       setActiveSlide(carouselApi.selectedScrollSnap());
+      resetAutoplay();
     };
 
     onSelect();
     carouselApi.on('select', onSelect);
     carouselApi.on('reInit', onSelect);
+    carouselApi.on('pointerDown', resetAutoplay);
 
     return () => {
       carouselApi.off('select', onSelect);
       carouselApi.off('reInit', onSelect);
+      carouselApi.off('pointerDown', resetAutoplay);
     };
-  }, [carouselApi]);
+  }, [carouselApi, resetAutoplay]);
 
   useEffect(() => {
-    if (!carouselApi) return;
-
-    const autoplayTimer = window.setInterval(() => {
-      carouselApi.scrollNext();
-    }, 5000);
-
     return () => {
-      window.clearInterval(autoplayTimer);
+      if (autoplayTimerRef.current) {
+        window.clearTimeout(autoplayTimerRef.current);
+      }
     };
-  }, [carouselApi]);
+  }, []);
 
   return (
     <Card className="relative min-h-[420px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] p-0 text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)] ring-0">
@@ -120,6 +151,7 @@ export function HeroSection() {
                     fill
                     className="object-cover opacity-45 mix-blend-screen"
                     priority={!slide.isSkeleton}
+                    sizes="100vw"
                   />
                 ) : null}
                 <div
@@ -150,9 +182,10 @@ export function HeroSection() {
                     </div>
                   ) : (
                     <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
-                      {slide.title}
-                      <br />
-                      {slide.subtitle}
+                      <span className="block line-clamp-2">{slide.title}</span>
+                      <span className="mt-1 block line-clamp-1 text-[0.72em] text-[#e4d5bf] md:text-[0.68em]">
+                        {slide.subtitle}
+                      </span>
                     </h1>
                   )}
 
@@ -162,7 +195,7 @@ export function HeroSection() {
                       <Skeleton className="h-5 w-5/6 bg-white/20" />
                     </div>
                   ) : (
-                    <p className="mt-4 max-w-xl text-base leading-relaxed text-[#d5cec0]">
+                    <p className="mt-4 min-h-[3.5rem] text-base leading-relaxed text-[#d5cec0] line-clamp-2">
                       {slide.description}
                     </p>
                   )}
@@ -210,14 +243,14 @@ export function HeroSection() {
       <Button
         className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
         type="button"
-        onClick={() => carouselApi?.scrollPrev()}
+        onClick={goToPreviousSlide}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Button
         className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
         type="button"
-        onClick={() => carouselApi?.scrollNext()}
+        onClick={goToNextSlide}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>
@@ -237,7 +270,7 @@ export function HeroSection() {
                   ? 'w-8 bg-white shadow-[0_0_12px_rgba(255,255,255,0.4)]'
                   : 'w-1.5 bg-white/40 hover:bg-white/60'
               }`}
-              onClick={() => carouselApi?.scrollTo(index)}
+              onClick={() => goToSlide(index)}
             />
           );
         })}
