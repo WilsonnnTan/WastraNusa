@@ -5,10 +5,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/repositories/order.repository');
 
-const mockRepo = vi.mocked(orderRepository);
+const mockRepo = vi.mocked(orderRepository, true);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Set default mock implementations for all repository methods
+  mockRepo.findExpiredPendingOrders.mockResolvedValue([] as never);
+  mockRepo.findOrdersByUserId.mockResolvedValue([] as never);
+  mockRepo.countOrdersByUserId.mockResolvedValue(0);
+  mockRepo.findOrderDetailByIdentifier.mockResolvedValue(null as never);
+  mockRepo.findOrderForCancellationById.mockResolvedValue(null as never);
+  mockRepo.cancelOrderAndRestoreStock.mockResolvedValue(undefined as never);
+  mockRepo.findOrdersForAdmin.mockResolvedValue([] as never);
+  mockRepo.countOrdersForAdmin.mockResolvedValue(0);
+  mockRepo.findProductDetailsForOrder.mockResolvedValue(null as never);
+  mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(null as never);
+  mockRepo.updateOrderForAdmin.mockResolvedValue(null as never);
 });
 
 describe('orderService', { tags: ['backend'] }, () => {
@@ -371,13 +383,9 @@ describe('orderService', { tags: ['backend'] }, () => {
         },
       };
 
-      vi.mocked(orderRepository).findOrdersForAdmin.mockResolvedValue([
-        orderData,
-      ] as never);
-      vi.mocked(orderRepository).countOrdersForAdmin.mockResolvedValue(1);
-      vi.mocked(orderRepository).findProductDetailsForOrder.mockResolvedValue(
-        null,
-      );
+      mockRepo.findOrdersForAdmin.mockResolvedValue([orderData] as never);
+      mockRepo.countOrdersForAdmin.mockResolvedValue(1);
+      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
 
       const result = await orderService.getAdminOrders(1, 10, {
         orderStatus: 'processing',
