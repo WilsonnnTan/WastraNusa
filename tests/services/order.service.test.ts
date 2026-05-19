@@ -5,11 +5,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.unmock('@/services/order.service');
 
-const mockRepo = vi.mocked(orderRepository);
+const mockRepo = vi.mocked(orderRepository, true);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Set default mock implementations for all repository methods
   mockRepo.findExpiredPendingOrders.mockResolvedValue([] as never);
+  mockRepo.findOrdersByUserId.mockResolvedValue([] as never);
+  mockRepo.countOrdersByUserId.mockResolvedValue(0);
+  mockRepo.findOrderDetailByIdentifier.mockResolvedValue(null as never);
+  mockRepo.findOrderForCancellationById.mockResolvedValue(null as never);
+  mockRepo.cancelOrderAndRestoreStock.mockResolvedValue(undefined as never);
+  mockRepo.findOrdersForAdmin.mockResolvedValue([] as never);
+  mockRepo.countOrdersForAdmin.mockResolvedValue(0);
+  mockRepo.findProductDetailsForOrder.mockResolvedValue(null as never);
+  mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(null as never);
+  mockRepo.updateOrderForAdmin.mockResolvedValue(null as never);
 });
 
 describe('orderService', { tags: ['backend'] }, () => {
@@ -33,6 +44,7 @@ describe('orderService', { tags: ['backend'] }, () => {
             name: 'Batik',
             province: 'Solo',
             clothingType: 'batik',
+            imageURL: null,
           },
         },
       ] as never);
@@ -58,6 +70,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.data[0].orderId).toBe('1');
       expect(result.data[0].status).toBe('Menunggu Bayar');
       expect(result.data[0].canCancel).toBe(true);
+      expect(result.data[0].products).toHaveLength(1);
+      expect(result.data[0].products[0].name).toBe('Batik');
       expect(result.data[0].paymentStatusLabel).toBe('Belum Bayar');
 
       expect(result.meta.page).toBe(2);
@@ -106,6 +120,8 @@ describe('orderService', { tags: ['backend'] }, () => {
         totalAmount: 150000,
         productPrice: 120000,
         quantity: 1,
+        productId: 'prod-1',
+        variantId: null,
         courier: 'JNE',
         courierService: 'REG',
         trackingNumber: 'RESI-1',
@@ -117,6 +133,7 @@ describe('orderService', { tags: ['backend'] }, () => {
           name: 'Batik',
           province: 'Solo',
           clothingType: 'batik',
+          imageURL: null,
         },
         shippingAddress: {
           recipientName: 'User',
@@ -153,6 +170,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.paymentStatus).toBe('paid');
       expect(result.paymentStatusLabel).toBe('Lunas');
       expect(result.totals.totalAmount).toContain('Rp');
+      expect(result.products).toHaveLength(1);
+      expect(result.products[0].name).toBe('Batik');
     });
 
     it('should throw ApiError when order not found', async () => {
@@ -335,30 +354,38 @@ describe('orderService', { tags: ['backend'] }, () => {
 
   describe('getAdminOrders', () => {
     it('should return paginated admin order list', async () => {
-      mockRepo.findOrdersForAdmin.mockResolvedValue([
-        {
-          id: 'order-id-1',
-          orderNumber: 'ORD-1',
-          orderStatus: 'processing',
-          paymentStatus: 'paid',
-          trackingNumber: null,
-          quantity: 1,
-          totalAmount: 150000,
-          createdAt: new Date('2025-03-14T00:00:00.000Z'),
-          user: {
-            id: 'user-1',
-            name: 'User',
-            email: 'user@example.com',
-          },
-          product: {
-            id: 'prod-1',
-            name: 'Batik',
-            province: 'Solo',
-            clothingType: 'batik',
-          },
+      const orderData = {
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'processing' as const,
+        paymentStatus: 'paid' as const,
+        trackingNumber: null as string | null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        customerNotes: null,
+        productId: 'prod-1',
+        variantId: null as string | null,
+        productName: 'Batik',
+        variantName: null as string | null,
+        productPrice: 120000,
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
         },
-      ] as never);
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+          imageURL: null,
+        },
+      };
+
+      mockRepo.findOrdersForAdmin.mockResolvedValue([orderData] as never);
       mockRepo.countOrdersForAdmin.mockResolvedValue(1);
+      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
 
       const result = await orderService.getAdminOrders(1, 10, {
         orderStatus: 'processing',
@@ -371,6 +398,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       );
       expect(result.items).toHaveLength(1);
       expect(result.items[0].orderNumber).toBe('ORD-1');
+      expect(result.items[0].products).toHaveLength(1);
+      expect(result.items[0].products[0].name).toBe('Batik');
       expect(result.meta.totalItems).toBe(1);
     });
   });
@@ -386,6 +415,9 @@ describe('orderService', { tags: ['backend'] }, () => {
         quantity: 1,
         totalAmount: 150000,
         createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        customerNotes: null,
+        productId: 'prod-1',
+        variantId: null,
         user: {
           id: 'user-1',
           name: 'User',
@@ -397,16 +429,6 @@ describe('orderService', { tags: ['backend'] }, () => {
           province: 'Solo',
           clothingType: 'batik',
         },
-        shippingAddress: {
-          recipientName: 'User',
-          phone: '0812',
-          province: 'Jawa Tengah',
-          city: 'Solo',
-          district: 'Laweyan',
-          subdistrict: null,
-          postalCode: '57147',
-          fullAddress: 'Jl. Mawar No. 1',
-        },
       };
 
       mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(order as never);
@@ -416,6 +438,7 @@ describe('orderService', { tags: ['backend'] }, () => {
         paymentStatus: 'paid',
         trackingNumber: 'RESI-123',
       } as never);
+      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
 
       const result = await orderService.updateOrderForAdmin('ORD-1', {
         orderStatus: 'shipped',
@@ -432,6 +455,8 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(result.orderStatus).toBe('shipped');
       expect(result.paymentStatus).toBe('paid');
       expect(result.trackingNumber).toBe('RESI-123');
+      expect(result.products).toHaveLength(1);
+      expect(result.products[0].name).toBe('Batik');
     });
 
     it('should throw when payment is not successful', async () => {
@@ -444,6 +469,9 @@ describe('orderService', { tags: ['backend'] }, () => {
         quantity: 1,
         totalAmount: 150000,
         createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        customerNotes: null,
+        productId: 'prod-1',
+        variantId: null,
         user: {
           id: 'user-1',
           name: 'User',
@@ -454,16 +482,6 @@ describe('orderService', { tags: ['backend'] }, () => {
           name: 'Batik',
           province: 'Solo',
           clothingType: 'batik',
-        },
-        shippingAddress: {
-          recipientName: 'User',
-          phone: '0812',
-          province: 'Jawa Tengah',
-          city: 'Solo',
-          district: 'Laweyan',
-          subdistrict: null,
-          postalCode: '57147',
-          fullAddress: 'Jl. Mawar No. 1',
         },
       } as never);
 

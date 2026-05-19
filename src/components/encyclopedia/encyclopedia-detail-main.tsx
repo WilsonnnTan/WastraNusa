@@ -318,20 +318,10 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   {section.title}
                 </h2>
 
-                <div
-                  className={
-                    showVisual
-                      ? 'mt-3 grid gap-5 grid-cols-1 md:grid-cols-[minmax(0,1fr)_240px] lg:grid-cols-[minmax(0,1fr)_280px]'
-                      : 'mt-3'
-                  }
-                >
-                  <p className="text-[15px] leading-8 text-[#465d51]">
-                    {section.content}
-                  </p>
-
+                <div className="mt-3">
                   {showVisual ? (
-                    <Card className="overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)] h-fit">
-                      <div className="relative w-full bg-[#ece1d0] aspect-video sm:aspect-square md:aspect-[3/4]">
+                    <Card className="md:float-right md:ml-5 lg:ml-5 w-full md:w-60 lg:w-72 overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)] mb-5 md:mb-0">
+                      <div className="relative w-full bg-[#ece1d0] aspect-square">
                         {section.imageURL ? (
                           <Image
                             src={section.imageURL}
@@ -372,6 +362,19 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                       </div>
                     </Card>
                   ) : null}
+
+                  <div className="space-y-4">
+                    {section.content.split('\n\n').map((paragraph, i) => (
+                      <p
+                        key={i}
+                        className="text-[15px] leading-8 text-[#465d51]"
+                      >
+                        {paragraph.trim()}
+                      </p>
+                    ))}
+                  </div>
+
+                  <div className="clear-both" />
                 </div>
 
                 {index < article.sections.length - 1 ? (

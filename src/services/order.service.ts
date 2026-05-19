@@ -256,7 +256,7 @@ async function reconcileExpiredOrders(userId?: string) {
   }
 }
 
-function mapAdminOrder(order: {
+async function mapAdminOrder(order: {
   id: string;
   orderNumber: string;
   quantity: number;
@@ -265,6 +265,10 @@ function mapAdminOrder(order: {
   paymentStatus: string;
   trackingNumber: string | null;
   createdAt: Date;
+  customerNotes: string | null;
+  productId: string;
+  variantId: string | null;
+  productPrice: { toNumber(): number } | number | null;
   user: { id: string; name: string; email: string };
   product: {
     id: string;
@@ -285,6 +289,96 @@ function mapAdminOrder(order: {
       ? order.totalAmount
       : order.totalAmount.toNumber();
 
+  // Extract checkout items from customerNotes if available
+  const checkoutItems = parseJsonTag(
+    order.customerNotes,
+    'checkout_items',
+  ) as Array<{
+    productId?: string;
+    quantity?: number;
+    unitPrice?: number;
+    productName?: string;
+    province?: string;
+    clothingType?: string;
+  }> | null;
+
+  // Build products array from checkout items or fallback to single product
+  let products: Array<{
+    id: string;
+    name: string;
+    location: string;
+    category: string;
+    quantity: number;
+    unitPrice: string;
+  }>;
+
+  if (checkoutItems && checkoutItems.length > 0) {
+    const validCheckoutItems = checkoutItems.filter(
+      (item) =>
+        typeof item.productId === 'string' &&
+        item.productId &&
+        typeof item.quantity === 'number' &&
+        item.quantity > 0,
+    );
+
+    // Map each item, filling in missing data from database if needed
+    products = await Promise.all(
+      validCheckoutItems.map(async (item) => {
+        // Use item's unitPrice if available, otherwise use order's productPrice
+        const itemUnitPrice =
+          typeof item.unitPrice === 'number'
+            ? item.unitPrice
+            : typeof order.productPrice === 'number'
+              ? order.productPrice
+              : (order.productPrice?.toNumber() ?? 0);
+
+        // If we have complete data from checkout_items, use it
+        if (item.productName && item.province && item.clothingType) {
+          return {
+            id: item.productId as string,
+            name: item.productName,
+            location: item.province,
+            category: item.clothingType,
+            quantity: item.quantity as number,
+            unitPrice: formatOrderCurrency(itemUnitPrice),
+          };
+        }
+
+        // Otherwise, query database to fill in missing data
+        const dbProduct = await orderRepository.findProductDetailsForOrder(
+          item.productId as string,
+        );
+
+        return {
+          id: item.productId as string,
+          name: dbProduct?.name || item.productName || 'Unknown Product',
+          location: dbProduct?.province || item.province || 'Unknown Location',
+          category:
+            dbProduct?.clothingType || item.clothingType || 'Unknown Category',
+          quantity: item.quantity as number,
+          unitPrice: formatOrderCurrency(itemUnitPrice),
+        };
+      }),
+    );
+  } else {
+    // Fallback to single product from order table
+    const singleProductPrice =
+      typeof order.productPrice === 'number'
+        ? order.productPrice
+        : (order.productPrice?.toNumber() ?? 0);
+
+    products = [
+      {
+        id: order.product.id,
+        name: order.product.name,
+        location: order.product.province,
+        category: order.product.clothingType,
+        quantity: order.quantity,
+        unitPrice: formatOrderCurrency(singleProductPrice),
+      },
+    ];
+  }
+
   return {
     orderId: order.id,
     orderNumber: order.orderNumber,
@@ -293,14 +387,7 @@ function mapAdminOrder(order: {
       name: order.user.name,
       email: order.user.email,
     },
-    product: {
-      id: order.product.id,
-      name: order.product.name,
-      location: order.product.province,
-      category: order.product.clothingType,
-      quantity: order.quantity,
-      imageURL: order.product.imageURL,
-    },
+    products,
     totalAmount,
     totalAmountLabel: formatOrderCurrency(totalAmount),
     orderStatus: effectiveOrderStatus,
@@ -362,34 +449,113 @@ export const orderService = {
 
     const totalPages = Math.ceil(totalItems / limit);
 
-    const formattedOrders = orders.map((order) => {
-      const uiStatus = mapToUiOrderStatus(order);
-      const paymentDeadlineAt =
-        uiStatus === 'Menunggu Bayar' ? getPaymentDeadlineAt(order) : null;
+    const formattedOrders = await Promise.all(
+      orders.map(async (order) => {
+        const uiStatus = mapToUiOrderStatus(order);
+        const paymentDeadlineAt =
+          uiStatus === 'Menunggu Bayar' ? getPaymentDeadlineAt(order) : null;
 
-      return {
-        orderId: order.id,
-        id: order.orderNumber || order.id,
-        date: formatOrderDate(order.createdAt),
-        totalPrice: formatOrderCurrency(Number(order.totalAmount)),
-        status: uiStatus,
-        paymentStatus: order.paymentStatus,
-        paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
-        paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
-        canCancel: canCancelPendingOrder(order),
-        product: {
-          category: order.product.clothingType,
-          name: order.product.name,
-          location: order.product.province,
-          quantity: order.quantity,
-          imageURL: order.product.imageURL,
-        },
-        actions: [
-          'Detail',
-          ...(uiStatus === 'Dikirim' ? ['Lacak Pesanan'] : []),
-        ] as ('Lacak Pesanan' | 'Detail')[],
-      };
-    });
+        // Extract checkout_items to get all products
+        const checkoutItems = parseJsonTag(
+          order.customerNotes,
+          'checkout_items',
+        ) as Array<{
+          productId?: string;
+          quantity?: number;
+          productName?: string;
+          province?: string;
+          clothingType?: string;
+          imageURL?: string | null;
+        }> | null;
+
+        let products;
+        if (checkoutItems && checkoutItems.length > 1) {
+          // Multiple items - build from checkout_items with enrichment
+          products = [];
+          for (const item of checkoutItems) {
+            if (
+              !(
+                typeof item.productId === 'string' &&
+                item.productId &&
+                typeof item.quantity === 'number' &&
+                item.quantity > 0
+              )
+            ) {
+              continue;
+            }
+
+            // Check if item has complete metadata
+            const hasCompleteMetadata =
+              item.productName &&
+              item.province &&
+              item.clothingType &&
+              item.imageURL;
+
+            let product = {
+              category: item.clothingType || order.product.clothingType,
+              name: item.productName || 'Unknown Product',
+              location: item.province || order.product.province,
+              quantity: item.quantity as number,
+              imageURL: item.imageURL || null,
+            };
+
+            // If metadata is incomplete, enrich from database
+            if (!hasCompleteMetadata) {
+              const productDetail =
+                await orderRepository.findProductDetailsForOrder(
+                  item.productId,
+                );
+              if (productDetail) {
+                product = {
+                  category: item.clothingType || productDetail.clothingType,
+                  name: item.productName || productDetail.name,
+                  location: item.province || productDetail.province,
+                  quantity: item.quantity as number,
+                  imageURL:
+                    item.imageURL ||
+                    (
+                      productDetail as typeof productDetail & {
+                        imageURL?: string | null;
+                      }
+                    ).imageURL ||
+                    null,
+                };
+              }
+            }
+
+            products.push(product);
+          }
+        } else {
+          // Single item - use primary product
+          products = [
+            {
+              category: order.product.clothingType,
+              name: order.product.name,
+              location: order.product.province,
+              quantity: order.quantity,
+              imageURL: order.product.imageURL,
+            },
+          ];
+        }
+
+        return {
+          orderId: order.id,
+          id: order.orderNumber || order.id,
+          date: formatOrderDate(order.createdAt),
+          totalPrice: formatOrderCurrency(Number(order.totalAmount)),
+          status: uiStatus,
+          paymentStatus: order.paymentStatus,
+          paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
+          paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
+          canCancel: canCancelPendingOrder(order),
+          products,
+          actions: [
+            'Detail',
+            ...(uiStatus === 'Dikirim' ? ['Lacak Pesanan'] : []),
+          ] as ('Lacak Pesanan' | 'Detail')[],
+        };
+      }),
+    );
 
     return {
       data: formattedOrders,
@@ -421,6 +587,100 @@ export const orderService = {
         ? getPaymentDeadlineAt(order)
         : null;
 
+    // Extract checkout_items to get all products
+    const checkoutItems = parseJsonTag(
+      order.customerNotes,
+      'checkout_items',
+    ) as Array<{
+      productId?: string;
+      quantity?: number;
+      unitPrice?: number;
+      productName?: string;
+      province?: string;
+      clothingType?: string;
+      imageURL?: string | null;
+    }> | null;
+
+    let products;
+    if (checkoutItems && checkoutItems.length > 1) {
+      // Multiple items - build from checkout_items with enrichment
+      products = [];
+      for (const item of checkoutItems) {
+        if (
+          !(
+            typeof item.productId === 'string' &&
+            item.productId &&
+            typeof item.quantity === 'number' &&
+            item.quantity > 0
+          )
+        ) {
+          continue;
+        }
+
+        // Check if item has complete metadata
+        const hasCompleteMetadata =
+          item.productName &&
+          item.province &&
+          item.clothingType &&
+          item.imageURL;
+
+        // Use item's unitPrice if available, otherwise use order's productPrice
+        const itemUnitPrice =
+          typeof item.unitPrice === 'number'
+            ? item.unitPrice
+            : Number(order.productPrice);
+
+        let product = {
+          id: item.productId,
+          name: item.productName || 'Unknown Product',
+          category: item.clothingType || order.product.clothingType,
+          location: item.province || order.product.province,
+          quantity: item.quantity as number,
+          unitPrice: formatOrderCurrency(itemUnitPrice),
+          imageURL: item.imageURL || null,
+        };
+
+        // If metadata is incomplete, enrich from database
+        if (!hasCompleteMetadata) {
+          const productDetail =
+            await orderRepository.findProductDetailsForOrder(item.productId);
+          if (productDetail) {
+            product = {
+              id: item.productId,
+              name: item.productName || productDetail.name,
+              category: item.clothingType || productDetail.clothingType,
+              location: item.province || productDetail.province,
+              quantity: item.quantity as number,
+              unitPrice: formatOrderCurrency(itemUnitPrice),
+              imageURL:
+                item.imageURL ||
+                (
+                  productDetail as typeof productDetail & {
+                    imageURL?: string | null;
+                  }
+                ).imageURL ||
+                null,
+            };
+          }
+        }
+
+        products.push(product);
+      }
+    } else {
+      // Single item - use primary product
+      products = [
+        {
+          id: order.product.id,
+          name: order.product.name,
+          category: order.product.clothingType,
+          location: order.product.province,
+          quantity: order.quantity,
+          unitPrice: formatOrderCurrency(Number(order.productPrice)),
+          imageURL: order.product.imageURL,
+        },
+      ];
+    }
+
     return {
       orderId: order.id,
       orderNumber: order.orderNumber,
@@ -436,15 +696,7 @@ export const orderService = {
         shippingCost: formatOrderCurrency(Number(order.shippingCost)),
         totalAmount: formatOrderCurrency(Number(order.totalAmount)),
       },
-      product: {
-        id: order.product.id,
-        name: order.product.name,
-        category: order.product.clothingType,
-        location: order.product.province,
-        quantity: order.quantity,
-        unitPrice: formatOrderCurrency(Number(order.productPrice)),
-        imageURL: order.product.imageURL,
-      },
+      products,
       shipping: {
         courier: order.courier,
         courierService: order.courierService,
@@ -538,8 +790,10 @@ export const orderService = {
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
 
+    const mappedItems = await Promise.all(orders.map(mapAdminOrder));
+
     return {
-      items: orders.map(mapAdminOrder),
+      items: mappedItems,
       meta: {
         page: safePage,
         limit: safeLimit,
@@ -613,6 +867,6 @@ export const orderService = {
       nextData,
     );
 
-    return mapAdminOrder(updated);
+    return await mapAdminOrder(updated);
   },
 };

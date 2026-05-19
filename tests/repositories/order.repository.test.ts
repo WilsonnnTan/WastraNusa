@@ -109,7 +109,17 @@ describe('orderRepository', { tags: ['db'] }, () => {
         where: { userId, orderStatus: 'pending' },
         skip: 10,
         take: 5,
-        include: {
+        select: {
+          id: true,
+          orderNumber: true,
+          createdAt: true,
+          totalAmount: true,
+          orderStatus: true,
+          paymentStatus: true,
+          quantity: true,
+          productId: true,
+          variantId: true,
+          customerNotes: true,
           product: {
             select: {
               name: true,
@@ -148,7 +158,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
           userId,
           OR: [{ id: 'ORD-1' }, { orderNumber: 'ORD-1' }],
         },
-        include: {
+        select: {
           product: {
             select: {
               id: true,
@@ -184,6 +194,24 @@ describe('orderRepository', { tags: ['db'] }, () => {
               createdAt: true,
             },
           },
+          id: true,
+          orderNumber: true,
+          createdAt: true,
+          totalAmount: true,
+          subtotal: true,
+          shippingCost: true,
+          orderStatus: true,
+          paymentStatus: true,
+          paymentMethod: true,
+          quantity: true,
+          productId: true,
+          variantId: true,
+          productPrice: true,
+          courier: true,
+          courierService: true,
+          trackingNumber: true,
+          estimatedDelivery: true,
+          customerNotes: true,
         },
       });
 
@@ -455,7 +483,21 @@ describe('orderRepository', { tags: ['db'] }, () => {
         where: { orderStatus: 'processing' },
         skip: 5,
         take: 10,
-        include: {
+        select: {
+          id: true,
+          orderNumber: true,
+          quantity: true,
+          totalAmount: true,
+          orderStatus: true,
+          paymentStatus: true,
+          trackingNumber: true,
+          createdAt: true,
+          customerNotes: true,
+          productId: true,
+          variantId: true,
+          productPrice: true,
+          productName: true,
+          variantName: true,
           user: {
             select: {
               id: true,
@@ -507,7 +549,21 @@ describe('orderRepository', { tags: ['db'] }, () => {
         where: {
           OR: [{ id: 'ORD-1' }, { orderNumber: 'ORD-1' }],
         },
-        include: {
+        select: {
+          id: true,
+          orderNumber: true,
+          quantity: true,
+          totalAmount: true,
+          orderStatus: true,
+          paymentStatus: true,
+          trackingNumber: true,
+          createdAt: true,
+          customerNotes: true,
+          productId: true,
+          variantId: true,
+          productPrice: true,
+          productName: true,
+          variantName: true,
           user: {
             select: {
               id: true,
@@ -574,7 +630,19 @@ describe('orderRepository', { tags: ['db'] }, () => {
           orderStatus: 'shipped',
           trackingNumber: 'RESI-123',
         },
-        include: {
+        select: {
+          id: true,
+          orderNumber: true,
+          quantity: true,
+          totalAmount: true,
+          orderStatus: true,
+          paymentStatus: true,
+          trackingNumber: true,
+          createdAt: true,
+          customerNotes: true,
+          productId: true,
+          variantId: true,
+          productPrice: true,
           user: {
             select: {
               id: true,
@@ -589,18 +657,6 @@ describe('orderRepository', { tags: ['db'] }, () => {
               province: true,
               clothingType: true,
               imageURL: true,
-            },
-          },
-          shippingAddress: {
-            select: {
-              recipientName: true,
-              phone: true,
-              province: true,
-              city: true,
-              district: true,
-              subdistrict: true,
-              postalCode: true,
-              fullAddress: true,
             },
           },
         },

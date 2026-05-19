@@ -25,6 +25,9 @@ interface CheckoutResolvedItem {
   productName: string;
   variantName: string | null;
   unitPrice: number;
+  province: string;
+  clothingType: string;
+  imageURL: string | null;
 }
 
 function sumVariantStock(
@@ -278,6 +281,9 @@ export const paymentService = {
         productName: product.name,
         variantName,
         unitPrice,
+        province: product.province,
+        clothingType: product.clothingType,
+        imageURL: product.imageURL,
       });
     }
 
@@ -308,6 +314,10 @@ export const paymentService = {
       variantId: item.variantId,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
+      productName: item.productName,
+      province: item.province,
+      clothingType: item.clothingType,
+      imageURL: item.imageURL,
     }));
     const checkoutCartItemIds = Array.from(
       new Set(itemSnapshot.flatMap((item) => item.cartItemIds)),

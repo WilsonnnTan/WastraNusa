@@ -121,92 +121,99 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
             </div>
           </div>
 
-          <div className="group flex items-center gap-4 rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4 transition-all">
-            <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
-              {order.product.imageURL ? (
-                <Image
-                  src={order.product.imageURL}
-                  alt={order.product.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <>
-                  <Hexagon
-                    size={24}
-                    strokeWidth={1.5}
-                    className="text-[#c4b9a3]"
-                  />
-                  <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
-                    {order.product.category.substring(0, 4)}
-                  </span>
-                </>
-              )}
-            </div>
+          <div className="flex flex-col gap-2">
+            {order.products.map((product, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-4 rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4"
+              >
+                <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
+                  {product.imageURL ? (
+                    <Image
+                      src={product.imageURL}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <>
+                      <Hexagon
+                        size={24}
+                        strokeWidth={1.5}
+                        className="text-[#c4b9a3]"
+                      />
+                      <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
+                        {product.category.substring(0, 4)}
+                      </span>
+                    </>
+                  )}
+                </div>
 
-            <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-              <div className="flex flex-wrap gap-1.5 mb-0.5">
-                <Badge
-                  variant="secondary"
-                  className="rounded border-none bg-[#f4efe6] px-2 py-0 text-[10px] font-medium text-[#c4826b] hover:bg-[#f4efe6]"
-                >
-                  {order.product.category}
-                </Badge>
+                <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+                  <div className="flex flex-wrap gap-1.5 mb-0.5">
+                    <Badge
+                      variant="secondary"
+                      className="rounded border-none bg-[#f4efe6] px-2 py-0 text-[10px] font-medium text-[#c4826b] hover:bg-[#f4efe6]"
+                    >
+                      {product.category}
+                    </Badge>
+                  </div>
+                  <h3 className="w-full truncate text-[15px] font-bold leading-none text-[#4d6356]">
+                    {product.name}
+                  </h3>
+                  <p className="text-[12px] leading-relaxed text-[#8f9b94] mt-0.5">
+                    {product.location} • {product.quantity} produk
+                  </p>
+                </div>
               </div>
-              <h3 className="w-full truncate text-[15px] font-bold leading-none text-[#4d6356]">
-                {order.product.name}
-              </h3>
-              <p className="text-[12px] leading-relaxed text-[#8f9b94] mt-0.5">
-                {order.product.location} • {order.product.quantity} produk
-              </p>
-            </div>
+            ))}
+          </div>
 
-            <div className="flex items-center gap-2">
-              {order.canCancel && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 rounded-lg border-[#d8b5a7] text-[#b56d56] hover:bg-[#fdf6f2] hover:text-[#9d5a46] text-xs font-semibold px-4"
-                  disabled={cancelOrderMutation.isPending}
-                  onClick={() => {
-                    cancelOrderMutation.mutate(order.id, {
-                      onSuccess: () => {
-                        toast.success('Pesanan berhasil dibatalkan.');
-                      },
-                      onError: (error) => {
-                        toast.error(error.message);
-                      },
-                    });
-                  }}
+          <div className="flex items-center gap-2">
+            {order.canCancel && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-lg border-[#d8b5a7] text-[#b56d56] hover:bg-[#fdf6f2] hover:text-[#9d5a46] text-xs font-semibold px-4"
+                disabled={cancelOrderMutation.isPending}
+                onClick={() => {
+                  cancelOrderMutation.mutate(order.id, {
+                    onSuccess: () => {
+                      toast.success('Pesanan berhasil dibatalkan.');
+                    },
+                    onError: (error) => {
+                      toast.error(error.message);
+                    },
+                  });
+                }}
+              >
+                Batalkan
+              </Button>
+            )}
+            {order.actions.includes('Lacak Pesanan') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-lg border-[#c4826b] text-[#c4826b] hover:bg-[#fdf6f2] hover:text-[#a06651] text-xs font-semibold px-4"
+              >
+                Lacak Pesanan
+              </Button>
+            )}
+            {order.actions.includes('Detail') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 rounded-lg border-[#ece7dd] text-[#726759] text-xs font-semibold px-4"
+                asChild
+              >
+                <Link
+                  href={`/profile/my-order/${encodeURIComponent(order.id)}`}
                 >
-                  Batalkan
-                </Button>
-              )}
-              {order.actions.includes('Lacak Pesanan') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 rounded-lg border-[#c4826b] text-[#c4826b] hover:bg-[#fdf6f2] hover:text-[#a06651] text-xs font-semibold px-4"
-                >
-                  Lacak Pesanan
-                </Button>
-              )}
-              {order.actions.includes('Detail') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 gap-1.5 rounded-lg border-[#ece7dd] text-[#726759] text-xs font-semibold px-4"
-                  asChild
-                >
-                  <Link
-                    href={`/profile/my-order/${encodeURIComponent(order.id)}`}
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                    Detail
-                  </Link>
-                </Button>
-              )}
-            </div>
+                  <Eye className="h-3.5 w-3.5" />
+                  Detail
+                </Link>
+              </Button>
+            )}
           </div>
 
           {order.paymentDeadlineAt && order.status === 'Menunggu Bayar' && (
