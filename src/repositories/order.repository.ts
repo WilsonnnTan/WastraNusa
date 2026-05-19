@@ -59,7 +59,27 @@ export const orderRepository = {
         userId,
         OR: [{ id: identifier }, { orderNumber: identifier }],
       },
-      include: userOrderRelations,
+      select: {
+        ...userOrderRelations,
+        id: true,
+        orderNumber: true,
+        createdAt: true,
+        totalAmount: true,
+        subtotal: true,
+        shippingCost: true,
+        orderStatus: true,
+        paymentStatus: true,
+        paymentMethod: true,
+        quantity: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
+        courier: true,
+        courierService: true,
+        trackingNumber: true,
+        estimatedDelivery: true,
+        customerNotes: true,
+      },
     });
   },
 
@@ -118,7 +138,17 @@ export const orderRepository = {
       where: { userId, ...filters },
       skip,
       take,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        createdAt: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        quantity: true,
+        productId: true,
+        variantId: true,
+        customerNotes: true,
         product: {
           select: {
             name: true,
@@ -246,7 +276,21 @@ export const orderRepository = {
       where: filters,
       skip,
       take,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        quantity: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        trackingNumber: true,
+        createdAt: true,
+        customerNotes: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
+        productName: true,
+        variantName: true,
         user: {
           select: {
             id: true,
@@ -281,7 +325,21 @@ export const orderRepository = {
       where: {
         OR: [{ id: identifier }, { orderNumber: identifier }],
       },
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        quantity: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        trackingNumber: true,
+        createdAt: true,
+        customerNotes: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
+        productName: true,
+        variantName: true,
         user: {
           select: {
             id: true,
@@ -332,7 +390,19 @@ export const orderRepository = {
         id: order?.id ?? identifier,
       },
       data,
-      include: {
+      select: {
+        id: true,
+        orderNumber: true,
+        quantity: true,
+        totalAmount: true,
+        orderStatus: true,
+        paymentStatus: true,
+        trackingNumber: true,
+        createdAt: true,
+        customerNotes: true,
+        productId: true,
+        variantId: true,
+        productPrice: true,
         user: {
           select: {
             id: true,
@@ -349,18 +419,19 @@ export const orderRepository = {
             imageURL: true,
           },
         },
-        shippingAddress: {
-          select: {
-            recipientName: true,
-            phone: true,
-            province: true,
-            city: true,
-            district: true,
-            subdistrict: true,
-            postalCode: true,
-            fullAddress: true,
-          },
-        },
+      },
+    });
+  },
+
+  findProductDetailsForOrder: async (productId: string) => {
+    return prisma.product.findFirst({
+      where: { id: productId },
+      select: {
+        id: true,
+        name: true,
+        province: true,
+        clothingType: true,
+        imageURL: true,
       },
     });
   },
