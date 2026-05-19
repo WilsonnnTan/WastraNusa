@@ -3,7 +3,7 @@ import { orderRepository } from '@/repositories/order.repository';
 import { orderService } from '@/services/order.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/repositories/order.repository');
+vi.unmock('@/services/order.service');
 
 const mockRepo = vi.mocked(orderRepository, true);
 

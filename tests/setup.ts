@@ -84,6 +84,7 @@ vi.mock('@/repositories/order.repository', () => ({
     countOrdersForAdmin: vi.fn(),
     findOrderForAdminByIdentifier: vi.fn(),
     updateOrderForAdmin: vi.fn(),
+    findProductDetailsForOrder: vi.fn(),
   },
 }));
 
