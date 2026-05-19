@@ -2,6 +2,7 @@
 
 import {
   EncyclopediaArticleCard,
+  EncyclopediaArticleListCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
   EncyclopediaSearchResults,
@@ -16,9 +17,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
 import type { Stat } from '@/types/encyclopedia';
+import { Grid3x3, Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -122,6 +125,7 @@ export function EncyclopediaMain({
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIsland, setSelectedIsland] = useState(initialIsland);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
@@ -238,7 +242,7 @@ export function EncyclopediaMain({
             <h1 className="mt-2 text-3xl font-medium tracking-tight text-[#2f5b49]">
               Ensiklopedia Budaya Wastra
             </h1>
-            <p className="mt-3 max-w-2xl text-medium leading-relaxed text-[#4d6759]">
+            <p className="mt-3 text-sm max-w-2xl text-medium leading-relaxed text-[#4d6759]">
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>
@@ -269,6 +273,7 @@ export function EncyclopediaMain({
               <EncyclopediaSidebar
                 islands={islands}
                 topics={topics}
+                selectedIsland={selectedIsland}
                 selectedTopic={selectedTopic}
                 onIslandClick={handleIslandClick}
                 onTopicClick={handleTopicClick}
@@ -280,9 +285,40 @@ export function EncyclopediaMain({
               {showLoadingSkeleton ? (
                 <Skeleton className="mb-3 h-5 w-44 bg-[#e6dfd1]" />
               ) : (
-                <p className="mb-3 text-sm font-semibold text-[#4e6659]">
-                  Menampilkan {data?.meta.totalItems ?? articles.length} artikel
-                </p>
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-[#4e6659]">
+                    Menampilkan {data?.meta.totalItems ?? articles.length}{' '}
+                    artikel
+                  </p>
+                  <div className="flex gap-2 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 w-8 p-0 transition ${
+                        viewMode === 'grid'
+                          ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                          : 'text-[#4c6457] hover:bg-[#ece5d8]'
+                      }`}
+                      onClick={() => setViewMode('grid')}
+                      title="Grid view"
+                    >
+                      <Grid3x3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 w-8 p-0  transition ${
+                        viewMode === 'list'
+                          ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                          : 'text-[#4c6457] hover:bg-[#ece5d8]'
+                      }`}
+                      onClick={() => setViewMode('list')}
+                      title="List view"
+                    >
+                      <Menu className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               )}
 
               {isPending && !showLoadingSkeleton ? (
@@ -302,22 +338,37 @@ export function EncyclopediaMain({
               {!isPending && !error && featuredArticle ? (
                 <EncyclopediaFeaturedCard
                   article={featuredArticle}
+                  viewMode={viewMode}
                   onReadMore={handleArticleClick}
                 />
               ) : null}
 
               {showLoadingSkeleton ? <EncyclopediaArticleGridSkeleton /> : null}
 
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div
+                className={`mt-4 ${
+                  viewMode === 'grid'
+                    ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3'
+                    : 'space-y-3'
+                }`}
+              >
                 {!isPending &&
                   !error &&
-                  standardArticles.map((article) => (
-                    <EncyclopediaArticleCard
-                      key={article.slug}
-                      article={article}
-                      onClick={handleArticleClick}
-                    />
-                  ))}
+                  standardArticles.map((article) =>
+                    viewMode === 'list' ? (
+                      <EncyclopediaArticleListCard
+                        key={article.slug}
+                        article={article}
+                        onClick={handleArticleClick}
+                      />
+                    ) : (
+                      <EncyclopediaArticleCard
+                        key={article.slug}
+                        article={article}
+                        onClick={handleArticleClick}
+                      />
+                    ),
+                  )}
 
                 {!isPending &&
                   !error &&
