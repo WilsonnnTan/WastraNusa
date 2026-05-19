@@ -9,7 +9,18 @@ const mockRepo = vi.mocked(orderRepository);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockRepo.findExpiredPendingOrders.mockResolvedValue([] as never);
+  // Initialize all mocks explicitly to ensure spy operations work
+  vi.spyOn(mockRepo, 'findExpiredPendingOrders').mockResolvedValue([] as never);
+  vi.spyOn(mockRepo, 'findOrdersByUserId').mockResolvedValue([] as never);
+  vi.spyOn(mockRepo, 'countOrdersByUserId').mockResolvedValue(0);
+  vi.spyOn(mockRepo, 'findOrderDetailByIdentifier').mockResolvedValue(
+    null as never,
+  );
+  vi.spyOn(mockRepo, 'findOrdersForAdmin').mockResolvedValue([] as never);
+  vi.spyOn(mockRepo, 'countOrdersForAdmin').mockResolvedValue(0);
+  vi.spyOn(mockRepo, 'findProductDetailsForOrder').mockResolvedValue(
+    null as never,
+  );
 });
 
 describe('orderService', { tags: ['backend'] }, () => {
