@@ -343,34 +343,40 @@ describe('orderService', { tags: ['backend'] }, () => {
 
   describe('getAdminOrders', () => {
     it('should return paginated admin order list', async () => {
-      mockRepo.findOrdersForAdmin.mockResolvedValue([
-        {
-          id: 'order-id-1',
-          orderNumber: 'ORD-1',
-          orderStatus: 'processing',
-          paymentStatus: 'paid',
-          trackingNumber: null,
-          quantity: 1,
-          totalAmount: 150000,
-          createdAt: new Date('2025-03-14T00:00:00.000Z'),
-          customerNotes: null,
-          productId: 'prod-1',
-          variantId: null,
-          user: {
-            id: 'user-1',
-            name: 'User',
-            email: 'user@example.com',
-          },
-          product: {
-            id: 'prod-1',
-            name: 'Batik',
-            province: 'Solo',
-            clothingType: 'batik',
-          },
+      const orderData = {
+        id: 'order-id-1',
+        orderNumber: 'ORD-1',
+        orderStatus: 'processing' as const,
+        paymentStatus: 'paid' as const,
+        trackingNumber: null as string | null,
+        quantity: 1,
+        totalAmount: 150000,
+        createdAt: new Date('2025-03-14T00:00:00.000Z'),
+        customerNotes: null,
+        productId: 'prod-1',
+        variantId: null as string | null,
+        productName: 'Batik',
+        variantName: null as string | null,
+        productPrice: 120000,
+        user: {
+          id: 'user-1',
+          name: 'User',
+          email: 'user@example.com',
         },
+        product: {
+          id: 'prod-1',
+          name: 'Batik',
+          province: 'Solo',
+          clothingType: 'batik',
+          imageURL: null,
+        },
+      };
+
+      vi.spyOn(mockRepo, 'findOrdersForAdmin').mockResolvedValue([
+        orderData,
       ] as never);
-      mockRepo.countOrdersForAdmin.mockResolvedValue(1);
-      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
+      vi.spyOn(mockRepo, 'countOrdersForAdmin').mockResolvedValue(1);
+      vi.spyOn(mockRepo, 'findProductDetailsForOrder').mockResolvedValue(null);
 
       const result = await orderService.getAdminOrders(1, 10, {
         orderStatus: 'processing',
