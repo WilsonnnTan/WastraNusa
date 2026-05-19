@@ -52,6 +52,7 @@ export interface ProductCatalogFilters {
   status?: ProductStatus;
   inStock?: boolean;
   sortBy?: ProductCatalogSortBy;
+  topic?: string;
 }
 
 export interface ProductFilterOption {
