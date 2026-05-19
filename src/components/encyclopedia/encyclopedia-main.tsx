@@ -235,10 +235,10 @@ export function EncyclopediaMain({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight text-[#2f5b49]">
+            <h1 className="mt-2 text-3xl font-medium tracking-tight text-[#2f5b49]">
               Ensiklopedia Budaya Wastra
             </h1>
-            <p className="mt-3 max-w-2xl text-lg leading-relaxed text-[#4d6759]">
+            <p className="mt-3 max-w-2xl text-medium leading-relaxed text-[#4d6759]">
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>

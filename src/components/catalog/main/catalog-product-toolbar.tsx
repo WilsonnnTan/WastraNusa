@@ -43,7 +43,7 @@ export function CatalogProductToolbar({
           ))}
         </div>
         <p className="text-sm text-[#607569]">
-          {productCount} produk ditemukan
+          {productCount} Produk Ditemukan
         </p>
       </div>
     </Card>
