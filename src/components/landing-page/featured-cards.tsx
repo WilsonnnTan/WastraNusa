@@ -43,7 +43,7 @@ export function FeaturedCards() {
               key={`featured-skeleton-${index}`}
               className="overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#5a453a] shadow-sm"
             >
-              <div className="relative min-h-[200px] p-4">
+              <div className="relative min-h-[215px] p-4">
                 <Skeleton className="absolute inset-0 h-full w-full bg-white/10" />
                 <div className="relative z-10 mt-auto flex min-h-[168px] flex-col justify-end">
                   <Skeleton className="mb-3 h-6 w-24 rounded-full bg-white/20" />
@@ -81,7 +81,7 @@ export function FeaturedCards() {
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,rgba(249,229,193,.28)_0%,rgba(0,0,0,0)_36%)]" />
 
-                <div className="relative flex min-h-[200px] items-end p-4">
+                <div className="relative flex min-h-[225px] items-end p-4">
                   <div>
                     <Badge className="mb-3 rounded-md bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm">
                       {article.topic}

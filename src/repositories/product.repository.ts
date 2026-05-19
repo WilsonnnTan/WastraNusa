@@ -32,6 +32,7 @@ function buildProductWhereInput(
     gender,
     status,
     inStock,
+    topic,
   } = filters;
 
   const andConditions: Prisma.ProductWhereInput[] = [];
@@ -65,6 +66,14 @@ function buildProductWhereInput(
             },
           },
     );
+  }
+
+  if (topic) {
+    andConditions.push({
+      article: {
+        topic,
+      },
+    });
   }
 
   const where: Prisma.ProductWhereInput = {
@@ -400,5 +409,24 @@ export const productRepository = {
         id: productId ?? idOrSlug,
       },
     });
+  },
+
+  getDistinctClothingTypes: async () => {
+    const result = await prisma.product.findMany({
+      distinct: ['clothingType'],
+      select: {
+        clothingType: true,
+      },
+      where: {
+        status: 'active',
+      },
+      orderBy: {
+        clothingType: 'asc',
+      },
+    });
+
+    return result
+      .map((item) => item.clothingType)
+      .filter((type): type is string => type !== null);
   },
 };
