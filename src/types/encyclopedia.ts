@@ -61,6 +61,7 @@ export interface EncyclopediaRelatedProduct {
   name: string;
   location: string;
   price: string;
+  imageURL?: string | null;
 }
 
 export interface EncyclopediaArticleDetail extends EncyclopediaArticle {

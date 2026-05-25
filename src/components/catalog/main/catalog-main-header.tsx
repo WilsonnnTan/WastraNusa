@@ -36,11 +36,11 @@ export function CatalogMainHeader({
 
       <div className="mt-3">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-[#2f5b49]">
-            Catalog Produk Wastra
+          <h1 className="text-3xl font-medium tracking-tight text-[#2f5b49]">
+            Katalog Produk Wastra
           </h1>
-          <p className="mt-1 text-[#4f6458]">
-            {totalProducts} produk autentik dari {totalIslands} pulau
+          <p className="mt-1 font-semibold text-[#4f6458]">
+            {totalProducts} Produk Autentik dari {totalIslands} pulau
           </p>
         </div>
       </div>

@@ -2,11 +2,15 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { IslandFilter } from '@/types/encyclopedia';
-import { Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+const MAX_VISIBLE_ISLANDS = 9;
 
 interface EncyclopediaSidebarProps {
   islands: IslandFilter[];
   topics: string[];
+  selectedIsland?: string;
   selectedTopic?: string;
   onIslandClick?: (island: string) => void;
   onTopicClick?: (topic: string) => void;
@@ -16,11 +20,30 @@ interface EncyclopediaSidebarProps {
 export function EncyclopediaSidebar({
   islands,
   topics,
+  selectedIsland,
   selectedTopic,
   onIslandClick,
   onTopicClick,
   onResetFilters,
 }: EncyclopediaSidebarProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const hasMoreIslands = islands.length > MAX_VISIBLE_ISLANDS;
+  const activeIslandIsHidden = useMemo(() => {
+    if (!selectedIsland) {
+      return false;
+    }
+
+    return islands
+      .slice(MAX_VISIBLE_ISLANDS)
+      .some((island) => island.name === selectedIsland);
+  }, [islands, selectedIsland]);
+
+  const shouldShowAllIslands = isExpanded || activeIslandIsHidden;
+  const visibleIslands = shouldShowAllIslands
+    ? islands
+    : islands.slice(0, MAX_VISIBLE_ISLANDS);
+
   return (
     <aside className="space-y-3">
       {/* Region Filters */}
@@ -30,7 +53,7 @@ export function EncyclopediaSidebar({
           Filter Pulau
         </h2>
         <ul className="space-y-1.5">
-          {islands.map((island) => (
+          {visibleIslands.map((island) => (
             <li key={island.name}>
               <Button
                 variant="ghost"
@@ -56,6 +79,26 @@ export function EncyclopediaSidebar({
             </li>
           ))}
         </ul>
+
+        {hasMoreIslands ? (
+          <Button
+            variant="ghost"
+            className="mt-2 h-auto w-full justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62] transition hover:bg-[#ece5d8] hover:text-[#5d6f62] aria-expanded:bg-transparent aria-expanded:text-[#5d6f62] aria-expanded:hover:bg-[#ece5d8] aria-expanded:hover:text-[#5d6f62]"
+            onClick={() => setIsExpanded((value) => !value)}
+            aria-expanded={shouldShowAllIslands}
+          >
+            <span>
+              {shouldShowAllIslands
+                ? 'Sembunyikan lainnya'
+                : 'Tampilkan lainnya'}
+            </span>
+            {shouldShowAllIslands ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        ) : null}
       </Card>
 
       {/* Topics */}
