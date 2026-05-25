@@ -210,7 +210,8 @@ export function HeroSection() {
                       <>
                         <Button
                           asChild
-                          className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#e4dccb]"
+                          variant="outline"
+                          className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#2d5f48] hover:text-white hover:border-[#2d5f48]"
                         >
                           <Link href={`/encyclopedia/${slide.slug}`}>
                             Baca Artikel

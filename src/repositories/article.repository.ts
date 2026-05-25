@@ -153,6 +153,7 @@ export const articleRepository = {
             province: true,
             island: true,
             price: true,
+            imageURL: true,
           },
           orderBy: { createdAt: 'desc' },
         },

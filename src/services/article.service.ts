@@ -187,6 +187,7 @@ export const articleService = {
         name: product.name,
         location: [product.province, product.island].filter(Boolean).join(', '),
         price: formatRupiah(Number(product.price)),
+        ...(product.imageURL ? { imageURL: product.imageURL } : {}),
       })),
       discussionCount: 0,
       nextArticle: {

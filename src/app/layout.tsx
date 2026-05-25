@@ -22,7 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${plusJakartaSans.className} antialiased`}>
+      <body
+        className={`${plusJakartaSans.className} antialiased`}
+        suppressHydrationWarning
+      >
         <QueryProvider>
           {children}
           <Toaster />

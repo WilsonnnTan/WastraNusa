@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+// Separator removed: sections now use border-top for separation
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail, useToggleArticleLike } from '@/hooks/use-article';
 import { authClient } from '@/lib/auth/auth-client';
@@ -304,7 +304,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
             </p>
           )}
 
-          {article.sections.map((section, index) => {
+          {article.sections.map((section) => {
             const showVisual = Boolean(
               section.imageURL || section.imageCaption || section.imageLabel,
             );
@@ -313,8 +313,11 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               section.imageCaption ?? `Visual ${visualLabel} dari artikel.`;
 
             return (
-              <section key={section.title} className="mt-9">
-                <h2 className="text-4xl font-bold tracking-tight text-[#2f5b49]">
+              <section
+                key={section.title}
+                className="mt-9 border-t border-[#e6ddd0] pt-6"
+              >
+                <h2 className="text-2xl font-semibold tracking-tight text-[#2f5b49] pl-4 border-l-4 border-[#d7e6db]">
                   {section.title}
                 </h2>
 
@@ -377,9 +380,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   <div className="clear-both" />
                 </div>
 
-                {index < article.sections.length - 1 ? (
-                  <Separator className="mt-7 bg-[#ddd4c4]" />
-                ) : null}
+                {/* border-top now handles separation between sections */}
               </section>
             );
           })}
@@ -430,13 +431,24 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                     className="flex items-center gap-3 rounded-lg border border-[#dfd4c2] bg-[#efe7da] p-3 transition-colors hover:bg-[#e9dfcf]"
                   >
                     <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-dashed border-[#d4c6b1] bg-[#e8ddcc]">
-                      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(111,96,78,0.12)_100%)]" />
-                      <div className="absolute inset-0 grid place-items-center">
-                        <div className="flex flex-col items-center gap-1.5 text-[#6f604e]">
-                          <span className="h-4 w-4 rotate-45 border border-[#b7a387]" />
-                          <span className="text-[9px] font-medium">Foto</span>
+                      {product.imageURL ? (
+                        <Image
+                          src={product.imageURL}
+                          alt={product.name}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                          sizes="80px"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 grid place-items-center">
+                          <div className="flex flex-col items-center gap-1.5 text-[#6f604e]">
+                            <span className="h-4 w-4 rotate-45 border border-[#b7a387]" />
+                            <span className="text-[9px] font-medium">Foto</span>
+                          </div>
                         </div>
-                      </div>
+                      )}
+                      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(111,96,78,0.12)_100%)] pointer-events-none" />
                     </div>
 
                     <div className="min-w-0">
