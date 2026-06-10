@@ -34,11 +34,17 @@ interface EncyclopediaMainProps {
 
 function EncyclopediaStatsSkeleton() {
   return (
-    <div className="mt-7 grid grid-cols-3 gap-4 border-y border-[#d8d0c1] py-5">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="flex flex-col gap-2">
-          <Skeleton className="h-10 w-20 bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-28 bg-[#e6dfd1]" />
+    <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[#d8d0c1] pt-5 sm:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-3 rounded-xl border border-[#ddd3c2] bg-[#f7f3ea]/70 px-4 py-3"
+        >
+          <Skeleton className="h-10 w-10 shrink-0 rounded-lg bg-[#e6dfd1]" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-10 bg-[#e6dfd1]" />
+            <Skeleton className="h-3 w-24 bg-[#e6dfd1]" />
+          </div>
         </div>
       ))}
     </div>
@@ -242,6 +248,7 @@ export function EncyclopediaMain({
             <h1 className="mt-2 text-3xl font-medium tracking-tight text-[#2f5b49]">
               Ensiklopedia Budaya Wastra
             </h1>
+            <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
             <p className="mt-3 text-sm max-w-2xl text-medium leading-relaxed text-[#4d6759]">
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
@@ -266,6 +273,50 @@ export function EncyclopediaMain({
 
       <section className="border-y border-[#d3cbbd] bg-[#e9e4d9] py-6">
         <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
+          {/* Toolbar: article count + view toggle. Full width so the count
+              aligns left with the sidebar and the toggle aligns right with the
+              cards; this also lets the filter card and article cards share the
+              same top edge inside the grid below. */}
+          {showLoadingSkeleton ? (
+            <div className="mb-4 flex h-9 items-center">
+              <Skeleton className="h-5 w-44 bg-[#e6dfd1]" />
+            </div>
+          ) : (
+            <div className="mb-4 flex h-9 items-center justify-between">
+              <p className="text-left text-sm font-semibold text-[#4e6659]">
+                Menampilkan {data?.meta.totalItems ?? articles.length} artikel
+              </p>
+              <div className="flex gap-1.5 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-0.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-7 w-7 p-0 transition-all active:scale-90 ${
+                    viewMode === 'grid'
+                      ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                      : 'text-[#4c6457] hover:bg-[#ece5d8]'
+                  }`}
+                  onClick={() => setViewMode('grid')}
+                  title="Grid view"
+                >
+                  <Grid3x3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-7 w-7 p-0 transition-all active:scale-90 ${
+                    viewMode === 'list'
+                      ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                      : 'text-[#4c6457] hover:bg-[#ece5d8]'
+                  }`}
+                  onClick={() => setViewMode('list')}
+                  title="List view"
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)]">
             {showLoadingSkeleton ? (
               <EncyclopediaSidebarSkeleton />
@@ -282,45 +333,6 @@ export function EncyclopediaMain({
             )}
 
             <div>
-              {showLoadingSkeleton ? (
-                <Skeleton className="mb-3 h-5 w-44 bg-[#e6dfd1]" />
-              ) : (
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-[#4e6659]">
-                    Menampilkan {data?.meta.totalItems ?? articles.length}{' '}
-                    artikel
-                  </p>
-                  <div className="flex gap-2 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`h-8 w-8 p-0 transition ${
-                        viewMode === 'grid'
-                          ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                          : 'text-[#4c6457] hover:bg-[#ece5d8]'
-                      }`}
-                      onClick={() => setViewMode('grid')}
-                      title="Grid view"
-                    >
-                      <Grid3x3 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`h-8 w-8 p-0  transition ${
-                        viewMode === 'list'
-                          ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                          : 'text-[#4c6457] hover:bg-[#ece5d8]'
-                      }`}
-                      onClick={() => setViewMode('list')}
-                      title="List view"
-                    >
-                      <Menu className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
               {isPending && !showLoadingSkeleton ? (
                 <div className="mt-4 rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658]">
                   Memuat artikel ensiklopedia...

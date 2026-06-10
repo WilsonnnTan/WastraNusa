@@ -28,12 +28,12 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
     return (
       <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm animate-pulse h-[400px]">
         <div className="flex justify-between mb-6">
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-4 bg-muted rounded w-1/2"></div>
+          <div className="h-4 bg-muted rounded w-1/4"></div>
         </div>
         <div className="space-y-4">
-          <div className="h-12 bg-gray-100 rounded"></div>
-          <div className="h-12 bg-gray-100 rounded"></div>
+          <div className="h-12 bg-muted rounded"></div>
+          <div className="h-12 bg-muted rounded"></div>
         </div>
       </div>
     );

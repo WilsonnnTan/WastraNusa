@@ -33,7 +33,7 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
             quantity: 1,
             imageURL: null,
           },
-          actions: ['Detail'] as ('Detail' | 'Lacak Pesanan')[],
+          actions: ['Detail'] as 'Detail'[],
         },
       ],
       meta: {

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
+import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -64,14 +65,14 @@ export function FeaturedCards() {
       {!isPending && !error && featuredArticles.length > 0
         ? featuredArticles.map((article, index) => (
             <Link key={article.slug} href={`/encyclopedia/${article.slug}`}>
-              <Card className="group relative overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#5a453a] shadow-sm">
+              <Card className="group relative overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#5a453a] shadow-sm transition-all duration-500 ease-out hover:-translate-y-1 hover:border-[#c7b59b] hover:shadow-[0_22px_42px_-24px_rgba(45,95,72,0.6)]">
                 <div className="absolute inset-0">
                   {article.imageURL ? (
                     <Image
                       src={article.imageURL}
                       alt={article.title}
                       fill
-                      className="object-cover transition duration-500 group-hover:scale-105"
+                      className="object-cover transition duration-700 ease-out group-hover:scale-110"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                   ) : null}
@@ -81,9 +82,13 @@ export function FeaturedCards() {
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,rgba(249,229,193,.28)_0%,rgba(0,0,0,0)_36%)]" />
 
+                <span className="absolute right-4 top-4 z-10 grid h-9 w-9 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6eee1] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                  <ArrowUpRight className="h-4 w-4" />
+                </span>
+
                 <div className="relative flex min-h-[225px] items-end p-4">
-                  <div>
-                    <Badge className="mb-3 rounded-md bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm">
+                  <div className="transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
+                    <Badge className="mb-3 rounded-md bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm transition-colors group-hover:bg-white/24">
                       {article.topic}
                     </Badge>
                     <p className="text-lg font-semibold leading-tight text-[#f6eee1]">

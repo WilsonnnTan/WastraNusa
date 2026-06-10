@@ -549,10 +549,7 @@ export const orderService = {
           paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
           canCancel: canCancelPendingOrder(order),
           products,
-          actions: [
-            'Detail',
-            ...(uiStatus === 'Dikirim' ? ['Lacak Pesanan'] : []),
-          ] as ('Lacak Pesanan' | 'Detail')[],
+          actions: ['Detail'] as 'Detail'[],
         };
       }),
     );

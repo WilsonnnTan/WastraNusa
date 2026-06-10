@@ -172,7 +172,7 @@ export function CheckoutMain() {
                 disabled={!selectedAddress}
                 className="w-full sm:w-auto bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95"
               >
-                Tinjau & Konfirmasi -&gt;
+                Tinjau & Konfirmasi
               </Button>
             </div>
 

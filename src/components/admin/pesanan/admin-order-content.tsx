@@ -102,7 +102,7 @@ function getOrderStatusBadgeClass(status: OrderStatus) {
       return 'bg-red-100 text-red-700';
     case OrderStatus.pending:
     default:
-      return 'bg-slate-200 text-slate-700';
+      return 'bg-muted text-foreground';
   }
 }
 
@@ -116,7 +116,7 @@ function getPaymentStatusBadgeClass(status: PaymentStatus) {
       return 'bg-orange-100 text-orange-700';
     case PaymentStatus.unpaid:
     default:
-      return 'bg-slate-200 text-slate-700';
+      return 'bg-muted text-foreground';
   }
 }
 
