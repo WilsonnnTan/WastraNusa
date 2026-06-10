@@ -130,7 +130,7 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
           onClick={handleGoToCheckout}
           className="w-full bg-[#2f5f49] hover:bg-[#244a39] text-white py-6 rounded-xl font-bold shadow-md shadow-brand/10 transition-all active:scale-[0.98]"
         >
-          Lanjut ke Checkout -&gt;
+          Checkout
         </Button>
       </div>
 
