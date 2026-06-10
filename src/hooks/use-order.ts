@@ -26,7 +26,7 @@ export interface OrderItem {
     quantity: number;
     imageURL: string | null;
   }>;
-  actions: ('Lacak Pesanan' | 'Detail')[];
+  actions: 'Detail'[];
 }
 
 export interface OrderDetail {
