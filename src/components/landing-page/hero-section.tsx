@@ -211,7 +211,7 @@ export function HeroSection() {
                         <Button
                           asChild
                           variant="outline"
-                          className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:bg-[#2d5f48] hover:text-white hover:border-[#2d5f48]"
+                          className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:-translate-y-0.5 hover:border-[#2d5f48] hover:bg-[#2d5f48] hover:text-white hover:shadow-lg active:scale-95"
                         >
                           <Link href={`/encyclopedia/${slide.slug}`}>
                             Baca Artikel
@@ -219,7 +219,7 @@ export function HeroSection() {
                         </Button>
                         <Button
                           asChild
-                          className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:bg-white/15"
+                          className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:-translate-y-0.5 hover:bg-white/20 active:scale-95"
                         >
                           <Link href="/encyclopedia">
                             Jelajahi Ensiklopedia
@@ -242,14 +242,14 @@ export function HeroSection() {
         {activeSlide + 1} / {slides.length}
       </Badge>
       <Button
-        className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
+        className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:bg-white/25 active:scale-95"
         type="button"
         onClick={goToPreviousSlide}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Button
-        className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:bg-white/20"
+        className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:bg-white/25 active:scale-95"
         type="button"
         onClick={goToNextSlide}
       >

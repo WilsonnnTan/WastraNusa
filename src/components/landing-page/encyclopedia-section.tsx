@@ -97,7 +97,7 @@ export function EncyclopediaSection() {
               keunikan motif, bahan, dan makna simbolis yang mendalam.
             </p>
 
-            <div className="mt-5 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a]">
+            <div className="mt-5 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a] transition-all duration-300 focus-within:border-white/35 focus-within:bg-[#21473590] focus-within:shadow-[0_0_0_4px_rgba(213,200,179,0.12)]">
               <Search className="ml-4 h-4 w-4 text-[#b7cdbf]" />
               <Input
                 className="h-12 w-full border-0 bg-transparent px-3 text-sm text-[#ebf3e7] placeholder:text-[#95b19f] focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -106,7 +106,7 @@ export function EncyclopediaSection() {
               />
               <Button
                 asChild
-                className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc]"
+                className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc] active:scale-95"
               >
                 <Link href="/encyclopedia">Cari</Link>
               </Button>
@@ -118,7 +118,7 @@ export function EncyclopediaSection() {
                 <Button
                   key={tag.name}
                   asChild
-                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:bg-white/14"
+                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:scale-105 hover:border-white/35 hover:bg-white/14 active:scale-95"
                 >
                   <Link
                     href={`/encyclopedia?island=${encodeURIComponent(tag.name)}`}
@@ -135,7 +135,7 @@ export function EncyclopediaSection() {
                 <Button
                   key={topic}
                   asChild
-                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:bg-white/14"
+                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:scale-105 hover:border-white/35 hover:bg-white/14 active:scale-95"
                 >
                   <Link
                     href={`/encyclopedia?topic=${encodeURIComponent(topic)}`}
@@ -206,7 +206,7 @@ export function EncyclopediaSection() {
                       href={`/encyclopedia/${article.slug}`}
                       className="block"
                     >
-                      <Card className="rounded-2xl border border-white/6 bg-white/7 p-4 transition hover:bg-white/11">
+                      <Card className="group rounded-2xl border border-white/6 bg-white/7 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/11">
                         <div className="flex items-center gap-4">
                           <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 border-dashed border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
                             {article.imageURL ? (
@@ -214,7 +214,7 @@ export function EncyclopediaSection() {
                                 src={article.imageURL}
                                 alt={article.title}
                                 fill
-                                className="object-cover"
+                                className="object-cover transition duration-500 ease-out group-hover:scale-110"
                                 sizes="80px"
                               />
                             ) : (
@@ -252,11 +252,11 @@ export function EncyclopediaSection() {
 
             <Button
               asChild
-              className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
+              className="group mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
             >
               <Link href="/encyclopedia">
                 Lihat semua artikel
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </Button>
           </aside>

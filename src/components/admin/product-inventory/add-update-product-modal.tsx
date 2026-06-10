@@ -242,7 +242,7 @@ export default function AddUpdateProductModal({
         }`}
       >
         <div className="flex items-center justify-between border-b border-[#ebd8c2] px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-800">
+          <h2 className="text-lg font-semibold text-foreground">
             {isEdit ? 'Edit Produk & Inventori' : 'Tambah Produk Baru'}
           </h2>
           <Button
@@ -250,7 +250,7 @@ export default function AddUpdateProductModal({
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            className="rounded-full bg-[#f3ede8] text-gray-500 hover:bg-[#e6dcd5]"
+            className="rounded-full bg-[#f3ede8] text-muted-foreground hover:bg-[#e6dcd5]"
           >
             <X className="size-4" />
           </Button>
@@ -259,7 +259,7 @@ export default function AddUpdateProductModal({
         <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto px-6 py-5">
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Artikel Terkait *
               </label>
               <Controller
@@ -271,7 +271,7 @@ export default function AddUpdateProductModal({
                     onValueChange={field.onChange}
                     disabled={isLoadingArticles}
                   >
-                    <SelectTrigger className="h-11 w-full rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-gray-700">
+                    <SelectTrigger className="h-11 w-full rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground">
                       <SelectValue
                         placeholder="Pilih artikel"
                         className="block w-full truncate"
@@ -291,12 +291,12 @@ export default function AddUpdateProductModal({
                         </SelectItem>
                       ))}
                       {isFetchingNextArticlePage ? (
-                        <p className="px-2 py-2 text-xs text-gray-500">
+                        <p className="px-2 py-2 text-xs text-muted-foreground">
                           Memuat artikel berikutnya...
                         </p>
                       ) : null}
                       {!hasNextArticlePage && articleOptions.length > 0 ? (
-                        <p className="px-2 py-2 text-xs text-gray-500">
+                        <p className="px-2 py-2 text-xs text-muted-foreground">
                           Semua artikel telah dimuat
                         </p>
                       ) : null}
@@ -312,7 +312,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Nama Produk *
               </label>
               <Input
@@ -328,7 +328,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Slug Produk *
               </label>
               <Input
@@ -344,7 +344,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 SKU Produk *
               </label>
               <Input
@@ -360,7 +360,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Harga *
               </label>
               <Input
@@ -378,7 +378,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Berat (gram) *
               </label>
               <Input
@@ -396,7 +396,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Jenis Pakaian *
               </label>
               <Input
@@ -412,7 +412,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Gender *
               </label>
               <Controller
@@ -420,7 +420,7 @@ export default function AddUpdateProductModal({
                 name="gender"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-gray-700">
+                    <SelectTrigger className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground">
                       <SelectValue placeholder="Pilih gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -441,7 +441,7 @@ export default function AddUpdateProductModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-600">
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                 Status Produk *
               </label>
               <Controller
@@ -449,7 +449,7 @@ export default function AddUpdateProductModal({
                 name="status"
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-gray-700">
+                    <SelectTrigger className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground">
                       <SelectValue placeholder="Pilih status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -471,7 +471,7 @@ export default function AddUpdateProductModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-600">
+            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
               URL Gambar Produk (Opsional)
             </label>
             <Input
@@ -487,14 +487,14 @@ export default function AddUpdateProductModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-600">
+            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
               Deskripsi (Opsional)
             </label>
             <textarea
               {...register('description')}
               rows={3}
               placeholder="Deskripsi singkat produk..."
-              className="w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 py-3 text-gray-700 placeholder:text-gray-400 focus-visible:border-[#c26a3d] focus-visible:ring-2 focus-visible:ring-[#c26a3d]/30 focus-visible:outline-none"
+              className="w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 py-3 text-foreground placeholder:text-muted-foreground focus-visible:border-[#c26a3d] focus-visible:ring-2 focus-visible:ring-[#c26a3d]/30 focus-visible:outline-none"
             />
           </div>
 
@@ -502,7 +502,7 @@ export default function AddUpdateProductModal({
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-gray-800">
+              <h3 className="text-base font-semibold text-foreground">
                 Varian Produk
               </h3>
               <Button
@@ -550,7 +550,7 @@ export default function AddUpdateProductModal({
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                       Nama Varian *
                     </label>
                     <Input
@@ -565,7 +565,7 @@ export default function AddUpdateProductModal({
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                       Tipe Varian *
                     </label>
                     <Controller
@@ -576,7 +576,7 @@ export default function AddUpdateProductModal({
                           value={variantField.value}
                           onValueChange={variantField.onChange}
                         >
-                          <SelectTrigger className="h-10 bg-white text-gray-700">
+                          <SelectTrigger className="h-10 bg-white text-foreground">
                             <SelectValue placeholder="Pilih tipe varian" />
                           </SelectTrigger>
                           <SelectContent>
@@ -600,7 +600,7 @@ export default function AddUpdateProductModal({
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                       SKU Varian *
                     </label>
                     <Input
@@ -615,7 +615,7 @@ export default function AddUpdateProductModal({
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                       Stok Varian *
                     </label>
                     <Input
@@ -634,7 +634,7 @@ export default function AddUpdateProductModal({
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                       URL Gambar Varian (Opsional)
                     </label>
                     <Input
@@ -649,7 +649,7 @@ export default function AddUpdateProductModal({
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                    <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                       Harga Varian *
                     </label>
                     <Controller
@@ -675,7 +675,7 @@ export default function AddUpdateProductModal({
                         />
                       )}
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Harga ini adalah harga jual langsung untuk varian, bukan
                       tambahan dari harga produk utama.
                     </p>
@@ -707,7 +707,7 @@ export default function AddUpdateProductModal({
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-11 rounded-xl border-[#e5ded5] bg-white px-6 text-base text-gray-600 hover:bg-gray-50"
+            className="h-11 rounded-xl border-[#e5ded5] bg-white px-6 text-base text-muted-foreground hover:bg-muted"
           >
             Batal
           </Button>

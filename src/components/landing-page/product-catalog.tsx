@@ -54,11 +54,11 @@ export function ProductCatalog() {
           <Button
             asChild
             variant="outline"
-            className="flex items-center gap-1 rounded-xl border border-[#2f4f3f] bg-[#f6f3eb] px-4 py-2 text-sm font-semibold text-[#2f4f3f] transition hover:border-[#2f4f3f] hover:bg-[#2d5f48] hover:text-white"
+            className="group flex items-center gap-1 rounded-xl border border-[#2f4f3f] bg-[#f6f3eb] px-4 py-2 text-sm font-semibold text-[#2f4f3f] transition hover:border-[#2f4f3f] hover:bg-[#2d5f48] hover:text-white active:scale-95"
           >
             <Link href="/catalog">
               Lihat Semua
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>
@@ -68,10 +68,10 @@ export function ProductCatalog() {
           {SORT_OPTIONS.map((option) => (
             <Button
               key={option.value}
-              className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition ${
+              className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition active:scale-95 ${
                 activeSort === option.value
-                  ? 'border-[#2d5f48] bg-[#2d5f48] text-[#ecf1e8]'
-                  : 'border-[#dad2c4] bg-[#f8f4ec] text-[#4f6658] hover:border-[#a9baa8]'
+                  ? 'border-[#2d5f48] bg-[#2d5f48] text-[#ecf1e8] shadow-sm'
+                  : 'border-[#dad2c4] bg-[#f8f4ec] text-[#4f6658] hover:border-[#a9baa8] hover:bg-[#f0eadd]'
               }`}
               type="button"
               onClick={() => setActiveSort(option.value)}

@@ -265,7 +265,7 @@ export default function AddUpdateArticleModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#ebdxc2]">
-          <div className="flex items-center gap-3 text-gray-800">
+          <div className="flex items-center gap-3 text-foreground">
             <svg
               className="w-5 h-5 text-[#8c6b5d]"
               fill="none"
@@ -288,7 +288,7 @@ export default function AddUpdateArticleModal({
             variant="ghost"
             size="icon-sm"
             onClick={onClose}
-            className="bg-[#f3ede8] hover:bg-[#e6dcd5] rounded-full text-gray-500 transition-colors"
+            className="bg-[#f3ede8] hover:bg-[#e6dcd5] rounded-full text-muted-foreground transition-colors"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -300,10 +300,10 @@ export default function AddUpdateArticleModal({
           <div className="rounded-2xl border border-[#e5ded5] bg-[#fdfaf7]/80 p-4 space-y-3">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-gray-800">
+                <p className="text-sm font-semibold text-foreground">
                   Impor dari Wikipedia
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Tempel URL artikel (mis.{' '}
                   <span className="font-mono text-[11px]">
                     https://id.wikipedia.org/wiki/Batik
@@ -322,7 +322,7 @@ export default function AddUpdateArticleModal({
                 value={wiki.url}
                 onChange={(e) => wiki.setUrl(e.target.value)}
                 disabled={wiki.isLoading}
-                className="h-11 flex-1 px-4 bg-white border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+                className="h-11 flex-1 px-4 bg-white border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
               />
               <Button
                 type="button"
@@ -383,15 +383,15 @@ export default function AddUpdateArticleModal({
                       className="w-full sm:w-28 h-28 object-cover rounded-lg border border-[#e5ded5] bg-[#f5f3ec]"
                     />
                   ) : (
-                    <div className="w-full sm:w-28 h-28 rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] flex items-center justify-center text-[11px] text-gray-400 text-center px-2">
+                    <div className="w-full sm:w-28 h-28 rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] flex items-center justify-center text-[11px] text-muted-foreground text-center px-2">
                       Tidak ada gambar thumbnail
                     </div>
                   )}
                   <div className="min-w-0 flex-1 space-y-1">
-                    <p className="font-medium text-gray-900 leading-snug">
+                    <p className="font-medium text-foreground leading-snug">
                       {wiki.preview.mapped.title}
                     </p>
-                    <p className="text-sm text-gray-600 line-clamp-4">
+                    <p className="text-sm text-muted-foreground line-clamp-4">
                       {wiki.preview.mapped.summary}
                     </p>
                   </div>
@@ -459,14 +459,14 @@ export default function AddUpdateArticleModal({
 
           {/* Judul Artikel */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1.5">
+            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
               Judul Artikel *
             </label>
             <Input
               {...register('title')}
               type="text"
               placeholder="Contoh: Sejarah Batik Jawa: Warisan Dunia UNESCO"
-              className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+              className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
             />
             {errors.title && (
               <p className="text-xs text-red-500 mt-1">
@@ -478,14 +478,14 @@ export default function AddUpdateArticleModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Motif Label */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Label Motif *
               </label>
               <Input
                 {...register('motifLabel')}
                 type="text"
                 placeholder="Batik Parang / Songket Palembang"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
               />
               {errors.motifLabel && (
                 <p className="text-xs text-red-500 mt-1 font-medium">
@@ -496,14 +496,14 @@ export default function AddUpdateArticleModal({
 
             {/* Topik */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Topik *
               </label>
               <Input
                 {...register('topic')}
                 type="text"
                 placeholder="Pakaian Adat / Tekstil"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
               />
               {errors.topic && (
                 <p className="text-xs text-red-500 mt-1">
@@ -514,7 +514,7 @@ export default function AddUpdateArticleModal({
 
             {/* Pulau */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Pulau *
               </label>
               <Controller
@@ -529,7 +529,7 @@ export default function AddUpdateArticleModal({
                     }}
                     value={field.value || undefined}
                   >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
                       <SelectValue placeholder="Pilih Pulau" />
                     </SelectTrigger>
                     <SelectContent>
@@ -551,7 +551,7 @@ export default function AddUpdateArticleModal({
 
             {/* Provinsi */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Provinsi *
               </label>
               <Controller
@@ -566,7 +566,7 @@ export default function AddUpdateArticleModal({
                     value={field.value || undefined}
                     disabled={!watchedIsland}
                   >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
                       <SelectValue
                         placeholder={
                           watchedIsland
@@ -594,7 +594,7 @@ export default function AddUpdateArticleModal({
 
             {/* Daerah */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Daerah *
               </label>
               <Controller
@@ -606,7 +606,7 @@ export default function AddUpdateArticleModal({
                     value={field.value || undefined}
                     disabled={!watchedProvince}
                   >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
                       <SelectValue
                         placeholder={
                           watchedProvince
@@ -633,17 +633,17 @@ export default function AddUpdateArticleModal({
             </div>
 
             {/* Read Minutes, Gender, Featured, Status */}
-            <div className="block text-sm font-medium text-gray-600 mb-1.5">
+            <div className="block text-sm font-medium text-muted-foreground mb-1.5">
               {/* Estimasi Waktu Baca */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                   Estimasi Waktu Baca (menit) *
                 </label>
                 <Input
                   {...register('readMinutes', { valueAsNumber: true })}
                   type="number"
                   placeholder="6"
-                  className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700"
+                  className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground"
                 />
                 {errors.readMinutes && (
                   <p className="text-xs text-red-500 mt-1">
@@ -655,7 +655,7 @@ export default function AddUpdateArticleModal({
             <div className="grid grid-cols-2 gap-5">
               {/* Gender */}
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                   Gender (Opsional)
                 </label>
                 <Controller
@@ -666,7 +666,7 @@ export default function AddUpdateArticleModal({
                       onValueChange={field.onChange}
                       value={field.value ?? undefined}
                     >
-                      <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700">
+                      <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
                         <SelectValue placeholder="Pilih Gender" />
                       </SelectTrigger>
                       <SelectContent>
@@ -694,9 +694,9 @@ export default function AddUpdateArticleModal({
                       type="checkbox"
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#c26a3d]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c26a3d]"></div>
+                    <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#c26a3d]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c26a3d]"></div>
                   </div>
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors">
+                  <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                     Tampilkan di Featured
                   </span>
                 </label>
@@ -707,14 +707,14 @@ export default function AddUpdateArticleModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Ethnic Group */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Suku / Kelompok Etnis (Opsional)
               </label>
               <Input
                 {...register('ethnicGroup')}
                 type="text"
                 placeholder="Contoh: Jawa / Dayak"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground"
               />
               {errors.ethnicGroup && (
                 <p className="text-xs text-red-500 mt-1">
@@ -725,14 +725,14 @@ export default function AddUpdateArticleModal({
 
             {/* Clothing Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Jenis Pakaian (Opsional)
               </label>
               <Input
                 {...register('clothingType')}
                 type="text"
                 placeholder="Contoh: Kebaya / Batik"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground"
               />
               {errors.clothingType && (
                 <p className="text-xs text-red-500 mt-1">
@@ -745,14 +745,14 @@ export default function AddUpdateArticleModal({
           {/* Excerpt, Summary, Description */}
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Excerpt (Ringkasan Pendek) *
               </label>
               <textarea
                 {...register('excerpt')}
                 rows={2}
                 placeholder="Teaser singkat yang muncul di kartu artikel..."
-                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
               />
               {errors.excerpt && (
                 <p className="text-xs text-red-500 mt-1">
@@ -762,14 +762,14 @@ export default function AddUpdateArticleModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Ringkasan (Summary) (Opsional)
               </label>
               <textarea
                 {...register('summary')}
                 rows={3}
                 placeholder="Ringkasan lengkap tentang isi artikel..."
-                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
               />
               {errors.summary && (
                 <p className="text-xs text-red-500 mt-1">
@@ -779,14 +779,14 @@ export default function AddUpdateArticleModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 Deskripsi Tambahan (Opsional)
               </label>
               <textarea
                 {...register('description')}
                 rows={3}
                 placeholder="Detail informasi tambahan lainnya..."
-                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
               />
               {errors.description && (
                 <p className="text-xs text-red-500 mt-1">
@@ -796,14 +796,14 @@ export default function AddUpdateArticleModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
                 URL Gambar Utama (Opsional)
               </label>
               <Input
                 {...register('imageURL')}
                 type="text"
                 placeholder="https://example.com/image.jpg"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
               />
               {errors.imageURL && (
                 <p className="text-xs text-red-500 mt-1">
@@ -818,7 +818,7 @@ export default function AddUpdateArticleModal({
           {/* Sections Management */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-gray-800">
+              <h3 className="text-base font-semibold text-foreground">
                 Konten Section
               </h3>
               <Button
@@ -851,7 +851,7 @@ export default function AddUpdateArticleModal({
                 </Button>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                     Judul Section {index + 1} *
                   </label>
                   <Input
@@ -867,14 +867,14 @@ export default function AddUpdateArticleModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                     Isi Konten *
                   </label>
                   <textarea
                     {...register(`sections.${index}.content` as const)}
                     rows={4}
                     placeholder="Tuliskan isi detail section di sini..."
-                    className="w-full px-4 py-3 bg-white border border-[#e5ded5] rounded-xl text-gray-700 placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
+                    className="w-full px-4 py-3 bg-white border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
                   />
                   {errors.sections?.[index]?.content && (
                     <p className="text-xs text-red-500 mt-1 italic">
@@ -884,7 +884,7 @@ export default function AddUpdateArticleModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
                     URL Gambar Section (Opsional)
                   </label>
                   <div className="flex items-start gap-3">
@@ -909,7 +909,7 @@ export default function AddUpdateArticleModal({
                             className="w-20 h-12 object-cover rounded-md"
                           />
                         ) : (
-                          <span className="text-[11px] text-gray-400 text-center">
+                          <span className="text-[11px] text-muted-foreground text-center">
                             No image
                           </span>
                         );
@@ -961,7 +961,7 @@ export default function AddUpdateArticleModal({
             type="button"
             variant="outline"
             onClick={onClose}
-            className="px-6 h-11 bg-white border-[#e5ded5] text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors text-base"
+            className="px-6 h-11 bg-white border-[#e5ded5] text-muted-foreground hover:bg-muted rounded-xl font-medium transition-colors text-base"
           >
             Batal
           </Button>

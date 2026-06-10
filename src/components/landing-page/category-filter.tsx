@@ -19,7 +19,7 @@ export function CategoryFilter() {
               key={category}
               asChild
               variant="outline"
-              className="rounded-full border border-[#4a3a2a]/[14.5%] bg-[#4a3a2a]/[6.3%] px-4 py-1.5 text-sm font-medium text-[#2f4f3f] transition hover:border-[#2f4f3f] hover:text-white hover:bg-[#2f4f3f]"
+              className="rounded-full border border-[#4a3a2a]/[14.5%] bg-[#4a3a2a]/[6.3%] px-4 py-1.5 text-sm font-medium text-[#2f4f3f] transition-all hover:-translate-y-0.5 hover:border-[#2f4f3f] hover:bg-[#2f4f3f] hover:text-white hover:shadow-sm active:scale-95"
             >
               <Link href={`/catalog?topic=${encodeURIComponent(category)}`}>
                 {category}

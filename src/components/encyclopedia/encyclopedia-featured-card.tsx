@@ -18,7 +18,7 @@ export function EncyclopediaFeaturedCard({
 }: EncyclopediaFeaturedCardProps) {
   if (viewMode === 'list') {
     return (
-      <Card className="overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2]">
+      <Card className="group overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#c0b39a] hover:shadow-[0_18px_36px_-26px_rgba(47,91,73,0.55)]">
         <div className="flex items-start gap-4 p-4">
           {/* Image */}
           <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl border border-dashed border-[#ded3c1] bg-[#ece1d0]">
@@ -29,7 +29,7 @@ export function EncyclopediaFeaturedCard({
                 fill
                 unoptimized
                 sizes="128px"
-                className="object-cover object-center"
+                className="object-cover object-center transition duration-700 ease-out group-hover:scale-110"
               />
             ) : (
               <div className="flex h-full items-center justify-center">
@@ -88,16 +88,16 @@ export function EncyclopediaFeaturedCard({
   }
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2]">
+    <Card className="group overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#c0b39a] hover:shadow-[0_26px_52px_-30px_rgba(47,91,73,0.55)]">
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)]">
         {/* Image Placeholder */}
-        <div className="relative min-h-[185px] border-b border-dashed border-[#dacfbf] bg-[#ece1d0] md:min-h-[220px] md:border-b-0 md:border-r">
+        <div className="relative min-h-[185px] overflow-hidden border-b border-dashed border-[#dacfbf] bg-[#ece1d0] md:min-h-[220px] md:border-b-0 md:border-r">
           {article.imageURL ? (
             <Image
               src={article.imageURL}
               alt={article.title}
               fill
-              className="object-cover"
+              className="object-cover transition duration-700 ease-out group-hover:scale-105"
             />
           ) : (
             <div className="absolute inset-0 grid place-items-center">
@@ -155,11 +155,11 @@ export function EncyclopediaFeaturedCard({
 
           <Button
             variant="outline"
-            className="mt-4 inline-flex items-center gap-1 rounded-xl border-[#98ab9e] px-4 py-2 text-sm font-bold text-[#2f5f49] transition hover:bg-[#edf2ea]"
+            className="group/btn mt-4 inline-flex items-center gap-1 rounded-xl border-[#98ab9e] px-4 py-2 text-sm font-bold text-[#2f5f49] transition hover:border-[#2f5f49] hover:bg-[#2f5f49] hover:text-[#edf3e8] active:scale-95"
             onClick={() => onReadMore?.(article)}
           >
             Baca Selengkapnya
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
           </Button>
         </div>
       </div>

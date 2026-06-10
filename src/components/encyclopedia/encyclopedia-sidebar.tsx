@@ -57,10 +57,10 @@ export function EncyclopediaSidebar({
             <li key={island.name}>
               <Button
                 variant="ghost"
-                className={`flex h-auto w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition ${
+                className={`flex h-auto w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
                   island.active
-                    ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                    : 'text-[#4c6457] hover:bg-[#ece5d8]'
+                    ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                    : 'text-[#4c6457] hover:translate-x-0.5 hover:bg-[#ece5d8]'
                 }`}
                 onClick={() => onIslandClick?.(island.name)}
               >
@@ -110,10 +110,10 @@ export function EncyclopediaSidebar({
               key={topic}
               variant="outline"
               size="sm"
-              className={`h-auto rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold transition ${
+              className={`h-auto rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
                 selectedTopic === topic
-                  ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                  : 'bg-[#efeadf] text-[#5d6f62] hover:bg-[#e4decf]'
+                  ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
+                  : 'bg-[#efeadf] text-[#5d6f62] hover:border-[#bfae8e] hover:bg-[#e4decf]'
               }`}
               onClick={() => onTopicClick?.(topic)}
             >
@@ -126,7 +126,7 @@ export function EncyclopediaSidebar({
       {/* Reset Button */}
       <Button
         variant="outline"
-        className="w-full rounded-xl border-[#d4cbbc] bg-[#f7f3ea] px-4 py-2 text-sm font-bold text-[#5d6f62] transition hover:bg-[#eee8db]"
+        className="w-full rounded-xl border-[#d4cbbc] bg-[#f7f3ea] px-4 py-2 text-sm font-bold text-[#5d6f62] transition-all duration-200 hover:border-[#c0b39a] hover:bg-[#eee8db] hover:shadow-sm active:scale-[0.99]"
         onClick={onResetFilters}
       >
         Reset Semua Filter

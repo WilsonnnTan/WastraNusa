@@ -40,7 +40,7 @@ function SecurityRow({
       <div className="flex items-center gap-3 w-full sm:w-auto">
         {icon}
         <div>
-          <div className="text-[13px] font-medium text-gray-700">{title}</div>
+          <div className="text-[13px] font-medium text-foreground">{title}</div>
           {subtitle && (
             <div className="text-[12px] text-amber-700">{subtitle}</div>
           )}
@@ -49,7 +49,7 @@ function SecurityRow({
       {action && (
         <Button
           variant="outline"
-          className="h-8 px-3.5 text-xs text-gray-700 w-full sm:w-auto mt-1 sm:mt-0"
+          className="h-8 px-3.5 text-xs text-foreground w-full sm:w-auto mt-1 sm:mt-0"
         >
           {action}
         </Button>
@@ -141,7 +141,7 @@ export default function SecuritySection() {
             variant="outline"
             onClick={() => setIsChangingPassword(true)}
             disabled={isOAuthOnly}
-            className="flex items-center gap-1.5 text-[13px] text-brand border-gray-300 rounded-lg h-9 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 text-[13px] text-brand border-border rounded-lg h-9 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Ubah Password
           </Button>

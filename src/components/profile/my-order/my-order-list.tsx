@@ -190,15 +190,6 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                 Batalkan
               </Button>
             )}
-            {order.actions.includes('Lacak Pesanan') && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 rounded-lg border-[#c4826b] text-[#c4826b] hover:bg-[#fdf6f2] hover:text-[#a06651] text-xs font-semibold px-4"
-              >
-                Lacak Pesanan
-              </Button>
-            )}
             {order.actions.includes('Detail') && (
               <Button
                 variant="outline"
