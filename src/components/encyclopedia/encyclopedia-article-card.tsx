@@ -15,18 +15,18 @@ export function EncyclopediaArticleCard({
 }: EncyclopediaArticleCardProps) {
   return (
     <Card
-      className="cursor-pointer overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] shadow-sm transition-shadow hover:shadow-md"
+      className="group cursor-pointer overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c0b39a] hover:shadow-[0_22px_42px_-26px_rgba(47,91,73,0.55)]"
       onClick={() => onClick?.(article)}
     >
       {/* Image Placeholder */}
-      <div className="relative h-44 border-b border-dashed border-[#ded3c1] bg-[#ece1d0]">
+      <div className="relative h-44 overflow-hidden border-b border-dashed border-[#ded3c1] bg-[#ece1d0]">
         {article.imageURL ? (
           <Image
             src={article.imageURL}
             alt={article.title}
             fill
             unoptimized
-            className="object-cover"
+            className="object-cover transition duration-700 ease-out group-hover:scale-110"
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
@@ -55,7 +55,7 @@ export function EncyclopediaArticleCard({
           </Badge>
         </div>
 
-        <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-[#315746]">
+        <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-[#315746] transition-colors duration-300 group-hover:text-[#2f5f49]">
           {article.title}
         </h3>
 

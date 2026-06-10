@@ -68,7 +68,7 @@ export default function Sidebar() {
           className={`flex-auto md:flex-none flex items-center justify-center md:justify-between px-3 md:px-3.5 py-2 md:py-2.5 rounded-lg cursor-pointer text-sm transition-colors whitespace-nowrap ${
             href && pathname === href
               ? 'bg-brand-muted text-brand font-medium'
-              : 'bg-transparent text-gray-700 hover:bg-gray-100'
+              : 'bg-transparent text-foreground hover:bg-muted'
           }`}
         >
           <div className="flex items-center gap-2.5">

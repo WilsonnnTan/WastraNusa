@@ -15,7 +15,7 @@ function InfoField({ label, value }: { label: string; value: string }) {
       <Input
         value={value}
         readOnly
-        className="bg-brand-muted border-none text-gray-700 pointer-events-none h-10 w-full"
+        className="bg-brand-muted border-none text-foreground pointer-events-none h-10 w-full"
       />
     </div>
   );
@@ -123,7 +123,7 @@ export default function ProfileInfoSection() {
           <Button
             variant="outline"
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1.5 text-[13px] text-brand border-gray-300 rounded-lg h-9 w-full sm:w-auto"
+            className="flex items-center gap-1.5 text-[13px] text-brand border-border rounded-lg h-9 w-full sm:w-auto"
           >
             <Edit2 className="w-3.5 h-3.5" />
             Edit Profil
@@ -177,7 +177,7 @@ export default function ProfileInfoSection() {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="h-10 border-gray-300"
+                className="h-10 border-border"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -187,7 +187,7 @@ export default function ProfileInfoSection() {
                 onChange={(e) =>
                   setFormData({ ...formData, phoneNumber: e.target.value })
                 }
-                className="h-10 border-gray-300"
+                className="h-10 border-border"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -195,7 +195,7 @@ export default function ProfileInfoSection() {
               <Input
                 value={user?.email || ''}
                 readOnly
-                className="bg-brand-muted border-none text-gray-700 pointer-events-none h-10 w-full"
+                className="bg-brand-muted border-none text-foreground pointer-events-none h-10 w-full"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -205,7 +205,7 @@ export default function ProfileInfoSection() {
                 onChange={(e) =>
                   setFormData({ ...formData, gender: e.target.value })
                 }
-                className="flex h-10 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Pilih</option>
                 <option value="male">Laki-laki</option>
@@ -221,7 +221,7 @@ export default function ProfileInfoSection() {
               onChange={(e) =>
                 setFormData({ ...formData, birthDate: e.target.value })
               }
-              className="h-10 border-gray-300 w-full md:w-[calc(50%-0.5rem)]"
+              className="h-10 border-border w-full md:w-[calc(50%-0.5rem)]"
             />
           </div>
         </div>

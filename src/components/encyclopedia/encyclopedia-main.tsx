@@ -34,11 +34,17 @@ interface EncyclopediaMainProps {
 
 function EncyclopediaStatsSkeleton() {
   return (
-    <div className="mt-7 grid grid-cols-3 gap-4 border-y border-[#d8d0c1] py-5">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="flex flex-col gap-2">
-          <Skeleton className="h-10 w-20 bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-28 bg-[#e6dfd1]" />
+    <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[#d8d0c1] pt-5 sm:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-3 rounded-xl border border-[#ddd3c2] bg-[#f7f3ea]/70 px-4 py-3"
+        >
+          <Skeleton className="h-10 w-10 shrink-0 rounded-lg bg-[#e6dfd1]" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-10 bg-[#e6dfd1]" />
+            <Skeleton className="h-3 w-24 bg-[#e6dfd1]" />
+          </div>
         </div>
       ))}
     </div>
@@ -239,9 +245,10 @@ export function EncyclopediaMain({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-2 text-3xl font-medium tracking-tight text-[#2f5b49]">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#2f5b49]">
               Ensiklopedia Budaya Wastra
             </h1>
+            <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
             <p className="mt-3 text-sm max-w-2xl text-medium leading-relaxed text-[#4d6759]">
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
@@ -294,7 +301,7 @@ export function EncyclopediaMain({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-8 w-8 p-0 transition ${
+                      className={`h-8 w-8 p-0 transition-all active:scale-90 ${
                         viewMode === 'grid'
                           ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
                           : 'text-[#4c6457] hover:bg-[#ece5d8]'
@@ -307,7 +314,7 @@ export function EncyclopediaMain({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-8 w-8 p-0  transition ${
+                      className={`h-8 w-8 p-0 transition-all active:scale-90 ${
                         viewMode === 'list'
                           ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
                           : 'text-[#4c6457] hover:bg-[#ece5d8]'

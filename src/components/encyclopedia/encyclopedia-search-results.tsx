@@ -75,7 +75,7 @@ export function EncyclopediaSearchResults({
   return (
     <div ref={containerRef} className="relative w-full">
       {/* Search Input */}
-      <div className="flex items-center overflow-hidden rounded-xl border border-[#ddd3c2] bg-[#f3ede2]">
+      <div className="flex items-center overflow-hidden rounded-xl border border-[#ddd3c2] bg-[#f3ede2] transition-all duration-300 focus-within:border-[#2f5b49]/40 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(47,91,73,0.08)]">
         <Search className="ml-4 h-4 w-4 text-[#9f9a8d]" />
         <Input
           className="h-12 w-full border-0 bg-transparent px-3 text-sm text-[#445f50] placeholder:text-[#b2ad9f] focus-visible:ring-0 focus-visible:ring-offset-0"

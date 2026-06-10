@@ -290,6 +290,10 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
         return;
       }
 
+      const selectedVariant = selectedVariantId
+        ? product.variants.find((variant) => variant.id === selectedVariantId)
+        : undefined;
+
       setCheckoutSession({
         items: [
           {
@@ -301,6 +305,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
               effectiveSelectedSize ?? effectiveSelectedColor ?? 'Default',
             price: selectedVariantPrice,
             quantity: safeQuantity,
+            imageURL: selectedVariant?.imageURL ?? product.imageURL,
           },
         ],
         createdAt: new Date().toISOString(),
