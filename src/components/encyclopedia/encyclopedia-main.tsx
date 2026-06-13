@@ -20,8 +20,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
+import { searchArticles as filterArticlesByQuery } from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
-import { Grid3x3, Menu } from 'lucide-react';
+import { Grid3x3, Menu, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -30,6 +31,7 @@ const ARTICLES_PER_PAGE = 10;
 interface EncyclopediaMainProps {
   initialIsland?: string;
   initialTopic?: string;
+  initialSearch?: string;
 }
 
 function EncyclopediaStatsSkeleton() {
@@ -126,11 +128,13 @@ function EncyclopediaArticleGridSkeleton() {
 export function EncyclopediaMain({
   initialIsland,
   initialTopic,
+  initialSearch,
 }: EncyclopediaMainProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIsland, setSelectedIsland] = useState(initialIsland);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
+  const [searchTerm, setSearchTerm] = useState(initialSearch ?? '');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { data, error, isPending } = useArticles(
     currentPage,
@@ -173,13 +177,20 @@ export function EncyclopediaMain({
     },
   ];
 
+  const normalizedSearch = searchTerm.trim();
+  const isSearching = normalizedSearch.length > 0;
+  const searchResults = isSearching
+    ? filterArticlesByQuery(searchArticles, normalizedSearch)
+    : [];
+
   const featuredArticle =
-    currentPage === 1 && !selectedIsland && !selectedTopic
+    !isSearching && currentPage === 1 && !selectedIsland && !selectedTopic
       ? (articles.find((article) => article.featured) ?? articles[0])
       : undefined;
   const standardArticles = featuredArticle
     ? articles.filter((article) => article.slug !== featuredArticle.slug)
     : articles;
+  const displayedArticles = isSearching ? searchResults : standardArticles;
 
   const pushFilterQuery = (island?: string, topic?: string) => {
     const searchParams = new URLSearchParams();
@@ -214,7 +225,13 @@ export function EncyclopediaMain({
     setCurrentPage(1);
     setSelectedIsland(undefined);
     setSelectedTopic(undefined);
+    setSearchTerm('');
     pushFilterQuery(undefined, undefined);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    pushFilterQuery(selectedIsland, selectedTopic);
   };
 
   const handleArticleClick = (article: (typeof articles)[number]) => {
@@ -245,7 +262,7 @@ export function EncyclopediaMain({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-2 text-3xl font-medium tracking-tight text-[#2f5b49]">
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#2f5b49]">
               Ensiklopedia Budaya Wastra
             </h1>
             <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
@@ -283,9 +300,26 @@ export function EncyclopediaMain({
             </div>
           ) : (
             <div className="mb-4 flex h-9 items-center justify-between">
-              <p className="text-left text-sm font-semibold text-[#4e6659]">
-                Menampilkan {data?.meta.totalItems ?? articles.length} artikel
-              </p>
+              {isSearching ? (
+                <p className="flex items-center gap-2 text-left text-sm font-semibold text-[#4e6659]">
+                  <span>
+                    {searchResults.length} hasil untuk &ldquo;
+                    {normalizedSearch}&rdquo;
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="inline-flex items-center gap-1 rounded-full border border-[#cdbfa8] bg-[#f7f3ea] px-2 py-0.5 text-xs font-medium text-[#4c6457] transition hover:bg-[#ece5d8]"
+                  >
+                    <X className="h-3 w-3" />
+                    Hapus
+                  </button>
+                </p>
+              ) : (
+                <p className="text-left text-sm font-semibold text-[#4e6659]">
+                  Menampilkan {data?.meta.totalItems ?? articles.length} artikel
+                </p>
+              )}
               <div className="flex gap-1.5 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-0.5">
                 <Button
                   variant="ghost"
@@ -366,7 +400,7 @@ export function EncyclopediaMain({
               >
                 {!isPending &&
                   !error &&
-                  standardArticles.map((article) =>
+                  displayedArticles.map((article) =>
                     viewMode === 'list' ? (
                       <EncyclopediaArticleListCard
                         key={article.slug}
@@ -385,14 +419,16 @@ export function EncyclopediaMain({
                 {!isPending &&
                   !error &&
                   !featuredArticle &&
-                  standardArticles.length === 0 && (
+                  displayedArticles.length === 0 && (
                     <div className="rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658] sm:col-span-2 xl:col-span-3">
-                      Belum ada artikel ensiklopedia yang tersedia.
+                      {isSearching
+                        ? `Tidak ada artikel yang cocok dengan "${normalizedSearch}".`
+                        : 'Belum ada artikel ensiklopedia yang tersedia.'}
                     </div>
                   )}
               </div>
 
-              {totalPages > 1 ? (
+              {!isSearching && totalPages > 1 ? (
                 <EncyclopediaPagination
                   currentPage={currentPage}
                   totalPages={totalPages}
