@@ -4,19 +4,21 @@ type EncyclopediaPageProps = {
   searchParams: Promise<{
     island?: string;
     topic?: string;
+    search?: string;
   }>;
 };
 
 export default async function EncyclopediaPage({
   searchParams,
 }: EncyclopediaPageProps) {
-  const { island, topic } = await searchParams;
+  const { island, topic, search } = await searchParams;
 
   return (
     <EncyclopediaMain
-      key={`${island ?? 'all'}-${topic ?? 'all'}`}
+      key={`${island ?? 'all'}-${topic ?? 'all'}-${search ?? ''}`}
       initialIsland={island}
       initialTopic={topic}
+      initialSearch={search}
     />
   );
 }

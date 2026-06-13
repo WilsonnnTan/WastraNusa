@@ -128,7 +128,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <Card className="relative min-h-[420px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] p-0 text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)] ring-0">
+    <Card className="relative min-h-[300px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] p-0 text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)] ring-0 sm:min-h-[360px] md:min-h-[420px]">
       <Carousel
         setApi={setCarouselApi}
         opts={{
@@ -139,7 +139,7 @@ export function HeroSection() {
         <CarouselContent className="-ml-0 h-full">
           {slides.map((slide) => (
             <CarouselItem key={slide.id} className="pl-0 h-full">
-              <div className="relative flex h-full min-h-[420px] flex-col justify-end pb-12 pt-6 pr-6 pl-20 md:pb-14 md:pt-8 md:pr-8 md:pl-20">
+              <div className="relative flex h-full min-h-[300px] flex-col justify-end pb-8 pt-5 pr-5 pl-14 sm:min-h-[360px] sm:pb-12 sm:pt-6 sm:pr-6 sm:pl-20 md:min-h-[420px] md:pb-14 md:pt-8 md:pr-8 md:pl-20">
                 <div
                   className={`absolute inset-0 ${slide.backgroundClassName}`}
                   aria-hidden="true"
@@ -181,7 +181,7 @@ export function HeroSection() {
                       <Skeleton className="h-10 w-48 bg-white/20 md:h-12 md:w-64" />
                     </div>
                   ) : (
-                    <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] md:text-[46px]">
+                    <h1 className="max-w-xl text-2xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] sm:text-3xl md:text-4xl lg:text-[46px]">
                       <span className="block line-clamp-2">{slide.title}</span>
                       <span className="mt-1 block line-clamp-1 text-[0.72em] text-[#e4d5bf] md:text-[0.68em]">
                         {slide.subtitle}
@@ -195,12 +195,12 @@ export function HeroSection() {
                       <Skeleton className="h-5 w-5/6 bg-white/20" />
                     </div>
                   ) : (
-                    <p className="mt-4 min-h-[3.5rem] text-base leading-relaxed text-[#d5cec0] line-clamp-2">
+                    <p className="mt-3 text-sm leading-relaxed text-[#d5cec0] line-clamp-2 sm:mt-4 sm:min-h-[3.5rem] sm:text-base">
                       {slide.description}
                     </p>
                   )}
 
-                  <div className="mt-7 flex flex-wrap gap-3">
+                  <div className="mt-4 flex flex-wrap gap-2 sm:mt-7 sm:gap-3">
                     {slide.isSkeleton ? (
                       <>
                         <Skeleton className="h-[42px] w-32 rounded-xl bg-white/20" />

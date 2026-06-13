@@ -14,7 +14,7 @@ import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function getIslandCardBackground(index: number) {
   const hue = 28 + ((index * 23) % 36);
@@ -27,10 +27,30 @@ function getIslandCardBackground(index: number) {
 
 export function IslandCards() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
   const { data, error, isPending } = useArticles(1, 50);
   const islands =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
   const shouldLoop = islands.length > 5;
+
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const onSelect = () => {
+      setCanScrollPrev(carouselApi.canScrollPrev());
+      setCanScrollNext(carouselApi.canScrollNext());
+    };
+
+    onSelect();
+    carouselApi.on('select', onSelect);
+    carouselApi.on('reInit', onSelect);
+
+    return () => {
+      carouselApi.off('select', onSelect);
+      carouselApi.off('reInit', onSelect);
+    };
+  }, [carouselApi]);
 
   const islandImages = useMemo(() => {
     const imagesByIsland = new Map<string, string>();
@@ -61,7 +81,7 @@ export function IslandCards() {
         Jelajahi Pulau
       </Badge>
 
-      <h3 className="mt-3 text-4xl font-bold tracking-tight text-[#2d5f48]">
+      <h3 className="mt-3 text-2xl font-bold tracking-tight text-[#2d5f48] sm:text-2xl lg:text-2xl">
         Wastra dari Seluruh Nusantara
       </h3>
 
@@ -99,7 +119,7 @@ export function IslandCards() {
             <Button
               type="button"
               className="absolute left-0 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-[#ddd4c6] bg-white text-[#2d5f48] shadow-sm transition hover:bg-[#2d5f48] hover:text-white hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-white disabled:hover:text-[#2d5f48]"
-              disabled={islands.length <= 5}
+              disabled={!canScrollPrev}
               onClick={() => carouselApi?.scrollPrev()}
             >
               <ChevronLeft />
@@ -107,7 +127,7 @@ export function IslandCards() {
             <Button
               type="button"
               className="absolute right-0 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-[#ddd4c6] bg-white text-[#2d5f48] shadow-sm transition hover:bg-[#2d5f48] hover:text-white hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-white disabled:hover:text-[#2d5f48]"
-              disabled={islands.length <= 5}
+              disabled={!canScrollNext}
               onClick={() => carouselApi?.scrollNext()}
             >
               <ChevronRight />

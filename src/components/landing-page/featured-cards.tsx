@@ -44,9 +44,9 @@ export function FeaturedCards() {
               key={`featured-skeleton-${index}`}
               className="overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#5a453a] shadow-sm"
             >
-              <div className="relative min-h-[215px] p-4">
+              <div className="relative min-h-[150px] p-4 sm:min-h-[180px] lg:min-h-[215px]">
                 <Skeleton className="absolute inset-0 h-full w-full bg-white/10" />
-                <div className="relative z-10 mt-auto flex min-h-[168px] flex-col justify-end">
+                <div className="relative z-10 mt-auto flex min-h-[110px] flex-col justify-end sm:min-h-[140px] lg:min-h-[168px]">
                   <Skeleton className="mb-3 h-6 w-24 rounded-full bg-white/20" />
                   <Skeleton className="h-7 w-4/5 bg-white/20" />
                   <Skeleton className="mt-2 h-4 w-1/2 bg-white/20" />
@@ -86,12 +86,12 @@ export function FeaturedCards() {
                   <ArrowUpRight className="h-4 w-4" />
                 </span>
 
-                <div className="relative flex min-h-[225px] items-end p-4">
+                <div className="relative flex min-h-[150px] items-end p-4 sm:min-h-[180px] lg:min-h-[225px]">
                   <div className="transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
                     <Badge className="mb-3 rounded-md bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm transition-colors group-hover:bg-white/24">
                       {article.topic}
                     </Badge>
-                    <p className="text-lg font-semibold leading-tight text-[#f6eee1]">
+                    <p className="text-base font-semibold leading-tight text-[#f6eee1] lg:text-lg">
                       {article.title}
                     </p>
                     <p className="mt-1 text-sm text-[#d5cab9]">
