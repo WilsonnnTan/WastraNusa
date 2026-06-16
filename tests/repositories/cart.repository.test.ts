@@ -29,11 +29,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // deleteMany is idempotent (no throw on already-removed rows) while still
-  // surfacing real DB errors instead of swallowing them with `.catch(() => {})`.
-  await prisma.cartItem.deleteMany({
-    where: { id: { in: createdCartItemIds } },
-  });
+  for (const id of createdCartItemIds) {
+    await prisma.cartItem.delete({ where: { id } }).catch(() => {});
+  }
 });
 
 describe('cartRepository', { tags: ['db'] }, () => {

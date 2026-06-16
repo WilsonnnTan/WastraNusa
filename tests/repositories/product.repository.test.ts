@@ -85,11 +85,10 @@ beforeAll(async () => {
 
 afterAll(async () => {
   for (const id of createdProductIds) {
-    // deleteMany is idempotent (no throw when a test already removed the row),
-    // so we no longer need to swallow errors with `.catch(() => {})` — real DB
-    // failures now surface instead of being silently hidden.
-    await prisma.productVariant.deleteMany({ where: { productId: id } });
-    await prisma.product.deleteMany({ where: { id } });
+    await prisma.productVariant
+      .deleteMany({ where: { productId: id } })
+      .catch(() => {});
+    await prisma.product.delete({ where: { id } }).catch(() => {});
   }
 });
 

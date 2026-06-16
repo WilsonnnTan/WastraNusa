@@ -27,12 +27,12 @@ describe('orderRepository', { tags: ['db'] }, () => {
   });
 
   afterAll(async () => {
-    // deleteMany is idempotent and surfaces real DB errors instead of
-    // swallowing them with `.catch(() => {})`.
-    await prisma.order.deleteMany({ where: { id: { in: orderIds } } });
-    await prisma.productVariant.deleteMany({
-      where: { id: { in: variantIds } },
-    });
+    for (const id of orderIds) {
+      await prisma.order.delete({ where: { id } }).catch(() => {});
+    }
+    for (const id of variantIds) {
+      await prisma.productVariant.delete({ where: { id } }).catch(() => {});
+    }
   });
 
   describe('createOrder', () => {
