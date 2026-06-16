@@ -26,15 +26,13 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
           paymentStatusLabel: 'Belum Bayar',
           paymentDeadlineAt: '2025-03-14T12:00:00Z',
           canCancel: true,
-          products: [
-            {
-              category: 'Batik',
-              name: 'Batik Kawung',
-              location: 'Solo',
-              quantity: 1,
-              imageURL: null,
-            },
-          ],
+          product: {
+            category: 'Batik',
+            name: 'Batik Kawung',
+            location: 'Solo',
+            quantity: 1,
+            imageURL: null,
+          },
           actions: ['Detail'] as 'Detail'[],
         },
       ],

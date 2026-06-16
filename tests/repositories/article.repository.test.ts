@@ -38,17 +38,15 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // deleteMany is idempotent and surfaces real DB errors. FK order preserved:
-  // children (engagement, likes) before the article itself.
-  await prisma.articleEngagement.deleteMany({
-    where: { articleId: { in: createdArticleIds } },
-  });
-  await prisma.userArticleLike.deleteMany({
-    where: { articleId: { in: createdArticleIds } },
-  });
-  await prisma.article.deleteMany({
-    where: { id: { in: createdArticleIds } },
-  });
+  for (const id of createdArticleIds) {
+    await prisma.articleEngagement
+      .deleteMany({ where: { articleId: id } })
+      .catch(() => {});
+    await prisma.userArticleLike
+      .deleteMany({ where: { articleId: id } })
+      .catch(() => {});
+    await prisma.article.delete({ where: { id } }).catch(() => {});
+  }
 });
 
 describe('articleRepository', { tags: ['db'] }, () => {

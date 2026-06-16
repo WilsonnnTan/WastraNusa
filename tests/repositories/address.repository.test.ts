@@ -24,11 +24,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // deleteMany is idempotent (no throw on already-removed rows) while still
-  // surfacing real DB errors instead of swallowing them with `.catch(() => {})`.
-  await prisma.customerAddress.deleteMany({
-    where: { id: { in: createdAddressIds } },
-  });
+  for (const id of createdAddressIds) {
+    await prisma.customerAddress.delete({ where: { id } }).catch(() => {});
+  }
 });
 
 describe('addressRepository', { tags: ['db'] }, () => {

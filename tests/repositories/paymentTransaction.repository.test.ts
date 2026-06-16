@@ -48,12 +48,10 @@ describe('paymentTransactionRepository', { tags: ['db'] }, () => {
   });
 
   afterAll(async () => {
-    // deleteMany is idempotent and surfaces real DB errors. FK order preserved:
-    // payment transactions before the order they reference.
-    await prisma.paymentTransaction.deleteMany({
-      where: { id: { in: txIds } },
-    });
-    await prisma.order.deleteMany({ where: { id: orderId } });
+    for (const id of txIds) {
+      await prisma.paymentTransaction.delete({ where: { id } }).catch(() => {});
+    }
+    await prisma.order.delete({ where: { id: orderId } }).catch(() => {});
   });
 
   describe('createPaymentTransaction', () => {
