@@ -22,7 +22,7 @@ async function login(page: import('@playwright/test').Page) {
   await expect(page).toHaveURL(/\/encyclopedia/, { timeout: 15_000 });
 }
 
-test.describe.skip('checkout', () => {
+test.describe('checkout', () => {
   test('a logged-in user can complete checkout to the payment redirect', async ({
     page,
   }) => {
