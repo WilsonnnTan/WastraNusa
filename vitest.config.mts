@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
@@ -8,6 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     clearMocks: true,
     setupFiles: ['./tests/setup.ts'],
+    // Playwright specs live in e2e/ and use their own runner — keep Vitest out.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     coverage: {
       provider: 'v8',
     },

@@ -1,5 +1,13 @@
+import { cleanup } from '@testing-library/react';
 import 'dotenv/config';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
+
+// vitest is not in `globals` mode, so React Testing Library's automatic
+// afterEach cleanup is not registered. Without this, rendered components
+// accumulate in document.body across tests (e.g. duplicate elements).
+afterEach(() => {
+  cleanup();
+});
 
 vi.mock('@/logger/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
