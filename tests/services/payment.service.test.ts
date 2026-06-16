@@ -336,5 +336,99 @@ describe('paymentService', () => {
         cartRepository.removePurchasedItemsByProductVariant,
       ).not.toHaveBeenCalled();
     });
+
+    it('should mark transaction failed and cancel order when payment is denied', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        userId: 'user-123',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'deny',
+      });
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ status: 'failed' }),
+      );
+      expect(orderService.cancelOrderBySystemId).toHaveBeenCalledWith(
+        'order-123',
+        'failed',
+      );
+      expect(orderRepository.updateOrderPaymentStatus).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ paymentStatus: 'failed' }),
+      );
+      // Not paid -> no cart cleanup.
+      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
+    });
+
+    it('should mark transaction expired and cancel order when payment expires', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        userId: 'user-123',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'expire',
+      });
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ status: 'expired' }),
+      );
+      expect(orderService.cancelOrderBySystemId).toHaveBeenCalledWith(
+        'order-123',
+        'expired',
+      );
+    });
+
+    it('should return early without mutating state when transaction is unknown', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue(null as never);
+
+      await expect(
+        paymentService.handleNotification(mockPayload),
+      ).resolves.toBeUndefined();
+
+      expect(orderRepository.findOrderById).not.toHaveBeenCalled();
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).not.toHaveBeenCalled();
+      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
+    });
+
+    it('should return early without mutating state when order is missing', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue(null as never);
+
+      await expect(
+        paymentService.handleNotification(mockPayload),
+      ).resolves.toBeUndefined();
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).not.toHaveBeenCalled();
+      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
+    });
   });
 });

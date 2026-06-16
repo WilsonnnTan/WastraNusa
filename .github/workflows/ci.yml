@@ -62,11 +62,14 @@ jobs:
       - name: Generate prisma client
         run: pnpm prisma generate
 
+      - name: Type check
+        run: pnpm typecheck
+
       - name: Run seeding scripts
         run: pnpm prisma-seed:dev
 
-      - name: Run test cases
-        run: pnpm run test
+      - name: Run test cases with coverage
+        run: pnpm run test:coverage
 
       - name: Run Build
         run: pnpm run build

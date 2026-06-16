@@ -10,6 +10,25 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'html', 'clover', 'json'],
+      exclude: [
+        'generated/**',
+        'src/generated/**',
+        'tests/**',
+        'prisma/**',
+        '**/*.config.*',
+        '**/*.d.ts',
+      ],
+      // Floor thresholds (ratchet upward). These are intentionally set near the
+      // current measured baseline so CI fails on *regressions* without breaking
+      // the existing pipeline. Branch coverage is the weakest area — raise these
+      // toward the >80% target stated in CONTRIBUTING.md as coverage improves.
+      thresholds: {
+        statements: 78,
+        lines: 78,
+        functions: 80,
+        branches: 55,
+      },
     },
     tags: [
       {
