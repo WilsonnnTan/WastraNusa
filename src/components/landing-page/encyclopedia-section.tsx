@@ -8,6 +8,7 @@ import { useArticles } from '@/hooks/use-article';
 import { ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 export interface HomepageArticlePreview {
@@ -19,6 +20,8 @@ export interface HomepageArticlePreview {
 }
 
 export function EncyclopediaSection() {
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState('');
   const { data, error, isPending } = useArticles(1, 2);
   const islandFilters =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
@@ -97,20 +100,35 @@ export function EncyclopediaSection() {
               keunikan motif, bahan, dan makna simbolis yang mendalam.
             </p>
 
-            <div className="mt-5 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a] transition-all duration-300 focus-within:border-white/35 focus-within:bg-[#21473590] focus-within:shadow-[0_0_0_4px_rgba(213,200,179,0.12)]">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const query = searchValue.trim();
+                router.push(
+                  query
+                    ? `/encyclopedia?search=${encodeURIComponent(query)}`
+                    : '/encyclopedia',
+                );
+              }}
+              role="search"
+              className="mt-5 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a] transition-all duration-300 focus-within:border-white/35 focus-within:bg-[#21473590] focus-within:shadow-[0_0_0_4px_rgba(213,200,179,0.12)]"
+            >
               <Search className="ml-4 h-4 w-4 text-[#b7cdbf]" />
               <Input
                 className="h-12 w-full border-0 bg-transparent px-3 text-sm text-[#ebf3e7] placeholder:text-[#95b19f] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Cari artikel budaya, motif, atau provinsi..."
-                type="text"
+                type="search"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                aria-label="Cari artikel ensiklopedia"
               />
               <Button
-                asChild
+                type="submit"
                 className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc] active:scale-95"
               >
-                <Link href="/encyclopedia">Cari</Link>
+                Cari
               </Button>
-            </div>
+            </form>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
               <span className="text-[#b1c4b5]">Filter Pulau :</span>

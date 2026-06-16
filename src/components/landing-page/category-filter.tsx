@@ -21,7 +21,9 @@ export function CategoryFilter() {
               variant="outline"
               className="rounded-full border border-[#4a3a2a]/[14.5%] bg-[#4a3a2a]/[6.3%] px-4 py-1.5 text-sm font-medium text-[#2f4f3f] transition-all hover:-translate-y-0.5 hover:border-[#2f4f3f] hover:bg-[#2f4f3f] hover:text-white hover:shadow-sm active:scale-95"
             >
-              <Link href={`/catalog?topic=${encodeURIComponent(category)}`}>
+              <Link
+                href={`/encyclopedia?topic=${encodeURIComponent(category)}`}
+              >
                 {category}
               </Link>
             </Button>

@@ -43,7 +43,7 @@ export function ProductCatalog() {
 
         <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
           <div>
-            <h2 className="text-3xl font-medium tracking-tight text-[#2b4d3c]">
+            <h2 className="text-2xl font-semibold tracking-tight text-[#2b4d3c] sm:text-3xl">
               Produk Pilihan Pengrajin Nusantara
             </h2>
             <p className="mt-2 text-base text-[#5f7366]">
