@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
@@ -8,8 +8,29 @@ export default defineConfig({
     environment: 'jsdom',
     clearMocks: true,
     setupFiles: ['./tests/setup.ts'],
+    // Playwright specs live in e2e/ and use their own runner — keep Vitest out.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'html', 'clover', 'json'],
+      exclude: [
+        'generated/**',
+        'src/generated/**',
+        'tests/**',
+        'prisma/**',
+        '**/*.config.*',
+        '**/*.d.ts',
+      ],
+      // Floor thresholds (ratchet upward). These are intentionally set near the
+      // current measured baseline so CI fails on *regressions* without breaking
+      // the existing pipeline. Branch coverage is the weakest area — raise these
+      // toward the >80% target stated in CONTRIBUTING.md as coverage improves.
+      thresholds: {
+        statements: 78,
+        lines: 78,
+        functions: 80,
+        branches: 55,
+      },
     },
     tags: [
       {

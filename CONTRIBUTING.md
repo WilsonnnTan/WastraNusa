@@ -1,7 +1,7 @@
-# Contributing to [Project Name]
+# Contributing to WastraNusa
 
-First off, thank you for considering contributing to [Project Name]! It's 
-people like you that make [Project Name] such a great tool.
+First off, thank you for considering contributing to WastraNusa! It's 
+people like you that make WastraNusa such a great tool.
 
 ## Table of Contents
 
